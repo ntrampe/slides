@@ -3,7 +3,6 @@ import { useInfinitePhotosFlattened, PhotoDisplay } from '../../photos';
 import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
-import { useDebugToggle } from '../../../shared/hooks';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 
 export const Slideshow = () => {
@@ -21,9 +20,6 @@ export const Slideshow = () => {
     // 2. Pass the flattened photos into the slideshow logic
     const { settings } = useSettingsData();
     const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos, settings.slideshow.intervalMs);
-
-    // Debug toggle
-    const { isDebugMode } = useDebugToggle('d');
 
     // 3. Auto-load more photos when getting close to the end
     useEffect(() => {
@@ -60,13 +56,13 @@ export const Slideshow = () => {
                 <PhotoDisplay
                     key={currentPhoto.id}
                     photo={currentPhoto}
-                    objectFit='contain'
+                    objectFit={settings.slideshow.photoFit}
                 />
                 {settings.slideshow.layout === 'split' && nextPhoto && (
                     <PhotoDisplay
                         key={nextPhoto.id}
                         photo={nextPhoto}
-                        objectFit='contain'
+                        objectFit={settings.slideshow.photoFit}
                     />
                 )}
             </div>
@@ -88,7 +84,7 @@ export const Slideshow = () => {
             </button>
 
             {/* DEBUG: Pagination Info */}
-            {import.meta.env.DEV && isDebugMode && (
+            {settings.debug.showDebugStats && (
                 <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-sm font-mono">
                     <div>Photos Loaded: {photos.length}</div>
                     <div>Current Index: {currentIndex}</div>
