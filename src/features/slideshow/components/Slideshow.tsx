@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useInfinitePhotosFlattened, PhotoDisplay } from '../../photos';
 import { Overlay } from '../components/Overlay';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import { useControls } from '../../../shared/hooks';
@@ -20,7 +20,7 @@ export const Slideshow = () => {
 
     // 2. Pass the flattened photos into the slideshow logic
     const { settings } = useSettingsData();
-    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos, settings.slideshow.intervalMs);
+    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress, isPlaying, togglePlayPause } = useSlideshow(photos, settings.slideshow.intervalMs);
     const { areControlsVisible } = useControls();
 
     // 3. Auto-load more photos when getting close to the end
@@ -39,12 +39,15 @@ export const Slideshow = () => {
                 goToPrevious();
             } else if (event.key === 'ArrowRight') {
                 goToNext();
+            } else if (event.key === ' ' || event.key === 'Spacebar') {
+                event.preventDefault();
+                togglePlayPause();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [goToNext, goToPrevious]);
+    }, [goToNext, goToPrevious, togglePlayPause]);
 
     // 4. Handle loading/error states
     if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading your memories...</div>;
@@ -85,6 +88,16 @@ export const Slideshow = () => {
                 aria-label="Next photo"
             >
                 <ChevronRight size={48} strokeWidth={2} />
+            </button>
+
+            {/* Play/Pause Button */}
+            <button
+                onClick={togglePlayPause}
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-4 transition-all duration-300 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+            >
+                {isPlaying ? <Pause size={48} strokeWidth={2} /> : <Play size={48} strokeWidth={2} />}
             </button>
 
             {/* DEBUG: Pagination Info */}
