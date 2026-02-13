@@ -70,11 +70,13 @@ export const Slideshow = ({ layout }: Props) => {
                 <PhotoDisplay
                     key={currentPhoto.id}
                     photo={currentPhoto}
+                    objectFit='contain'
                 />
                 {layout === 'split' && nextPhoto && (
                     <PhotoDisplay
                         key={nextPhoto.id}
                         photo={nextPhoto}
+                        objectFit='contain'
                     />
                 )}
             </div>
