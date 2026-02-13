@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { Calendar, MapPin } from 'lucide-react';
 import type { Photo } from '../../photos';
 import { WeatherDisplay } from '../../weather';
 import { useServices } from '../../../shared/context/ServiceContext';
@@ -22,12 +23,20 @@ export const Overlay = ({ photo }: { photo?: Photo }) => {
                 <WeatherDisplay {...weather} />
             </div>
 
-            {photo?.location && (
-                <div className="bg-black/20 backdrop-blur-md self-start p-6 rounded-2xl border border-white/5 text-white">
-                    <p className="text-sm uppercase tracking-widest opacity-60">Location</p>
-                    <h2 className="text-2xl font-medium">{photo.location}</h2>
-                </div>
-            )}
+            <div className="bg-black/20 backdrop-blur-md self-start p-6 rounded-2xl border border-white/5 text-white">
+                {photo?.createdAt && (
+                    <div className="mb-4 flex items-center gap-3">
+                        <Calendar className="w-6 h-6 opacity-60" />
+                        <p className="text-2xl font-medium">{format(new Date(photo.createdAt), 'MMMM d, yyyy')}</p>
+                    </div>
+                )}
+                {photo?.location && (
+                    <div className="flex items-center gap-3">
+                        <MapPin className="w-6 h-6 opacity-60" />
+                        <h2 className="text-2xl font-medium">{photo.location}</h2>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
