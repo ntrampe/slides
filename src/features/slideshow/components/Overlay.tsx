@@ -5,7 +5,7 @@ import { WeatherDisplay } from '../../weather';
 import { useServices } from '../../../shared/context/ServiceContext';
 import { useQuery } from '@tanstack/react-query';
 
-export const Overlay = ({ photo }: { photo?: Photo }) => {
+export const Overlay = ({ photo, progress }: { photo?: Photo; progress: number }) => {
     const { weather: weatherService } = useServices();
 
     const { data: weather } = useQuery({
@@ -36,6 +36,14 @@ export const Overlay = ({ photo }: { photo?: Photo }) => {
                         <h2 className="text-2xl font-medium">{photo.location}</h2>
                     </div>
                 )}
+            </div>
+
+            {/* Timer Progress Bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                <div
+                    className="h-full bg-white transition-all duration-100 ease-linear"
+                    style={{ width: `${progress}%` }}
+                />
             </div>
         </div>
     );

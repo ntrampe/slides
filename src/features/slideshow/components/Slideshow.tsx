@@ -20,7 +20,7 @@ export const Slideshow = ({ layout }: Props) => {
     } = useInfinitePhotosFlattened({ pageSize: 100 });
 
     // 2. Pass the flattened photos into the slideshow logic
-    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex } = useSlideshow(photos);
+    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos);
 
     // DEBUG: Log pagination status
     useEffect(() => {
@@ -64,7 +64,7 @@ export const Slideshow = ({ layout }: Props) => {
 
     return (
         <div className="relative h-screen w-screen bg-black overflow-hidden">
-            <Overlay photo={currentPhoto} />
+            <Overlay photo={currentPhoto} progress={progress} />
 
             <div className={`grid h-full w-full transition-all duration-1000 ${layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'}`}>
                 <img
