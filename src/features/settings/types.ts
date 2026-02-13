@@ -3,9 +3,12 @@ import type { LayoutMode, ObjectFit } from "../../shared/types/config";
 export interface AppSettings {
     slideshow: {
         layout: LayoutMode;
-        photoFit: ObjectFit;
         intervalMs: number;
     };
+    photo: {
+        fit: ObjectFit;
+        dateFormat: string;
+    },
     clock: {
         show24HourFormat: boolean;
         dateFormat: string;
@@ -36,12 +39,15 @@ export interface SettingsService {
 const defaultSettings: AppSettings = {
     slideshow: {
         layout: 'single',
-        photoFit: 'cover',
         intervalMs: 5000,
+    },
+    photo: {
+        fit: 'cover',
+        dateFormat: 'MMM dd, yyy',
     },
     clock: {
         show24HourFormat: false,
-        dateFormat: 'MMM dd, yyyy',
+        dateFormat: 'MMM dd, yyy',
     },
     weather: {
         location: {

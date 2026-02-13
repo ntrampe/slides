@@ -24,10 +24,27 @@ export const SettingsPanel = () => {
                 </label>
 
                 <label className="block mb-4">
+                    <span className="block mb-1">Interval (ms)</span>
+                    <input
+                        type="number"
+                        value={settings.slideshow.intervalMs}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, intervalMs: Number(e.target.value) } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                        min="1000"
+                        step="1000"
+                    />
+                </label>
+            </div>
+
+            {/* Photo Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Photo</h3>
+
+                <label className="block mb-4">
                     <span className="block mb-1">Photo Fit</span>
                     <select
-                        value={settings.slideshow.photoFit}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, photoFit: e.target.value as any } })}
+                        value={settings.photo.fit}
+                        onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, fit: e.target.value as any } })}
                         className="bg-slate-800 w-full p-2 rounded"
                     >
                         <option value="contain">Contain</option>
@@ -37,14 +54,13 @@ export const SettingsPanel = () => {
                 </label>
 
                 <label className="block mb-4">
-                    <span className="block mb-1">Interval (ms)</span>
+                    <span className="block mb-1">Date Format</span>
                     <input
-                        type="number"
-                        value={settings.slideshow.intervalMs}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, intervalMs: Number(e.target.value) } })}
+                        type="text"
+                        value={settings.photo.dateFormat}
+                        onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, dateFormat: e.target.value } })}
                         className="bg-slate-800 w-full p-2 rounded"
-                        min="1000"
-                        step="1000"
+                        placeholder="MMM dd, yyyy"
                     />
                 </label>
             </div>

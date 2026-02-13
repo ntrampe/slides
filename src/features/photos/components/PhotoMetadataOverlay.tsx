@@ -19,7 +19,7 @@ export const PhotoMetadataOverlay = ({ createdAt, location }: PhotoMetadataOverl
                 <div className="mb-4 flex items-center gap-3">
                     <Calendar className="w-6 h-6 opacity-60" />
                     <p className="text-2xl font-medium">
-                        {format(new Date(createdAt), settings.clock.dateFormat)}
+                        {format(new Date(createdAt), settings.photo.dateFormat)}
                     </p>
                 </div>
             )}

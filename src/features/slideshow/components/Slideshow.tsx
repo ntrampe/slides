@@ -56,13 +56,13 @@ export const Slideshow = () => {
                 <PhotoDisplay
                     key={currentPhoto.id}
                     photo={currentPhoto}
-                    objectFit={settings.slideshow.photoFit}
+                    objectFit={settings.photo.fit}
                 />
                 {settings.slideshow.layout === 'split' && nextPhoto && (
                     <PhotoDisplay
                         key={nextPhoto.id}
                         photo={nextPhoto}
-                        objectFit={settings.slideshow.photoFit}
+                        objectFit={settings.photo.fit}
                     />
                 )}
             </div>
