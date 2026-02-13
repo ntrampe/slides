@@ -4,22 +4,124 @@ export const SettingsPanel = () => {
     const { settings, updateSettings } = useSettingsData();
 
     return (
-        <div className="fixed right-0 top-0 h-full w-80 bg-slate-900/90 p-8 text-white z-50">
+        <div className="fixed right-0 top-0 h-full w-80 bg-slate-900/90 p-8 text-white z-50 overflow-y-auto">
             <h2 className="text-xl font-bold mb-6">Settings</h2>
 
-            <label className="block mb-4">
-                <span>Layout</span>
-                <select
-                    value={settings.slideshow.layout}
-                    onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, layout: e.target.value as any } })}
-                    className="bg-slate-800 w-full p-2 rounded"
-                >
-                    <option value="single">Single Image</option>
-                    <option value="split">Split View</option>
-                </select>
-            </label>
+            {/* Slideshow Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Slideshow</h3>
 
-            {/* Add more toggles for Object Fit, etc. */}
-        </div >
+                <label className="block mb-4">
+                    <span className="block mb-1">Layout</span>
+                    <select
+                        value={settings.slideshow.layout}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, layout: e.target.value as any } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                    >
+                        <option value="single">Single Image</option>
+                        <option value="split">Split View</option>
+                    </select>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Photo Fit</span>
+                    <select
+                        value={settings.slideshow.photoFit}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, photoFit: e.target.value as any } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                    >
+                        <option value="contain">Contain</option>
+                        <option value="cover">Cover</option>
+                        <option value="fill">Fill</option>
+                    </select>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Interval (ms)</span>
+                    <input
+                        type="number"
+                        value={settings.slideshow.intervalMs}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, intervalMs: Number(e.target.value) } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                        min="1000"
+                        step="1000"
+                    />
+                </label>
+            </div>
+
+            {/* UI Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">UI</h3>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.ui.showClock}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showClock: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Clock</span>
+                </label>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.ui.showWeather}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showWeather: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Weather</span>
+                </label>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.ui.showProgressBar}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showProgressBar: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Progress Bar</span>
+                </label>
+
+                <label className="flex items-center mb-4 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.ui.showPhotoMetadata}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showPhotoMetadata: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Photo Metadata</span>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Font Size</span>
+                    <select
+                        value={settings.ui.fontSize}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, fontSize: e.target.value as any } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                    >
+                        <option value="sm">Small</option>
+                        <option value="base">Base</option>
+                        <option value="lg">Large</option>
+                        <option value="xl">Extra Large</option>
+                    </select>
+                </label>
+            </div>
+
+            {/* Debug Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Debug</h3>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.debug.showDebugStats}
+                        onChange={(e) => updateSettings({ ...settings, debug: { ...settings.debug, showDebugStats: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Debug Stats</span>
+                </label>
+            </div>
+        </div>
     );
 };
