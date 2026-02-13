@@ -13,6 +13,9 @@ export interface AppSettings {
         showPhotoMetadata: boolean;
         fontSize: 'sm' | 'base' | 'lg' | 'xl';
     };
+    debug: {
+        showDebugStats: boolean;
+    },
 }
 
 export interface SettingsService {
@@ -33,6 +36,9 @@ const defaultSettings: AppSettings = {
         showPhotoMetadata: true,
         fontSize: 'base',
     },
+    debug: {
+        showDebugStats: false,
+    }
 };
 
 export default defaultSettings;
