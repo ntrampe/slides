@@ -7,7 +7,7 @@ import type { WeatherService } from "../../features/weather/types";
 import type { SettingsService } from '../../features/settings';
 import { LocalSettingsService } from '../../features/settings/services/LocalStorageSettingsService';
 
-const isMock = true; // import.meta.env.VITE_USE_MOCK === 'true'
+const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 // Define explicit type for app services
 export type AppServices = {
@@ -25,10 +25,7 @@ const mockServices: AppServices = {
 
 // Live services
 const liveServices: AppServices = {
-    photos: new ImmichPhotoService(
-        import.meta.env.VITE_IMMICH_URL || '',
-        import.meta.env.VITE_IMMICH_KEY || ''
-    ),
+    photos: new ImmichPhotoService(),
     weather: new OWMWeatherService(import.meta.env.VITE_OWM_KEY || ''),
     settings: new LocalSettingsService()
 };

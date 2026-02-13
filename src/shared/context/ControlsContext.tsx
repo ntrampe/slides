@@ -15,7 +15,7 @@ interface ControlsProviderProps {
 
 export const ControlsProvider = ({ children, autoHideDelay = 3000 }: ControlsProviderProps) => {
   const [areControlsVisible, setAreControlsVisible] = useState(true);
-  const [hideTimeout, setHideTimeout] = useState<number | null>(null);
+  const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const showControls = useCallback(() => {
     setAreControlsVisible(true);
@@ -30,7 +30,7 @@ export const ControlsProvider = ({ children, autoHideDelay = 3000 }: ControlsPro
       setAreControlsVisible(false);
     }, autoHideDelay);
 
-    setHideTimeout(timeout);
+    setHideTimeout(timeout as ReturnType<typeof setTimeout>);
   }, [hideTimeout, autoHideDelay]);
 
   const hideControls = useCallback(() => {

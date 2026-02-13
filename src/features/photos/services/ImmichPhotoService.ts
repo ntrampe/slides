@@ -1,47 +1,89 @@
-import type { Photo, PhotoService, PaginationParams, PaginatedPhotos } from "../types";
-
+import type { PhotoService, PaginationParams, PaginatedPhotos } from "../types";
 
 export class ImmichPhotoService implements PhotoService {
-    private baseUrl: string;
-    private apiKey: string;
-
-    constructor(baseUrl: string, apiKey: string) {
-        this.baseUrl = baseUrl;
-        this.apiKey = apiKey;
-    }
+    private proxyUrl = '/immich';
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
-        const { page = 1, pageSize = 100 } = params;
+        console.log('[ImmichPhotoService] getPhotos called with params:', params);
 
-        // Immich API supports pagination via skip and take parameters
+        const { page = 1, pageSize = 100, albumId, personId } = params;
         const skip = (page - 1) * pageSize;
-        const url = new URL(`${this.baseUrl}/api/asset`);
-        url.searchParams.append('skip', skip.toString());
-        url.searchParams.append('take', pageSize.toString());
 
-        const res = await fetch(url.toString(), {
-            headers: { 'x-api-key': this.apiKey }
-        });
-        const data = await res.json();
+        console.log('[ImmichPhotoService] Pagination calculated - page:', page, 'pageSize:', pageSize, 'skip:', skip);
 
-        const photos = data.map((item: any) => ({
-            id: item.id,
-            url: `${this.baseUrl}/api/asset/file/${item.id}`,
-            location: item.exifInfo?.city || 'Unknown',
-            createdAt: new Date(item.fileCreatedAt),
-        }));
+        try {
+            // Build search metadata request body
+            const searchBody: any = {
+                size: pageSize,
+                page: page,
+            };
 
-        // Note: Immich might not return total count in the standard asset endpoint
-        // You may need to make a separate call to get the total count
-        // For now, we'll estimate based on the response
-        const hasMore = data.length === pageSize;
+            // Add filters if provided
+            if (albumId) {
+                searchBody.albumIds = [albumId];
+            }
+            if (personId) {
+                searchBody.personIds = [personId];
+            }
 
-        return {
-            photos,
-            total: hasMore ? skip + pageSize + 1 : skip + photos.length, // Estimated
-            page,
-            pageSize,
-            hasMore,
-        };
+            console.log('[ImmichPhotoService] Search body:', searchBody);
+
+            // POST to search/metadata endpoint
+            const searchUrl = `${this.proxyUrl}/api/search/metadata`;
+            console.log('[ImmichPhotoService] Fetching from URL:', searchUrl);
+
+            const searchRes = await fetch(searchUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(searchBody),
+            });
+
+            if (!searchRes.ok) {
+                const errorText = await searchRes.text();
+                throw new Error(`Failed to search assets: ${searchRes.status} ${searchRes.statusText} - ${errorText}`);
+            }
+
+            const searchResult = await searchRes.json();
+            console.log('[ImmichPhotoService] Search result:', searchResult);
+
+            const assets = searchResult.assets?.items || [];
+            const total = searchResult.assets?.total || 0;
+
+            console.log('[ImmichPhotoService] Received assets - count:', assets.length, 'total:', total);
+
+            const photos = assets.map((asset: any) => ({
+                id: asset.id,
+                url: `${this.proxyUrl}/api/assets/${asset.id}/original`,
+                location: asset.exifInfo?.city || asset.exifInfo?.state || 'Unknown',
+                createdAt: new Date(asset.fileCreatedAt || asset.createdAt),
+                description: asset.exifInfo?.description,
+            }));
+
+            const hasMore = true; //skip + assets.length < total;
+            console.log('[ImmichPhotoService] Processed photos - count:', photos.length, 'hasMore:', hasMore);
+
+            const result = {
+                photos,
+                total,
+                page,
+                pageSize,
+                hasMore,
+            };
+
+            console.log('[ImmichPhotoService] Returning result:', {
+                photoCount: result.photos.length,
+                total: result.total,
+                page: result.page,
+                pageSize: result.pageSize,
+                hasMore: result.hasMore
+            });
+
+            return result;
+        } catch (error) {
+            console.error('[ImmichPhotoService] Error fetching photos:', error);
+            throw error;
+        }
     }
 }
