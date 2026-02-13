@@ -1,18 +1,48 @@
 import { useEffect } from 'react';
-import { usePhotos } from '../../photos/hooks/usePhotos';
-import { useSlideshow } from '../../photos/hooks/useSlideshow';
+import { useInfinitePhotosFlattened } from '../../photos/hooks/useInfinitePhotosFlattened';
 import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSlideshow } from '../hooks/useSlideshow';
 
 interface Props { layout: 'single' | 'split' }
 
 export const Slideshow = ({ layout }: Props) => {
-    // 1. Fetch the data
-    const { data: myPhotos, isLoading, isError } = usePhotos();
+    // 1. Fetch photos with infinite pagination
+    const {
+        photos,
+        isLoading,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        totalFetched,
+        totalAvailable
+    } = useInfinitePhotosFlattened({ pageSize: 100 });
 
-    // 2. Pass the data into the slideshow logic
-    // We use the empty array fallback [] so useSlideshow doesn't crash while loading
-    const { currentPhoto, nextPhoto, goToNext, goToPrevious } = useSlideshow(myPhotos ?? []);
+    // 2. Pass the flattened photos into the slideshow logic
+    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex } = useSlideshow(photos);
+
+    // DEBUG: Log pagination status
+    useEffect(() => {
+        console.log('📸 Pagination Status:', {
+            totalPhotos: photos.length,
+            currentIndex,
+            photosRemaining: photos.length - currentIndex,
+            hasNextPage,
+            isFetchingNextPage,
+            totalFetched,
+            totalAvailable
+        });
+    }, [photos.length, currentIndex, hasNextPage, isFetchingNextPage, totalFetched, totalAvailable]);
+
+    // 3. Auto-load more photos when getting close to the end
+    useEffect(() => {
+        // When we're within 10 photos of the end, load more
+        const photosRemaining = photos.length - currentIndex;
+        if (photosRemaining <= 10 && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [currentIndex, photos.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // Handle keyboard navigation
     useEffect(() => {
@@ -28,7 +58,7 @@ export const Slideshow = ({ layout }: Props) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [goToNext, goToPrevious]);
 
-    // 3. Handle loading/error states
+    // 4. Handle loading/error states
     if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading your memories...</div>;
     if (isError || !currentPhoto) return <div className="text-white">Something went wrong.</div>;
 
@@ -66,6 +96,17 @@ export const Slideshow = ({ layout }: Props) => {
             >
                 <ChevronRight size={48} strokeWidth={2} />
             </button>
+
+            {/* DEBUG: Pagination Info */}
+            {import.meta.env.DEV && (
+                <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-sm font-mono">
+                    <div>Photos Loaded: {photos.length}</div>
+                    <div>Current Index: {currentIndex}</div>
+                    <div>Has More: {hasNextPage ? '✅' : '❌'}</div>
+                    <div>Loading: {isFetchingNextPage ? '⏳' : '✅'}</div>
+                    <div>Total Available: {totalAvailable ?? '?'}</div>
+                </div>
+            )}
         </div>
     );
 };
