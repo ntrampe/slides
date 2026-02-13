@@ -4,8 +4,9 @@ import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { useDebugToggle } from '../../../shared/hooks';
+import type { LayoutMode } from '../../../shared/types/config';
 
-interface Props { layout: 'single' | 'split' }
+interface Props { layout: LayoutMode }
 
 export const Slideshow = ({ layout }: Props) => {
     // 1. Fetch photos with infinite pagination

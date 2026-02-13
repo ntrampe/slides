@@ -1,13 +1,14 @@
-import type { Photo, PhotoFit } from '../types';
+import type { ObjectFit } from '../../../shared/types/config';
+import type { Photo } from '../types';
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 
 interface PhotoDisplayProps {
     photo: Photo;
-    objectFit?: PhotoFit;
+    objectFit?: ObjectFit;
 }
 
 export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) => {
-    const objectFitClasses: Record<PhotoFit, string> = {
+    const objectFitClasses: Record<ObjectFit, string> = {
         contain: 'object-contain',
         cover: 'object-cover',
         fill: 'object-fill',

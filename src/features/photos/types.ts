@@ -6,8 +6,6 @@ export interface Photo {
     description?: string;
 }
 
-export type PhotoFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
-
 export interface PaginationParams {
     page?: number;
     pageSize?: number;
