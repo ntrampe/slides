@@ -6,6 +6,16 @@ export interface AppSettings {
         photoFit: ObjectFit;
         intervalMs: number;
     };
+    clock: {
+        show24HourFormat: boolean;
+        dateFormat: string;
+    },
+    weather: {
+        location: {
+            lat: number;
+            lng: number;
+        },
+    },
     ui: {
         showClock: boolean;
         showWeather: boolean;
@@ -28,6 +38,16 @@ const defaultSettings: AppSettings = {
         layout: 'single',
         photoFit: 'cover',
         intervalMs: 5000,
+    },
+    clock: {
+        show24HourFormat: false,
+        dateFormat: 'MMM dd, yyyy',
+    },
+    weather: {
+        location: {
+            lat: 51.5074,
+            lng: -0.1278,
+        },
     },
     ui: {
         showClock: true,

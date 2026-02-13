@@ -49,6 +49,61 @@ export const SettingsPanel = () => {
                 </label>
             </div>
 
+            {/* Clock Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Clock</h3>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.clock.show24HourFormat}
+                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, show24HourFormat: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>24-Hour Format</span>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Date Format</span>
+                    <input
+                        type="text"
+                        value={settings.clock.dateFormat}
+                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, dateFormat: e.target.value } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                        placeholder="MMM DD, YYYY"
+                    />
+                </label>
+            </div>
+
+            {/* Weather Settings */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Weather</h3>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Latitude</span>
+                    <input
+                        type="number"
+                        value={settings.weather.location.lat}
+                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lat: Number(e.target.value) } } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                        step="0.0001"
+                        placeholder="0.0000"
+                    />
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Longitude</span>
+                    <input
+                        type="number"
+                        value={settings.weather.location.lng}
+                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lng: Number(e.target.value) } } })}
+                        className="bg-slate-800 w-full p-2 rounded"
+                        step="0.0001"
+                        placeholder="0.0000"
+                    />
+                </label>
+            </div>
+
             {/* UI Settings */}
             <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">UI</h3>

@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { Calendar, MapPin } from 'lucide-react';
 import type { Photo } from '../types';
+import { useSettingsData } from '../../settings/hooks/useSettingsData';
 
 interface PhotoMetadataOverlayProps {
     createdAt?: Photo['createdAt'];
@@ -8,6 +9,8 @@ interface PhotoMetadataOverlayProps {
 }
 
 export const PhotoMetadataOverlay = ({ createdAt, location }: PhotoMetadataOverlayProps) => {
+    const { settings } = useSettingsData();
+
     if (!createdAt && !location) return null;
 
     return (
@@ -16,7 +19,7 @@ export const PhotoMetadataOverlay = ({ createdAt, location }: PhotoMetadataOverl
                 <div className="mb-4 flex items-center gap-3">
                     <Calendar className="w-6 h-6 opacity-60" />
                     <p className="text-2xl font-medium">
-                        {format(new Date(createdAt), 'MMMM d, yyyy')}
+                        {format(new Date(createdAt), settings.clock.dateFormat)}
                     </p>
                 </div>
             )}
