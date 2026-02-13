@@ -7,23 +7,29 @@ import type { WeatherService } from "../../features/weather/types";
 
 const isMock = true; // import.meta.env.VITE_USE_MOCK === 'true'
 
-export const photoService: PhotoService = isMock
-    ? new MockPhotoService()
-    : new ImmichPhotoService(
-        import.meta.env.VITE_IMMICH_URL || '',
-        import.meta.env.VITE_IMMICH_KEY || ''
-    );
-
-export const weatherService: WeatherService = isMock
-    ? new MockWeatherService()
-    : new OWMWeatherService(import.meta.env.VITE_OWM_KEY || '');
-
-export const services = {
-    photos: photoService,
-    weather: weatherService,
+// Define explicit type for app services
+export type AppServices = {
+    photos: PhotoService;
+    weather: WeatherService;
 };
 
-export type AppServices = typeof services;
+// Mock services
+const mockServices: AppServices = {
+    photos: new MockPhotoService(),
+    weather: new MockWeatherService(),
+};
+
+// Live services
+const liveServices: AppServices = {
+    photos: new ImmichPhotoService(
+        import.meta.env.VITE_IMMICH_URL || '',
+        import.meta.env.VITE_IMMICH_KEY || ''
+    ),
+    weather: new OWMWeatherService(import.meta.env.VITE_OWM_KEY || ''),
+};
+
+// Select services based on flag
+export const services: AppServices = isMock ? mockServices : liveServices;
 
 export const ServiceContext = createContext<AppServices | null>(null);
 
