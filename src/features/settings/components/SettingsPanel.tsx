@@ -4,7 +4,7 @@ export const SettingsPanel = () => {
     const { settings, updateSettings } = useSettingsData();
 
     return (
-        <div className="fixed right-0 top-0 h-full w-80 bg-slate-900/90 p-8 text-white z-50 overflow-y-auto">
+        <div className="h-full w-full bg-slate-900/90 p-8 text-white overflow-y-auto">
             <h2 className="text-xl font-bold mb-6">Settings</h2>
 
             {/* Slideshow Settings */}

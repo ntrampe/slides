@@ -51,7 +51,7 @@ export const Slideshow = () => {
     if (isError || !currentPhoto) return <div className="text-white">Something went wrong.</div>;
 
     return (
-        <div className="relative h-screen w-screen bg-black overflow-hidden">
+        <div className="relative h-full w-full bg-black overflow-hidden">
             <Overlay progress={progress} />
 
             <div className={`grid h-full w-full transition-all duration-1000 ${settings.slideshow.layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'}`}>
