@@ -1,11 +1,9 @@
 import { format } from 'date-fns';
-import { Calendar, MapPin } from 'lucide-react';
-import type { Photo } from '../../photos';
 import { WeatherDisplay } from '../../weather';
 import { useServices } from '../../../shared/context/ServiceContext';
 import { useQuery } from '@tanstack/react-query';
 
-export const Overlay = ({ photo, progress }: { photo?: Photo; progress: number }) => {
+export const Overlay = ({ progress }: { progress: number }) => {
     const { weather: weatherService } = useServices();
 
     const { data: weather } = useQuery({
@@ -21,21 +19,6 @@ export const Overlay = ({ photo, progress }: { photo?: Photo; progress: number }
                     {format(new Date(), 'HH:mm')}
                 </div>
                 <WeatherDisplay {...weather} />
-            </div>
-
-            <div className="bg-black/20 backdrop-blur-md self-start p-6 rounded-2xl border border-white/5 text-white">
-                {photo?.createdAt && (
-                    <div className="mb-4 flex items-center gap-3">
-                        <Calendar className="w-6 h-6 opacity-60" />
-                        <p className="text-2xl font-medium">{format(new Date(photo.createdAt), 'MMMM d, yyyy')}</p>
-                    </div>
-                )}
-                {photo?.location && (
-                    <div className="flex items-center gap-3">
-                        <MapPin className="w-6 h-6 opacity-60" />
-                        <h2 className="text-2xl font-medium">{photo.location}</h2>
-                    </div>
-                )}
             </div>
 
             {/* Timer Progress Bar */}

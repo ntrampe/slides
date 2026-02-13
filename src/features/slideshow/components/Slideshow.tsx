@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useInfinitePhotosFlattened } from '../../photos/hooks/useInfinitePhotosFlattened';
+import { useInfinitePhotosFlattened, PhotoDisplay } from '../../photos';
 import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
@@ -64,19 +64,17 @@ export const Slideshow = ({ layout }: Props) => {
 
     return (
         <div className="relative h-screen w-screen bg-black overflow-hidden">
-            <Overlay photo={currentPhoto} progress={progress} />
+            <Overlay progress={progress} />
 
             <div className={`grid h-full w-full transition-all duration-1000 ${layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'}`}>
-                <img
+                <PhotoDisplay
                     key={currentPhoto.id}
-                    src={currentPhoto.url}
-                    className="w-full h-full object-cover animate-in fade-in duration-1000"
+                    photo={currentPhoto}
                 />
                 {layout === 'split' && nextPhoto && (
-                    <img
+                    <PhotoDisplay
                         key={nextPhoto.id}
-                        src={nextPhoto.url}
-                        className="w-full h-full object-cover animate-in slide-in-from-right duration-700"
+                        photo={nextPhoto}
                     />
                 )}
             </div>
