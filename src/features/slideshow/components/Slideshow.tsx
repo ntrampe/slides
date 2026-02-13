@@ -4,6 +4,7 @@ import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { useControls } from '../../../shared/hooks';
 
 export const Slideshow = () => {
     // 1. Fetch photos with infinite pagination
@@ -20,6 +21,7 @@ export const Slideshow = () => {
     // 2. Pass the flattened photos into the slideshow logic
     const { settings } = useSettingsData();
     const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos, settings.slideshow.intervalMs);
+    const { areControlsVisible } = useControls();
 
     // 3. Auto-load more photos when getting close to the end
     useEffect(() => {
@@ -70,14 +72,16 @@ export const Slideshow = () => {
             {/* Navigation Arrows */}
             <button
                 onClick={goToPrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                className={`absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
                 aria-label="Previous photo"
             >
                 <ChevronLeft size={48} strokeWidth={2} />
             </button>
             <button
                 onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                className={`absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
                 aria-label="Next photo"
             >
                 <ChevronRight size={48} strokeWidth={2} />
