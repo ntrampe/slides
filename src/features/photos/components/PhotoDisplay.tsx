@@ -1,4 +1,5 @@
 import type { ObjectFit } from '../../../shared/types/config';
+import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import type { Photo } from '../types';
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 
@@ -16,6 +17,8 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
         'scale-down': 'object-scale-down',
     };
 
+    const { settings } = useSettingsData();
+
     return (
         <div className={`relative h-full w-full overflow-hidden animate-in fade-in duration-1000`}>
             {/* Photo Image */}
@@ -26,10 +29,12 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
             />
 
             {/* Date & Location Metadata Overlay */}
-            <PhotoMetadataOverlay
-                createdAt={photo.createdAt}
-                location={photo.location}
-            />
+            {settings.ui.showPhotoMetadata &&
+                <PhotoMetadataOverlay
+                    createdAt={photo.createdAt}
+                    location={photo.location}
+                />
+            }
         </div>
     );
 };

@@ -4,11 +4,9 @@ import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { useDebugToggle } from '../../../shared/hooks';
-import type { LayoutMode } from '../../../shared/types/config';
+import { useSettingsData } from '../../settings/hooks/useSettingsData';
 
-interface Props { layout: LayoutMode }
-
-export const Slideshow = ({ layout }: Props) => {
+export const Slideshow = () => {
     // 1. Fetch photos with infinite pagination
     const {
         photos,
@@ -21,7 +19,8 @@ export const Slideshow = ({ layout }: Props) => {
     } = useInfinitePhotosFlattened({ pageSize: 100 });
 
     // 2. Pass the flattened photos into the slideshow logic
-    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos);
+    const { settings } = useSettingsData();
+    const { currentPhoto, nextPhoto, goToNext, goToPrevious, currentIndex, progress } = useSlideshow(photos, settings.slideshow.intervalMs);
 
     // Debug toggle
     const { isDebugMode } = useDebugToggle('d');
@@ -57,13 +56,13 @@ export const Slideshow = ({ layout }: Props) => {
         <div className="relative h-screen w-screen bg-black overflow-hidden">
             <Overlay progress={progress} />
 
-            <div className={`grid h-full w-full transition-all duration-1000 ${layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'}`}>
+            <div className={`grid h-full w-full transition-all duration-1000 ${settings.slideshow.layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'}`}>
                 <PhotoDisplay
                     key={currentPhoto.id}
                     photo={currentPhoto}
                     objectFit='contain'
                 />
-                {layout === 'split' && nextPhoto && (
+                {settings.slideshow.layout === 'split' && nextPhoto && (
                     <PhotoDisplay
                         key={nextPhoto.id}
                         photo={nextPhoto}
