@@ -20,7 +20,7 @@ function AppContent() {
   const isSettingsPanelVisible = isSettingsShown || showSettings;
 
   return (
-    <main className="h-screen w-screen bg-black cursor-none select-none overflow-hidden relative">
+    <main className="h-screen w-screen bg-black select-none overflow-hidden relative">
       {/* Slideshow Container - shrinks when settings are visible */}
       <div
         className="h-full transition-all duration-500 ease-in-out"
