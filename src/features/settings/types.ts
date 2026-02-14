@@ -5,6 +5,7 @@ export interface AppSettings {
         layout: LayoutMode;
         intervalMs: number;
         shuffle: boolean;
+        autoplay: boolean;
     };
     photo: {
         fit: ObjectFit;
@@ -42,6 +43,7 @@ const defaultSettings: AppSettings = {
         layout: 'single',
         intervalMs: 5000,
         shuffle: true,
+        autoplay: true,
     },
     photo: {
         fit: 'cover',

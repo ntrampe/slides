@@ -44,6 +44,16 @@ export const SettingsPanel = () => {
                     />
                     <span>Shuffle Photos</span>
                 </label>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.slideshow.autoplay}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, autoplay: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Autoplay</span>
+                </label>
             </div>
 
             {/* Photo Settings */}

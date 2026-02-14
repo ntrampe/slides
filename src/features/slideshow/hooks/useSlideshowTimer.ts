@@ -5,20 +5,17 @@ interface UseSlideshowTimerOptions {
     onAdvance: () => void;
     currentIndex: number; // Add this to detect when photo changes
     isCurrentPhotoLoaded: boolean; // Add this to pause while loading
+    isPlaying: boolean; // Playing state from settings
 }
 
 export function useSlideshowTimer({
     interval,
     onAdvance,
     currentIndex,
-    isCurrentPhotoLoaded
+    isCurrentPhotoLoaded,
+    isPlaying
 }: UseSlideshowTimerOptions) {
     const [progress, setProgress] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(true);
-
-    const togglePlayPause = useCallback(() => {
-        setIsPlaying((prev) => !prev);
-    }, []);
 
     const reset = useCallback(() => {
         setProgress(0);
@@ -55,8 +52,6 @@ export function useSlideshowTimer({
 
     return {
         progress,
-        isPlaying,
-        togglePlayPause,
         reset,
     };
 }

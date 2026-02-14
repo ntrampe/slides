@@ -8,7 +8,7 @@ import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import { useControls } from '../../../shared/hooks';
 
 export const Slideshow = () => {
-    const { settings } = useSettingsData();
+    const { settings, updateSettings } = useSettingsData();
 
     // 1. Fetch photos with infinite pagination
     const {
@@ -40,12 +40,16 @@ export const Slideshow = () => {
     });
 
     // 3. Use timer for auto-advance
-    const { progress, isPlaying, togglePlayPause, reset } = useSlideshowTimer({
+    const { progress, reset } = useSlideshowTimer({
         interval: settings.slideshow.intervalMs,
         onAdvance: goToNext,
         currentIndex,
         isCurrentPhotoLoaded: !!currentLoaded, // Timer only runs when photo is loaded
+        isPlaying: settings.slideshow.autoplay, // Single source of truth from settings
     });
+
+    // Get isPlaying from settings (single source of truth)
+    const isPlaying = settings.slideshow.autoplay;
 
     const { areControlsVisible } = useControls();
 
@@ -60,6 +64,17 @@ export const Slideshow = () => {
         }
     }, [currentIndex, photos.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+    // Toggle play/pause by updating settings (single source of truth)
+    const handleTogglePlayPause = () => {
+        updateSettings({
+            ...settings,
+            slideshow: {
+                ...settings.slideshow,
+                autoplay: !settings.slideshow.autoplay,
+            },
+        });
+    };
+
     // Handle keyboard navigation
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -71,13 +86,13 @@ export const Slideshow = () => {
                 reset();
             } else if (event.key === ' ' || event.key === 'Spacebar') {
                 event.preventDefault();
-                togglePlayPause();
+                handleTogglePlayPause();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [goToNext, goToPrevious, togglePlayPause, reset]);
+    }, [goToNext, goToPrevious, handleTogglePlayPause, reset]);
 
     // 5. Handle loading/error states
     if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading metadata...</div>;
@@ -143,7 +158,7 @@ export const Slideshow = () => {
 
             {/* Play/Pause Button */}
             <button
-                onClick={togglePlayPause}
+                onClick={handleTogglePlayPause}
                 className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-4 transition-all duration-300 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
