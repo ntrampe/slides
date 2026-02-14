@@ -36,7 +36,7 @@ export class ImmichPhotoService implements PhotoService {
 
         const photos = assets.map((asset: any) => ({
             id: asset.id,
-            url: `${this.proxyUrl}/api/assets/${asset.id}/original`,
+            url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
             createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
             location:
                 asset.exifInfo?.city ??
