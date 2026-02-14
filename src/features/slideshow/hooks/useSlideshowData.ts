@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useInfinitePhotosFlattened } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
 import type { SlideshowFilter } from '../../../shared/types/config';
+import type { UseSlideshowDataReturn } from './types';
 
 interface UseSlideshowDataOptions extends SlideshowFilter {
     pageSize?: number;
@@ -17,7 +18,7 @@ export function useSlideshowData({
     shuffle = false,
     preloadForward = 5,
     preloadBackward = 2,
-}: UseSlideshowDataOptions) {
+}: UseSlideshowDataOptions): UseSlideshowDataReturn {
     // 1. Fetch photos with infinite pagination
     const {
         photos,

@@ -1,77 +1,82 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { useControls } from '../../../shared/hooks';
+import { useSlideshowData } from './useSlideshowData';
+import { useSlideshowTimer } from './useSlideshowTimer';
+import { useSlideshowKeyboard } from './useSlideshowKeyboard';
+import type { UseSlideshowReturn } from './types';
 
-interface UseSlideshowOptions {
-    onAdvance: () => void;
-    currentIndex: number;
-    isCurrentPhotoLoaded: boolean;
-}
+export function useSlideshow(): UseSlideshowReturn {
+    const { settings } = useSettingsData();
+    const { areControlsVisible } = useControls();
 
-export function useSlideshow({
-    onAdvance,
-    currentIndex,
-    isCurrentPhotoLoaded,
-}: UseSlideshowOptions) {
-    const { settings, updateSettings } = useSettingsData();
-    const [progress, setProgress] = useState(0);
+    // Data layer: photos, pooling, navigation
+    const data = useSlideshowData({
+        ...(settings.slideshow.filter.albumIds?.length && { albumIds: settings.slideshow.filter.albumIds }),
+        ...(settings.slideshow.filter.personIds?.length && { personIds: settings.slideshow.filter.personIds }),
+        pageSize: 1000,
+        shuffle: settings.slideshow.shuffle,
+        preloadForward: 5,
+        preloadBackward: 2,
+    });
 
-    // Get playing state and interval from settings
-    const isPlaying = settings.slideshow.autoplay;
-    const interval = settings.slideshow.intervalMs;
+    // Timer layer: autoplay, progress tracking
+    const timer = useSlideshowTimer({
+        onAdvance: data.goToNext,
+        currentIndex: data.currentIndex,
+        isCurrentPhotoLoaded: !!data.currentLoaded,
+    });
 
-    // Reset progress manually when navigating
-    const reset = useCallback(() => {
-        setProgress(0);
-    }, []);
+    // Coordination: reset timer when manually navigating
+    const handlePrevious = useCallback(() => {
+        data.goToPrevious();
+        timer.reset();
+    }, [data, timer]);
 
-    // Toggle play/pause by updating settings
-    const togglePlayPause = useCallback(() => {
-        updateSettings({
-            ...settings,
-            slideshow: {
-                ...settings.slideshow,
-                autoplay: !settings.slideshow.autoplay,
-            },
-        });
-    }, [settings, updateSettings]);
+    const handleNext = useCallback(() => {
+        data.goToNext();
+        timer.reset();
+    }, [data, timer]);
 
-    // Timer effect: handles progress tracking and auto-advance
-    useEffect(() => {
-        // Don't run timer if paused or if current photo isn't loaded yet
-        if (!isPlaying || !isCurrentPhotoLoaded) {
-            setProgress(0);
-            return;
-        }
+    // Keyboard navigation
+    useSlideshowKeyboard({
+        onPrevious: handlePrevious,
+        onNext: handleNext,
+        onTogglePlayPause: timer.togglePlayPause,
+        onReset: timer.reset,
+    });
 
-        // Reset progress when timer starts or when index changes
-        setProgress(0);
-
-        // Update progress every 100ms for smooth animation
-        const progressInterval = setInterval(() => {
-            setProgress((prev) => {
-                const increment = (100 / interval) * 100;
-                return Math.min(prev + increment, 100);
-            });
-        }, 100);
-
-        // Auto-advance after interval
-        const timer = setInterval(() => {
-            onAdvance();
-        }, interval);
-
-        return () => {
-            clearInterval(timer);
-            clearInterval(progressInterval);
-        };
-    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded]);
+    // Get next photo for split view
+    const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
 
     return {
-        // State
-        isPlaying,
-        progress,
-
-        // Actions
-        togglePlayPause,
-        reset,
+        state: {
+            currentPhoto: data.currentLoaded?.photo,
+            nextPhoto: nextLoaded?.photo,
+            currentIndex: data.currentIndex,
+            count: data.count,
+            isLoading: data.isLoading,
+            isError: data.isError,
+            isPlaying: timer.isPlaying,
+            progress: timer.progress,
+            areControlsVisible,
+        },
+        actions: {
+            goToPrevious: handlePrevious,
+            goToNext: handleNext,
+            togglePlayPause: timer.togglePlayPause,
+        },
+        debug: settings.debug.showDebugStats
+            ? {
+                currentIndex: data.currentIndex,
+                count: data.count,
+                isPlaying: timer.isPlaying,
+                progress: timer.progress,
+                poolStats: data.poolStats,
+                totalPhotos: data.totalPhotos,
+                hasNextPage: data.hasNextPage,
+                isFetchingNextPage: data.isFetchingNextPage,
+            }
+            : undefined,
     };
 }
