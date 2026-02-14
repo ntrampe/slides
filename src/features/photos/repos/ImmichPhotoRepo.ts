@@ -15,6 +15,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
             page,
             size: pageSize,
             type: "IMAGE",
+            withExif: true,
         };
 
         if (albumIds && albumIds.length > 0) searchBody.albumIds = albumIds;
@@ -38,11 +39,13 @@ export class ImmichPhotoRepo implements PhotoRepo {
             id: asset.id,
             url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
             createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
-            location:
-                asset.exifInfo?.city ??
-                asset.exifInfo?.state ??
-                asset.exifInfo?.country ??
-                "Unknown",
+            location: [
+                asset.exifInfo?.city,
+                asset.exifInfo?.state,
+                asset.exifInfo?.country
+            ]
+                .filter(Boolean)
+                .join(", "),
             description: asset.exifInfo?.description,
         }));
 
