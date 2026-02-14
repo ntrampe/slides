@@ -1,0 +1,101 @@
+import { useState, useMemo } from 'react';
+import { SelectedItems } from './SelectedItems';
+import { SearchInput } from './SearchInput';
+import { ItemDropdown } from './ItemDropdown';
+import type { PickerItem, ItemPickerProps } from './types';
+
+export function ItemPicker<T extends PickerItem>({
+    label,
+    selectedIds,
+    onChange,
+    items,
+    isLoading,
+    error,
+    searchPlaceholder = "Search...",
+    emptyMessage = "No items selected. Leave empty to show all.",
+    noResultsMessage = "No items found",
+    renderImage,
+    renderLabel,
+}: ItemPickerProps<T>) {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Filter items based on search query
+    const filteredItems = useMemo(() => {
+        if (!searchQuery.trim()) return items;
+        const query = searchQuery.toLowerCase();
+        return items.filter(item =>
+            item.label.toLowerCase().includes(query) ||
+            item.subtitle?.toLowerCase().includes(query)
+        );
+    }, [items, searchQuery]);
+
+    // Get selected items
+    const selectedItems = useMemo(() => {
+        return items.filter(item => selectedIds.includes(item.id));
+    }, [items, selectedIds]);
+
+    // Available items (not selected)
+    const availableItems = useMemo(() => {
+        return filteredItems.filter(item => !selectedIds.includes(item.id));
+    }, [filteredItems, selectedIds]);
+
+    const handleRemove = (itemId: string) => {
+        onChange(selectedIds.filter(id => id !== itemId));
+    };
+
+    const handleSelect = (itemId: string) => {
+        onChange([...selectedIds, itemId]);
+        setSearchQuery('');
+    };
+
+    if (error) {
+        return (
+            <div className="mb-4">
+                <span className="block mb-2 text-red-400">{label} (Error loading)</span>
+                <p className="text-sm text-red-400">Failed to load items</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-4">
+            <span className="block mb-2">{label}</span>
+
+            <SelectedItems
+                items={selectedItems}
+                onRemove={handleRemove}
+                renderImage={renderImage}
+                renderLabel={renderLabel}
+            />
+
+            <div className="relative">
+                <SearchInput
+                    value={searchQuery}
+                    onChange={(value) => {
+                        setSearchQuery(value);
+                        setIsDropdownOpen(true);
+                    }}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    placeholder={isLoading ? "Loading..." : searchPlaceholder}
+                    disabled={isLoading}
+                />
+
+                {isDropdownOpen && !isLoading && (
+                    <ItemDropdown
+                        items={availableItems}
+                        onSelect={handleSelect}
+                        onClose={() => setIsDropdownOpen(false)}
+                        noResultsMessage={searchQuery ? noResultsMessage : 'All items selected'}
+                        renderImage={renderImage}
+                        renderLabel={renderLabel}
+                    />
+                )}
+            </div>
+
+            {selectedIds.length === 0 && (
+                <p className="text-xs text-slate-400 mt-1">{emptyMessage}</p>
+            )}
+        </div>
+    );
+}
