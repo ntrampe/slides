@@ -25,7 +25,8 @@ export const Slideshow = () => {
         hasNextPage,
         isFetchingNextPage,
     } = useSlideshowData({
-        personId: "607b51ff-9483-46ab-a6bb-956cea8551a7",
+        albumIds: settings.slideshow.albumIds.length > 0 ? settings.slideshow.albumIds : undefined,
+        personIds: settings.slideshow.personIds.length > 0 ? settings.slideshow.personIds : undefined,
         pageSize: 1000,
         shuffle: settings.slideshow.shuffle,
         preloadForward: 5,

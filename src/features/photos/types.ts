@@ -9,8 +9,8 @@ export interface Photo {
 export interface PaginationParams {
     page?: number;
     pageSize?: number;
-    albumId?: string;
-    personId?: string;
+    albumIds?: string[];
+    personIds?: string[];
 }
 
 export interface PaginatedPhotos {

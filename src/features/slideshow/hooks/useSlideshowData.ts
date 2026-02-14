@@ -3,7 +3,8 @@ import { useInfinitePhotosFlattened } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
 
 interface UseSlideshowDataOptions {
-    personId?: string;
+    albumIds?: string[];
+    personIds?: string[];
     pageSize?: number;
     shuffle?: boolean;
     preloadForward?: number;
@@ -11,7 +12,8 @@ interface UseSlideshowDataOptions {
 }
 
 export function useSlideshowData({
-    personId,
+    albumIds,
+    personIds,
     pageSize = 1000,
     shuffle = false,
     preloadForward = 5,
@@ -26,8 +28,9 @@ export function useSlideshowData({
         hasNextPage,
         isFetchingNextPage,
     } = useInfinitePhotosFlattened({
+        albumIds,
+        personIds,
         pageSize,
-        personId,
     });
 
     // 2. Use photo pool for preloading
@@ -59,18 +62,18 @@ export function useSlideshowData({
         currentLoaded,
         currentIndex,
         count,
-        
+
         // Navigation
         goToNext,
         goToPrevious,
         jumpTo,
         getPhotoAt,
-        
+
         // Loading states
         isLoading,
         isError,
         isFetchingNextPage,
-        
+
         // Stats for debug
         poolStats,
         totalPhotos: photos.length,

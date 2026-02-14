@@ -6,6 +6,8 @@ export interface AppSettings {
         intervalMs: number;
         shuffle: boolean;
         autoplay: boolean;
+        albumIds: string[];
+        personIds: string[];
     };
     photo: {
         fit: ObjectFit;
@@ -44,6 +46,8 @@ const defaultSettings: AppSettings = {
         intervalMs: 5000,
         shuffle: true,
         autoplay: true,
+        albumIds: [],
+        personIds: [],
     },
     photo: {
         fit: 'cover',

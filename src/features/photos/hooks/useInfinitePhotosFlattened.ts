@@ -3,8 +3,8 @@ import { useInfinitePhotos } from './usePhotos';
 import type { Photo } from '../types';
 
 interface UseInfinitePhotosFlattenedParams {
-    albumId?: string;
-    personId?: string;
+    albumIds?: string[];
+    personIds?: string[];
     pageSize?: number;
 }
 

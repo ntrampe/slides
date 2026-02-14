@@ -1,4 +1,5 @@
 import { useSettingsData } from "../hooks/useSettingsData";
+import { StringArrayEditor } from "../../../shared/components";
 
 export const SettingsPanel = () => {
     const { settings, updateSettings } = useSettingsData();
@@ -10,6 +11,26 @@ export const SettingsPanel = () => {
             {/* Slideshow Settings */}
             <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Slideshow</h3>
+
+                <StringArrayEditor
+                    label="Album IDs"
+                    values={settings.slideshow.albumIds}
+                    onChange={(albumIds) => updateSettings({
+                        ...settings,
+                        slideshow: { ...settings.slideshow, albumIds }
+                    })}
+                    placeholder="Enter album ID..."
+                />
+
+                <StringArrayEditor
+                    label="Person IDs"
+                    values={settings.slideshow.personIds}
+                    onChange={(personIds) => updateSettings({
+                        ...settings,
+                        slideshow: { ...settings.slideshow, personIds }
+                    })}
+                    placeholder="Enter person ID..."
+                />
 
                 <label className="block mb-4">
                     <span className="block mb-1">Layout</span>

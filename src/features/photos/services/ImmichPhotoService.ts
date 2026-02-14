@@ -7,8 +7,8 @@ export class ImmichPhotoService implements PhotoService {
         const {
             page = 1,
             pageSize = 100,
-            albumId,
-            personId,
+            albumIds,
+            personIds,
         } = params;
 
         const searchBody: any = {
@@ -17,8 +17,8 @@ export class ImmichPhotoService implements PhotoService {
             type: "IMAGE",
         };
 
-        if (albumId) searchBody.albumIds = [albumId];
-        if (personId) searchBody.personIds = [personId];
+        if (albumIds && albumIds.length > 0) searchBody.albumIds = albumIds;
+        if (personIds && personIds.length > 0) searchBody.personIds = personIds;
 
         const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
             method: "POST",
