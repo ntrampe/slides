@@ -1,89 +1,56 @@
 import type { PhotoService, PaginationParams, PaginatedPhotos } from "../types";
 
 export class ImmichPhotoService implements PhotoService {
-    private proxyUrl = '/immich';
+    private proxyUrl = "/immich";
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
-        console.log('[ImmichPhotoService] getPhotos called with params:', params);
+        const {
+            page = 1,
+            pageSize = 100,
+            albumId,
+            personId,
+        } = params;
 
-        const { page = 1, pageSize = 100, albumId, personId } = params;
-        const skip = (page - 1) * pageSize;
+        const searchBody: any = {
+            page,
+            size: pageSize,
+            type: "IMAGE", // strongly recommended
+        };
 
-        console.log('[ImmichPhotoService] Pagination calculated - page:', page, 'pageSize:', pageSize, 'skip:', skip);
+        if (albumId) searchBody.albumIds = [albumId];
+        if (personId) searchBody.personIds = [personId];
 
-        try {
-            // Build search metadata request body
-            const searchBody: any = {
-                size: pageSize,
-                page: page,
-            };
+        const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(searchBody),
+        });
 
-            // Add filters if provided
-            if (albumId) {
-                searchBody.albumIds = [albumId];
-            }
-            if (personId) {
-                searchBody.personIds = [personId];
-            }
-
-            console.log('[ImmichPhotoService] Search body:', searchBody);
-
-            // POST to search/metadata endpoint
-            const searchUrl = `${this.proxyUrl}/api/search/metadata`;
-            console.log('[ImmichPhotoService] Fetching from URL:', searchUrl);
-
-            const searchRes = await fetch(searchUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(searchBody),
-            });
-
-            if (!searchRes.ok) {
-                const errorText = await searchRes.text();
-                throw new Error(`Failed to search assets: ${searchRes.status} ${searchRes.statusText} - ${errorText}`);
-            }
-
-            const searchResult = await searchRes.json();
-            console.log('[ImmichPhotoService] Search result:', searchResult);
-
-            const assets = searchResult.assets?.items || [];
-            const total = searchResult.assets?.total || 0;
-
-            console.log('[ImmichPhotoService] Received assets - count:', assets.length, 'total:', total);
-
-            const photos = assets.map((asset: any) => ({
-                id: asset.id,
-                url: `${this.proxyUrl}/api/assets/${asset.id}/original`,
-                location: asset.exifInfo?.city || asset.exifInfo?.state || 'Unknown',
-                createdAt: new Date(asset.fileCreatedAt || asset.createdAt),
-                description: asset.exifInfo?.description,
-            }));
-
-            const hasMore = true; //skip + assets.length < total;
-            console.log('[ImmichPhotoService] Processed photos - count:', photos.length, 'hasMore:', hasMore);
-
-            const result = {
-                photos,
-                total,
-                page,
-                pageSize,
-                hasMore,
-            };
-
-            console.log('[ImmichPhotoService] Returning result:', {
-                photoCount: result.photos.length,
-                total: result.total,
-                page: result.page,
-                pageSize: result.pageSize,
-                hasMore: result.hasMore
-            });
-
-            return result;
-        } catch (error) {
-            console.error('[ImmichPhotoService] Error fetching photos:', error);
-            throw error;
+        if (!res.ok) {
+            throw new Error(`Immich search failed: ${res.status}`);
         }
+
+        const json = await res.json();
+
+        const assets = json.assets?.items ?? [];
+
+        const photos = assets.map((asset: any) => ({
+            id: asset.id,
+            url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail`,
+            createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
+            location:
+                asset.exifInfo?.city ??
+                asset.exifInfo?.state ??
+                asset.exifInfo?.country ??
+                "Unknown",
+            description: asset.exifInfo?.description,
+        }));
+
+        return {
+            photos,
+            page,
+            pageSize,
+            hasMore: assets.length === pageSize,
+        };
     }
 }

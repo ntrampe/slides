@@ -15,7 +15,6 @@ export interface PaginationParams {
 
 export interface PaginatedPhotos {
     photos: Photo[];
-    total: number;
     page: number;
     pageSize: number;
     hasMore: boolean;

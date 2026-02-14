@@ -15,8 +15,7 @@ export const Slideshow = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        totalAvailable
-    } = useInfinitePhotosFlattened({ pageSize: 100 });
+    } = useInfinitePhotosFlattened({ pageSize: 10, personId: "607b51ff-9483-46ab-a6bb-956cea8551a7" });
 
     // 2. Pass the flattened photos into the slideshow logic
     const { settings } = useSettingsData();
@@ -107,7 +106,6 @@ export const Slideshow = () => {
                     <div>Current Index: {currentIndex}</div>
                     <div>Has More: {hasNextPage ? '✅' : '❌'}</div>
                     <div>Loading: {isFetchingNextPage ? '⏳' : '✅'}</div>
-                    <div>Total Available: {totalAvailable ?? '?'}</div>
                 </div>
             )}
         </div>

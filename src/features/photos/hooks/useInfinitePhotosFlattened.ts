@@ -25,6 +25,5 @@ export function useInfinitePhotosFlattened(params: UseInfinitePhotosFlattenedPar
         ...query,
         photos: allPhotos,
         totalFetched: allPhotos.length,
-        totalAvailable: query.data?.pages[0]?.total,
     };
 }

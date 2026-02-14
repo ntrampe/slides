@@ -80,7 +80,6 @@ export class MockPhotoService implements PhotoService {
 
         return {
             photos,
-            total,
             page,
             pageSize,
             hasMore,
