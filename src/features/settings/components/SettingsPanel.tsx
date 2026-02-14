@@ -1,5 +1,6 @@
 import { useSettingsData } from "../hooks/useSettingsData";
 import { StringArrayEditor } from "../../../shared/components";
+import { PeoplePicker } from "../../people/components/PeoplePicker";
 
 export const SettingsPanel = () => {
     const { settings, updateSettings } = useSettingsData();
@@ -25,9 +26,9 @@ export const SettingsPanel = () => {
                     placeholder="Enter album ID..."
                 />
 
-                <StringArrayEditor
-                    label="Person IDs"
-                    values={settings.slideshow.filter.personIds || []}
+                <PeoplePicker
+                    label="People"
+                    selectedIds={settings.slideshow.filter.personIds || []}
                     onChange={(personIds) => updateSettings({
                         ...settings,
                         slideshow: {
@@ -35,7 +36,6 @@ export const SettingsPanel = () => {
                             filter: { ...settings.slideshow.filter, personIds }
                         }
                     })}
-                    placeholder="Enter person ID..."
                 />
 
                 <label className="block mb-4">
