@@ -1,4 +1,4 @@
-import type { Person, PeopleService } from '../types';
+import type { Person, PeopleRepo } from '../types';
 
 const MOCK_PEOPLE: Person[] = [
     {
@@ -48,7 +48,7 @@ const MOCK_PEOPLE: Person[] = [
     }
 ];
 
-export class MockPeopleService implements PeopleService {
+export class MockPeopleRepo implements PeopleRepo {
     async getPeople(): Promise<Person[]> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 300));

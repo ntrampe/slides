@@ -1,6 +1,6 @@
-import type { PhotoService, PaginationParams, PaginatedPhotos } from "../types";
+import type { PhotoRepo, PaginationParams, PaginatedPhotos } from "../types";
 
-export class ImmichPhotoService implements PhotoService {
+export class ImmichPhotoRepo implements PhotoRepo {
     private proxyUrl = "/immich";
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {

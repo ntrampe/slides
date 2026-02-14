@@ -20,6 +20,6 @@ export interface PaginatedPhotos {
     hasMore: boolean;
 }
 
-export interface PhotoService {
+export interface PhotoRepo {
     getPhotos: (params: PaginationParams) => Promise<PaginatedPhotos>;
 }

@@ -1,4 +1,4 @@
-import type { Photo, PhotoService, PaginationParams, PaginatedPhotos } from '../types';
+import type { Photo, PhotoRepo, PaginationParams, PaginatedPhotos } from '../types';
 
 const LOCATIONS = [
     'Sunset Beach',
@@ -66,7 +66,7 @@ function generateMockPhotos(count: number): Photo[] {
     return photos;
 }
 
-export class MockPhotoService implements PhotoService {
+export class MockPhotoRepo implements PhotoRepo {
     private allPhotos: Photo[] = generateMockPhotos(500);
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {

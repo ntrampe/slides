@@ -12,6 +12,6 @@ export interface PeopleResponse {
     people: Person[];
 }
 
-export interface PeopleService {
+export interface PeopleRepo {
     getPeople: () => Promise<Person[]>;
 }

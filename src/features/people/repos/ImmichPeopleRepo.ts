@@ -1,6 +1,6 @@
-import type { PeopleService, Person } from '../types';
+import type { PeopleRepo, Person } from '../types';
 
-export class ImmichPeopleService implements PeopleService {
+export class ImmichPeopleRepo implements PeopleRepo {
     private proxyUrl = "/immich";
 
     async getPeople(): Promise<Person[]> {

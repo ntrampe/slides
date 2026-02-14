@@ -1,39 +1,39 @@
 import { createContext, useContext } from 'react';
 
-import { ImmichPhotoService, MockPhotoService, type PhotoService } from "../../features/photos";
+import { ImmichPhotoRepo, MockPhotoRepo, type PhotoRepo } from "../../features/photos";
 import { MockWeatherService } from "../../features/weather/services/MockWeatherService";
 import { OWMWeatherService } from "../../features/weather/services/OWMWeatherService";
 import type { WeatherService } from "../../features/weather/types";
 import type { SettingsService } from '../../features/settings';
 import { LocalSettingsService } from '../../features/settings/services/LocalStorageSettingsService';
-import type { PeopleService } from '../../features/people/types';
-import { MockPeopleService } from '../../features/people/services/MockPeopleService';
-import { ImmichPeopleService } from '../../features/people/services/ImmichPeopleService';
+import type { PeopleRepo } from '../../features/people/types';
+import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
+import { ImmichPeopleRepo } from '../../features/people/repos/ImmichPeopleRepo';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 // Define explicit type for app services
 export type AppServices = {
-    photos: PhotoService;
+    photos: PhotoRepo;
     weather: WeatherService;
     settings: SettingsService;
-    people: PeopleService;
+    people: PeopleRepo;
 };
 
 // Mock services
 const mockServices: AppServices = {
-    photos: new MockPhotoService(),
+    photos: new MockPhotoRepo(),
     weather: new MockWeatherService(),
     settings: new LocalSettingsService(),
-    people: new MockPeopleService()
+    people: new MockPeopleRepo()
 };
 
 // Live services
 const liveServices: AppServices = {
-    photos: new ImmichPhotoService(),
+    photos: new ImmichPhotoRepo(),
     weather: new OWMWeatherService(import.meta.env.VITE_OWM_KEY || ''),
     settings: new LocalSettingsService(),
-    people: new ImmichPeopleService()
+    people: new ImmichPeopleRepo()
 };
 
 // Select services based on flag
