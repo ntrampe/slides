@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useSlideshowTimer(interval: number, onAdvance: () => void) {
+interface UseSlideshowTimerOptions {
+    interval: number;
+    onAdvance: () => void;
+    currentIndex: number; // Add this to detect when photo changes
+    isCurrentPhotoLoaded: boolean; // Add this to pause while loading
+}
+
+export function useSlideshowTimer({
+    interval,
+    onAdvance,
+    currentIndex,
+    isCurrentPhotoLoaded
+}: UseSlideshowTimerOptions) {
     const [progress, setProgress] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
 
@@ -13,12 +25,13 @@ export function useSlideshowTimer(interval: number, onAdvance: () => void) {
     }, []);
 
     useEffect(() => {
-        if (!isPlaying) {
+        // Don't run timer if paused or if current photo isn't loaded yet
+        if (!isPlaying || !isCurrentPhotoLoaded) {
             setProgress(0);
             return;
         }
 
-        // Reset progress when timer starts
+        // Reset progress when timer starts or when index changes
         setProgress(0);
 
         // Update progress every 100ms for smooth animation
@@ -38,7 +51,7 @@ export function useSlideshowTimer(interval: number, onAdvance: () => void) {
             clearInterval(timer);
             clearInterval(progressInterval);
         };
-    }, [interval, isPlaying, onAdvance]);
+    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded]); // Add dependencies
 
     return {
         progress,

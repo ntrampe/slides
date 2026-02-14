@@ -39,10 +39,12 @@ export const Slideshow = () => {
     });
 
     // 3. Use timer for auto-advance
-    const { progress, isPlaying, togglePlayPause, reset } = useSlideshowTimer(
-        settings.slideshow.intervalMs,
-        goToNext
-    );
+    const { progress, isPlaying, togglePlayPause, reset } = useSlideshowTimer({
+        interval: settings.slideshow.intervalMs,
+        onAdvance: goToNext,
+        currentIndex,
+        isCurrentPhotoLoaded: !!currentLoaded, // Timer only runs when photo is loaded
+    });
 
     const { areControlsVisible } = useControls();
 
@@ -79,7 +81,17 @@ export const Slideshow = () => {
     // 5. Handle loading/error states
     if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading your memories...</div>;
     if (isError) return <div className="text-white">Something went wrong.</div>;
-    if (!currentLoaded) return <div className="text-white">No photos available.</div>;
+    if (!currentLoaded) {
+        // Show loading state while waiting for photo
+        return (
+            <div className="h-screen bg-black flex items-center justify-center text-white">
+                <div className="text-center">
+                    <div className="text-xl mb-2">Loading photo...</div>
+                    <div className="text-sm opacity-60">{currentIndex + 1} / {count}</div>
+                </div>
+            </div>
+        );
+    }
 
     const currentPhoto = currentLoaded.photo;
 
@@ -151,7 +163,7 @@ export const Slideshow = () => {
                     <div>Window Size: {poolStats.windowSize}</div>
 
                     <div className="font-bold border-b border-white/20 pb-2 mt-3 pt-2">Pagination</div>
-                    <div>Photos Fetched: {photos.length}</div>
+                    <div>Metadata Fetched: {photos.length}</div>
                     <div>Remaining: {photos.length - currentIndex}</div>
                     <div>Has More: {hasNextPage ? '✅' : '❌'}</div>
                     <div>Loading: {isFetchingNextPage ? '⏳' : '✅'}</div>
