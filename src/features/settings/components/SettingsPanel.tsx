@@ -34,6 +34,16 @@ export const SettingsPanel = () => {
                         step="1000"
                     />
                 </label>
+
+                <label className="flex items-center mb-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.slideshow.shuffle}
+                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, shuffle: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Shuffle Photos</span>
+                </label>
             </div>
 
             {/* Photo Settings */}

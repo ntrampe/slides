@@ -4,6 +4,7 @@ export interface AppSettings {
     slideshow: {
         layout: LayoutMode;
         intervalMs: number;
+        shuffle: boolean;
     };
     photo: {
         fit: ObjectFit;
@@ -40,6 +41,7 @@ const defaultSettings: AppSettings = {
     slideshow: {
         layout: 'single',
         intervalMs: 5000,
+        shuffle: true,
     },
     photo: {
         fit: 'cover',

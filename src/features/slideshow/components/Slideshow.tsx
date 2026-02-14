@@ -34,7 +34,7 @@ export const Slideshow = () => {
         getPhotoAt,
         poolStats,
     } = usePhotoPool(photos, {
-        shuffle: true, // settings.slideshow.shuffle,
+        shuffle: settings.slideshow.shuffle,
         preloadForward: 5,
         preloadBackward: 2,
     });
