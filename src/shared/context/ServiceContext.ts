@@ -9,6 +9,9 @@ import { LocalSettingsService } from '../../features/settings/services/LocalStor
 import type { PeopleRepo } from '../../features/people/types';
 import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
 import { ImmichPeopleRepo } from '../../features/people/repos/ImmichPeopleRepo';
+import type { AlbumRepo } from '../../features/albums/types';
+import { MockAlbumRepo } from '../../features/albums/repos/MockAlbumRepo';
+import { ImmichAlbumRepo } from '../../features/albums/repos/ImmichAlbumRepo';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
@@ -18,6 +21,7 @@ export type AppServices = {
     weather: WeatherService;
     settings: SettingsService;
     people: PeopleRepo;
+    albums: AlbumRepo;
 };
 
 // Mock services
@@ -25,7 +29,8 @@ const mockServices: AppServices = {
     photos: new MockPhotoRepo(),
     weather: new MockWeatherService(),
     settings: new LocalSettingsService(),
-    people: new MockPeopleRepo()
+    people: new MockPeopleRepo(),
+    albums: new MockAlbumRepo()
 };
 
 // Live services
@@ -33,7 +38,8 @@ const liveServices: AppServices = {
     photos: new ImmichPhotoRepo(),
     weather: new OWMWeatherService(import.meta.env.VITE_OWM_KEY || ''),
     settings: new LocalSettingsService(),
-    people: new ImmichPeopleRepo()
+    people: new ImmichPeopleRepo(),
+    albums: new ImmichAlbumRepo()
 };
 
 // Select services based on flag
