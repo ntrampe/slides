@@ -1,26 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSettingsData } from '../../settings/hooks/useSettingsData';
 
-interface UseSlideshowTimerOptions {
-    interval: number;
+interface UseSlideshowOptions {
     onAdvance: () => void;
-    currentIndex: number; // Add this to detect when photo changes
-    isCurrentPhotoLoaded: boolean; // Add this to pause while loading
-    isPlaying: boolean; // Playing state from settings
+    currentIndex: number;
+    isCurrentPhotoLoaded: boolean;
 }
 
-export function useSlideshowTimer({
-    interval,
+export function useSlideshow({
     onAdvance,
     currentIndex,
     isCurrentPhotoLoaded,
-    isPlaying
-}: UseSlideshowTimerOptions) {
+}: UseSlideshowOptions) {
+    const { settings, updateSettings } = useSettingsData();
     const [progress, setProgress] = useState(0);
 
+    // Get playing state and interval from settings
+    const isPlaying = settings.slideshow.autoplay;
+    const interval = settings.slideshow.intervalMs;
+
+    // Reset progress manually when navigating
     const reset = useCallback(() => {
         setProgress(0);
     }, []);
 
+    // Toggle play/pause by updating settings
+    const togglePlayPause = useCallback(() => {
+        updateSettings({
+            ...settings,
+            slideshow: {
+                ...settings.slideshow,
+                autoplay: !settings.slideshow.autoplay,
+            },
+        });
+    }, [settings, updateSettings]);
+
+    // Timer effect: handles progress tracking and auto-advance
     useEffect(() => {
         // Don't run timer if paused or if current photo isn't loaded yet
         if (!isPlaying || !isCurrentPhotoLoaded) {
@@ -39,7 +54,7 @@ export function useSlideshowTimer({
             });
         }, 100);
 
-        // Auto-advance
+        // Auto-advance after interval
         const timer = setInterval(() => {
             onAdvance();
         }, interval);
@@ -48,10 +63,15 @@ export function useSlideshowTimer({
             clearInterval(timer);
             clearInterval(progressInterval);
         };
-    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded]); // Add dependencies
+    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded]);
 
     return {
+        // State
+        isPlaying,
         progress,
+
+        // Actions
+        togglePlayPause,
         reset,
     };
 }
