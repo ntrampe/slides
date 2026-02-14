@@ -1,12 +1,6 @@
 import type { Photo } from '../../photos';
 import type { LoadedPhoto } from '../../photo-pool';
-
-export interface PoolStats {
-    loadedCount: number;
-    windowStart: number;
-    windowEnd: number;
-    windowSize: number;
-}
+import type { PoolDebugInfo, SlideshowDebugInfo } from '../../debug-panel';
 
 export interface UseSlideshowDataReturn {
     currentLoaded: LoadedPhoto | undefined;
@@ -19,7 +13,7 @@ export interface UseSlideshowDataReturn {
     isLoading: boolean;
     isError: boolean;
     isFetchingNextPage: boolean;
-    poolStats: PoolStats;
+    poolStats: PoolDebugInfo;  // Updated type name
     totalPhotos: number;
     hasNextPage: boolean | undefined;
 }
@@ -29,17 +23,6 @@ export interface UseSlideshowTimerReturn {
     progress: number;
     togglePlayPause: () => void;
     reset: () => void;
-}
-
-export interface SlideshowDebugInfo {
-    currentIndex: number;
-    count: number;
-    isPlaying: boolean;
-    progress: number;
-    poolStats: PoolStats;
-    totalPhotos: number;
-    hasNextPage: boolean | undefined;
-    isFetchingNextPage: boolean;
 }
 
 export interface UseSlideshowReturn {
