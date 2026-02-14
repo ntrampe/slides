@@ -14,7 +14,7 @@ export class ImmichPhotoService implements PhotoService {
         const searchBody: any = {
             page,
             size: pageSize,
-            type: "IMAGE", // strongly recommended
+            type: "IMAGE",
         };
 
         if (albumId) searchBody.albumIds = [albumId];
@@ -36,7 +36,7 @@ export class ImmichPhotoService implements PhotoService {
 
         const photos = assets.map((asset: any) => ({
             id: asset.id,
-            url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail`,
+            url: `${this.proxyUrl}/api/assets/${asset.id}/original`,
             createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
             location:
                 asset.exifInfo?.city ??
