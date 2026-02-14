@@ -77,7 +77,11 @@ export function usePhotoPool(
         setIndex(Math.max(0, Math.min(i, orderedPhotos.length - 1)));
     }, [orderedPhotos.length]);
 
-    // Add at the end of the hook, before return:
+    const getPhotoAt = useCallback((targetIndex: number): LoadedPhoto | undefined => {
+        const photo = orderedPhotos[targetIndex];
+        if (!photo) return undefined;
+        return poolRef.current.get(photo.id);
+    }, [orderedPhotos]);
 
     const poolStats = useMemo(() => ({
         loadedCount: poolRef.current.size,
@@ -86,7 +90,6 @@ export function usePhotoPool(
         windowSize: windowEnd - windowStart + 1,
     }), [windowStart, windowEnd, poolRef.current.size]);
 
-    // Update return statement:
     return {
         current: currentLoaded,
         index,
@@ -94,6 +97,7 @@ export function usePhotoPool(
         next,
         previous,
         jumpTo,
+        getPhotoAt,
         poolStats,
     };
 }

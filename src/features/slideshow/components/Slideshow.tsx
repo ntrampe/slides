@@ -31,6 +31,7 @@ export const Slideshow = () => {
         next: goToNext,
         previous: goToPrevious,
         jumpTo,
+        getPhotoAt,
         poolStats,
     } = usePhotoPool(photos, {
         shuffle: true, // settings.slideshow.shuffle,
@@ -49,7 +50,7 @@ export const Slideshow = () => {
     const { areControlsVisible } = useControls();
 
     // Get next photo for split view (manually since we have the index)
-    const nextLoaded = photos[currentIndex + 1];
+    const nextLoaded = getPhotoAt(currentIndex + 1);
 
     // 4. Auto-load more photos when getting close to the end
     useEffect(() => {
@@ -79,7 +80,7 @@ export const Slideshow = () => {
     }, [goToNext, goToPrevious, togglePlayPause, reset]);
 
     // 5. Handle loading/error states
-    if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading your memories...</div>;
+    if (isLoading) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading metadata...</div>;
     if (isError) return <div className="text-white">Something went wrong.</div>;
     if (!currentLoaded) {
         // Show loading state while waiting for photo
@@ -94,6 +95,7 @@ export const Slideshow = () => {
     }
 
     const currentPhoto = currentLoaded.photo;
+    const nextPhoto = nextLoaded?.photo;
 
     return (
         <div className="relative h-full w-full bg-black overflow-hidden">
@@ -106,10 +108,10 @@ export const Slideshow = () => {
                     photo={currentPhoto}
                     objectFit={settings.photo.fit}
                 />
-                {settings.slideshow.layout === 'split' && nextLoaded && (
+                {settings.slideshow.layout === 'split' && nextPhoto && (
                     <PhotoDisplay
-                        key={nextLoaded.id}
-                        photo={nextLoaded}
+                        key={nextPhoto.id}
+                        photo={nextPhoto}
                         objectFit={settings.photo.fit}
                     />
                 )}
