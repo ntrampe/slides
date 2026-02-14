@@ -14,20 +14,26 @@ export const SettingsPanel = () => {
 
                 <StringArrayEditor
                     label="Album IDs"
-                    values={settings.slideshow.albumIds}
+                    values={settings.slideshow.filter.albumIds || []}
                     onChange={(albumIds) => updateSettings({
                         ...settings,
-                        slideshow: { ...settings.slideshow, albumIds }
+                        slideshow: {
+                            ...settings.slideshow,
+                            filter: { ...settings.slideshow.filter, albumIds }
+                        }
                     })}
                     placeholder="Enter album ID..."
                 />
 
                 <StringArrayEditor
                     label="Person IDs"
-                    values={settings.slideshow.personIds}
+                    values={settings.slideshow.filter.personIds || []}
                     onChange={(personIds) => updateSettings({
                         ...settings,
-                        slideshow: { ...settings.slideshow, personIds }
+                        slideshow: {
+                            ...settings.slideshow,
+                            filter: { ...settings.slideshow.filter, personIds }
+                        }
                     })}
                     placeholder="Enter person ID..."
                 />

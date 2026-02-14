@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { useInfinitePhotos } from './usePhotos';
 import type { Photo } from '../types';
+import type { SlideshowFilter } from '../../../shared/types/config';
 
-interface UseInfinitePhotosFlattenedParams {
-    albumIds?: string[];
-    personIds?: string[];
+interface UseInfinitePhotosFlattenedParams extends SlideshowFilter {
     pageSize?: number;
 }
 

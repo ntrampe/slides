@@ -1,3 +1,5 @@
+import type { SlideshowFilter } from '../../shared/types/config';
+
 export interface Photo {
     id: string;
     url: string;
@@ -6,11 +8,9 @@ export interface Photo {
     description?: string;
 }
 
-export interface PaginationParams {
+export interface PaginationParams extends SlideshowFilter {
     page?: number;
     pageSize?: number;
-    albumIds?: string[];
-    personIds?: string[];
 }
 
 export interface PaginatedPhotos {

@@ -1,9 +1,8 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useServices } from "../../../shared/context/ServiceContext";
+import type { SlideshowFilter } from '../../../shared/types/config';
 
-interface UsePhotosParams {
-    albumIds?: string[];
-    personIds?: string[];
+interface UsePhotosParams extends SlideshowFilter {
     page?: number;
     pageSize?: number;
 }

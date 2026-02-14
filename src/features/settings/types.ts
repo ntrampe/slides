@@ -1,4 +1,4 @@
-import type { LayoutMode, ObjectFit } from "../../shared/types/config";
+import type { LayoutMode, ObjectFit, SlideshowFilter } from "../../shared/types/config";
 
 export interface AppSettings {
     slideshow: {
@@ -6,8 +6,7 @@ export interface AppSettings {
         intervalMs: number;
         shuffle: boolean;
         autoplay: boolean;
-        albumIds: string[];
-        personIds: string[];
+        filter: SlideshowFilter;
     };
     photo: {
         fit: ObjectFit;
@@ -46,8 +45,10 @@ const defaultSettings: AppSettings = {
         intervalMs: 5000,
         shuffle: true,
         autoplay: true,
-        albumIds: [],
-        personIds: [],
+        filter: {
+            albumIds: [],
+            personIds: [],
+        },
     },
     photo: {
         fit: 'cover',
