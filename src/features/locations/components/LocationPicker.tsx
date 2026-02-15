@@ -8,7 +8,7 @@ interface LocationPickerProps {
     label: string;
 }
 
-export const LocationPicker = ({ selection, onChange, label }: LocationPickerProps) => {
+export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => {
     const {
         countryItems,
         stateItems,
@@ -56,7 +56,7 @@ export const LocationPicker = ({ selection, onChange, label }: LocationPickerPro
                 isLoading={isLoading}
                 error={error}
                 searchPlaceholder="Search states/provinces..."
-                emptyMessage={selection.country ? "No state/province selected." : "Select a country first to see states/provinces."}
+                emptyMessage="No state/province selected."
                 renderLabel={(item) => (
                     <div>
                         <div>{item.label}</div>
@@ -77,7 +77,7 @@ export const LocationPicker = ({ selection, onChange, label }: LocationPickerPro
                 isLoading={isLoading}
                 error={error}
                 searchPlaceholder="Search cities..."
-                emptyMessage={selection.state ? "No city selected." : "Select a state/province first to see cities."}
+                emptyMessage="No city selected."
                 renderLabel={(item) => (
                     <div>
                         <div>{item.label}</div>
