@@ -1,58 +1,16 @@
-version: '3.8'
+version: "3.8"
 
 services:
   immich-slideshow:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: immich-slideshow
+    image: ghcr.io/ntrampe/slides:latest
+    container_name: immich-slides
+    env_file:
+      - .env
     ports:
       - "${PORT}:${PORT}"
-    environment:
-      # Required - Point to your Immich instance
-      - IMMICH_URL=${IMMICH_URL}
-      - IMMICH_API_KEY=${IMMICH_API_KEY}
-      
-      # Optional - Server Configuration
-      - PORT=${PORT:-3000}
-      
-      # Optional - Frontend Defaults (can be changed in UI)
-      - VITE_DEFAULT_LAYOUT=${VITE_DEFAULT_LAYOUT:-single}
-      - VITE_DEFAULT_INTERVAL_MS=${VITE_DEFAULT_INTERVAL_MS:-5000}
-      - VITE_DEFAULT_SHUFFLE=${VITE_DEFAULT_SHUFFLE:-true}
-      - VITE_DEFAULT_AUTOPLAY=${VITE_DEFAULT_AUTOPLAY:-true}
-      - VITE_DEFAULT_OBJECT_FIT=${VITE_DEFAULT_OBJECT_FIT:-contain}
-      - VITE_DEFAULT_THEME=${VITE_DEFAULT_THEME:-system}
-      - VITE_DEFAULT_SHOW_CLOCK=${VITE_DEFAULT_SHOW_CLOCK:-true}
-      - VITE_DEFAULT_SHOW_WEATHER=${VITE_DEFAULT_SHOW_WEATHER:-false}
-      - VITE_DEFAULT_SHOW_PROGRESS_BAR=${VITE_DEFAULT_SHOW_PROGRESS_BAR:-true}
-      - VITE_DEFAULT_SHOW_PHOTO_METADATA=${VITE_DEFAULT_SHOW_PHOTO_METADATA:-true}
-      - VITE_DEFAULT_FONT_SIZE=${VITE_DEFAULT_FONT_SIZE:-base}
-      - VITE_DEFAULT_24_HOUR_FORMAT=${VITE_DEFAULT_24_HOUR_FORMAT:-false}
-      - VITE_DEFAULT_TRANSITION_TYPE=${VITE_DEFAULT_TRANSITION_TYPE:-fade}
-      - VITE_DEFAULT_TRANSITION_DURATION=${VITE_DEFAULT_TRANSITION_DURATION:-500}
-      - VITE_DEFAULT_ALBUM_IDS=${VITE_DEFAULT_ALBUM_IDS:-}
-      - VITE_DEFAULT_PERSON_IDS=${VITE_DEFAULT_PERSON_IDS:-}
-      - VITE_DEFAULT_LOCATION_COUNTRY=${VITE_DEFAULT_LOCATION_COUNTRY:-}
-      - VITE_DEFAULT_LOCATION_STATE=${VITE_DEFAULT_LOCATION_STATE:-}
-      - VITE_DEFAULT_LOCATION_CITY=${VITE_DEFAULT_LOCATION_CITY:-}
-      - VITE_OWM_KEY=${VITE_OWM_KEY:-}
-      - VITE_DEFAULT_WEATHER_LAT=${VITE_DEFAULT_WEATHER_LAT:-}
-      - VITE_DEFAULT_WEATHER_LNG=${VITE_DEFAULT_WEATHER_LNG:-}
-      
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + process.env.PORT, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + (process.env.PORT || 3000), r => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 3s
-      start_period: 5s
       retries: 3
-
-    # Uncomment to connect to Immich's network (if running Immich in Docker)
-    # networks:
-    #   - immich-network
-
-# Uncomment if connecting to existing Immich network
-# networks:
-#   immich-network:
-#     external: true
