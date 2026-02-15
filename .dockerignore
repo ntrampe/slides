@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+npm-debug.log
+
+# Build output
+dist/
+build/
+
+# Development files
+.git/
+.gitignore
+.continue/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Environment files (will be provided at runtime)
+.env
+.env.local
+.env.production
+.env.development
+*.env
+
+# Documentation
+docs/
+agent_metadata.md
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Misc
+*.log
+*.md
+!README_DOCKER.md
