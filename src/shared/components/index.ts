@@ -1,4 +1,5 @@
 export { StringArrayEditor } from './StringArrayEditor';
+export { CollapsibleSection } from './CollapsibleSection';
 export { ItemPicker } from './picker/ItemPicker';
 export { SelectedItems } from './picker/SelectedItems';
 export { SearchInput } from './picker/SearchInput';
