@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useSettingsData } from '../../../features/settings/hooks/useSettingsData';
-import type { ThemeMode } from '../../types/config';
+import type { ThemeMode } from "../types";
 import type { UseThemeReturn } from './types';
 
 /**

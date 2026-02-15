@@ -1,4 +1,4 @@
-import type { ThemeMode } from '../../types/config';
+import type { ThemeMode } from "../types";
 
 export interface UseThemeReturn {
     // Theme mode
