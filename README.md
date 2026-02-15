@@ -24,24 +24,35 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 
 ### 🐳 Docker Installation (Recommended)
 
-The easiest way to run this application is with Docker:
+1. **Download the files**
+   ```bash
+   curl -O https://raw.githubusercontent.com/ntrampe/slides/refs/heads/main/docker-compose.yml
+   curl -O https://raw.githubusercontent.com/ntrampe/slides/refs/heads/main/.env.example
+   ```
 
-```bash
-# Create environment file
-cp .env.example .env
+2. **Configure your environment**
+   ```bash
+   cp .env.example .env
+   nano .env
+   ```
+   
+   Edit the required settings:
+   ```env
+   IMMICH_URL=http://your-immich-server:2283
+   IMMICH_API_KEY=your-api-key-here
+   ```
 
-# Edit with your Immich details
-nano .env
+3. **Start the container**
+   ```bash
+   docker-compose up -d
+   ```
 
-# Start the container
-docker-compose up -d
-```
+4. **Open in browser**
+   ```
+   http://localhost:3000
+   ```
 
-Includes:
-- Docker Compose setup
-- Synology NAS installation guide
-- Complete configuration reference
-- Troubleshooting tips
+That's it! The slideshow is now running. All other settings can be customized in the UI.
 
 ### 💻 Local Development
 
@@ -62,7 +73,7 @@ For development or manual setup:
 
 2. **Configure environment**
    ```bash
-   cp example.env .env
+   cp .env.example .env
    ```
    
    Edit `.env` with your Immich details:
@@ -98,32 +109,29 @@ npm run build
 node --loader tsx src/server/index.ts
 ```
 
-## 📖 Documentation
-
-- **[Docker Installation Guide](README_DOCKER.md)** - Complete Docker setup for all platforms
-- **[Architecture](agent_metadata.md)** - Code structure and patterns
-
 ## ⚙️ Configuration
 
-### Required Environment Variables
+### Required Settings
 
 | Variable | Description |
 |----------|-------------|
-| `IMMICH_URL` | Your Immich server URL |
-| `IMMICH_API_KEY` | Your Immich API key |
+| `IMMICH_URL` | Your Immich server URL (e.g., `http://localhost:2283`) |
+| `IMMICH_API_KEY` | Your Immich API key (get from User Settings → API Keys) |
 
 ### Optional Settings
 
-Many optional environment variables are available to set default values:
-- Layout and display options
+All other settings have sensible defaults and can be:
+- **Changed in the UI** - Settings panel is accessible via the ⚙️ icon or press `S`
+- **Pre-configured via environment variables** - See [.env.example](.env.example) for full list
+
+Available options include:
+- Layout and display preferences
 - Slideshow timing and transitions
 - Photo filters (albums, people, locations)
-- Weather integration
-- UI preferences
+- Weather integration (requires OpenWeatherMap API key)
+- UI customization (theme, overlays, font size)
 
-See [.env.example](.env.example) for complete list.
-
-**Note**: Settings can be changed in the UI and persist in browser localStorage.
+**All settings persist in browser localStorage** - your preferences are saved automatically.
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -178,16 +186,6 @@ See [agent_metadata.md](agent_metadata.md) for detailed patterns.
 - Immich SDK
 - OpenWeatherMap API (optional)
 
-## 🐳 Docker
-
-Multi-stage Docker build optimized for:
-- ✅ Small image size (~150-200MB)
-- ✅ Production-ready with health checks
-- ✅ Multi-platform (amd64, arm64)
-- ✅ Synology NAS compatible
-
-See [README_DOCKER.md](README_DOCKER.md) for details.
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
@@ -209,6 +207,4 @@ MIT License - see LICENSE file for details.
 
 ## 📞 Support
 
-- 🐛 [Report Issues](https://github.com/your-username/immich-slideshow/issues)
-- 💬 [Discussions](https://github.com/your-username/immich-slideshow/discussions)
 - 📖 [Immich Docs](https://immich.app/docs)
