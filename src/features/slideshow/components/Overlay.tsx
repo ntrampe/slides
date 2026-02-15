@@ -3,6 +3,7 @@ import { WeatherDisplay } from '../../weather';
 import { useServices } from '../../../shared/context/ServiceContext';
 import { useQuery } from '@tanstack/react-query';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { HudPanel, hudTextSizes } from '../../../shared/components';
 
 export const Overlay = ({ progress }: { progress: number }) => {
     const { weather: weatherService } = useServices();
@@ -18,19 +19,19 @@ export const Overlay = ({ progress }: { progress: number }) => {
     const now = new Date();
 
     return (
-        <div className="absolute inset-0 p-12 flex flex-col justify-between pointer-events-none z-10">
-            <div className="flex justify-between items-start">
+        <div className="absolute inset-0 p-4 sm:p-8 md:p-12 flex flex-col justify-between pointer-events-none z-10">
+            <div className="flex justify-between items-start gap-4 flex-wrap">
                 {settings.clock.enabled &&
-                    <div className="flex flex-col">
-                        <div className="text-7xl font-light text-white drop-shadow-2xl">
+                    <HudPanel variant="subtle">
+                        <div className={`font-light ${hudTextSizes.display}`}>
                             {format(now, timeFormat)}
                         </div>
-                        <div className="text-2xl font-light text-white/80 drop-shadow-2xl mt-2">
+                        <div className={`font-light opacity-80 mt-1 sm:mt-2 ${hudTextSizes.heading}`}>
                             {format(now, settings.clock.dateFormat)}
                         </div>
-                    </div>
+                    </HudPanel>
                 }
-                {settings.weather.enabled &&
+                {settings.weather.enabled && weather &&
                     <WeatherDisplay {...weather} />
                 }
             </div>

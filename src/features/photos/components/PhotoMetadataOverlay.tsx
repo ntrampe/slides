@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { Calendar, MapPin } from 'lucide-react';
 import type { Photo } from '../types';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { HudPanel, hudTextSizes } from '../../../shared/components';
 
 interface PhotoMetadataOverlayProps {
     createdAt?: Photo['createdAt'];
@@ -14,21 +15,24 @@ export const PhotoMetadataOverlay = ({ createdAt, location }: PhotoMetadataOverl
     if (!createdAt && !location) return null;
 
     return (
-        <div className="absolute bottom-6 left-6 bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/5 text-white">
+        <HudPanel
+            variant="subtle"
+            className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6"
+        >
             {createdAt && (
-                <div className="mb-4 flex items-center gap-3">
-                    <Calendar className="w-6 h-6 opacity-60" />
-                    <p className="text-2xl font-medium">
+                <div className="mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
+                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6 opacity-60" />
+                    <p className={`font-medium ${hudTextSizes.body}`}>
                         {format(new Date(createdAt), settings.photos.dateFormat)}
                     </p>
                 </div>
             )}
             {location && (
-                <div className="flex items-center gap-3">
-                    <MapPin className="w-6 h-6 opacity-60" />
-                    <h2 className="text-2xl font-medium">{location}</h2>
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 opacity-60" />
+                    <h2 className={`font-medium ${hudTextSizes.body}`}>{location}</h2>
                 </div>
             )}
-        </div>
+        </HudPanel>
     );
 };

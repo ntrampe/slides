@@ -3,6 +3,7 @@ import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { DebugPanel } from '../../debug-panel';
+import { HudButton, hudTextSizes } from '../../../shared/components';
 
 export const Slideshow = () => {
     const { state, actions, debug } = useSlideshow();
@@ -24,8 +25,8 @@ export const Slideshow = () => {
         return (
             <div className="h-screen bg-black flex items-center justify-center text-text-inverse">
                 <div className="text-center">
-                    <div className="text-xl mb-2">Loading photo...</div>
-                    <div className="text-sm opacity-60">{state.currentIndex + 1} / {state.count}</div>
+                    <div className={`mb-2 ${hudTextSizes.heading}`}>Loading photo...</div>
+                    <div className={`opacity-60 ${hudTextSizes.caption}`}>{state.currentIndex + 1} / {state.count}</div>
                 </div>
             </div>
         );
@@ -54,32 +55,35 @@ export const Slideshow = () => {
             </div>
 
             {/* Navigation Arrows */}
-            <button
+            <HudButton
                 onClick={actions.goToPrevious}
-                className={`absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                label="Previous photo"
+                size="large"
+                className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
-                aria-label="Previous photo"
             >
-                <ChevronLeft size={48} strokeWidth={2} />
-            </button>
-            <button
+                <ChevronLeft strokeWidth={2} />
+            </HudButton>
+            <HudButton
                 onClick={actions.goToNext}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                label="Next photo"
+                size="large"
+                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
-                aria-label="Next photo"
             >
-                <ChevronRight size={48} strokeWidth={2} />
-            </button>
+                <ChevronRight strokeWidth={2} />
+            </HudButton>
 
             {/* Play/Pause Button */}
-            <button
+            <HudButton
                 onClick={actions.togglePlayPause}
-                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full p-4 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                label={state.isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+                size="large"
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${state.areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
-                aria-label={state.isPlaying ? 'Pause slideshow' : 'Play slideshow'}
             >
-                {state.isPlaying ? <Pause size={48} strokeWidth={2} /> : <Play size={48} strokeWidth={2} />}
-            </button>
+                {state.isPlaying ? <Pause strokeWidth={2} /> : <Play strokeWidth={2} />}
+            </HudButton>
 
             {/* Debug Panel */}
             {debug && <DebugPanel debug={debug} />}
