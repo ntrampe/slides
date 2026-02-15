@@ -44,6 +44,10 @@ export function buildDefaultSettings(): AppSettings {
                 albumIds: parseIdArray(env.VITE_DEFAULT_ALBUM_IDS),
                 personIds: parseIdArray(env.VITE_DEFAULT_PERSON_IDS),
             },
+            transition: {
+                type: (env.VITE_DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',
+                duration: parseNumber(env.VITE_DEFAULT_TRANSITION_DURATION, 500),
+            },
         },
         photo: {
             fit: (env.VITE_DEFAULT_OBJECT_FIT as AppSettings['photo']['fit']) || 'cover',

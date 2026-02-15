@@ -8,6 +8,10 @@ export interface AppSettings {
         shuffle: boolean;
         autoplay: boolean;
         filter: SlideshowFilter;
+        transition: {
+            type: 'fade' | 'slide' | 'none';
+            duration: number; // in milliseconds
+        };
     };
     photo: {
         fit: ObjectFit;

@@ -86,6 +86,51 @@ export const SettingsPanel = () => {
                     />
                     <span>Autoplay</span>
                 </label>
+
+                {/* Transition Settings */}
+                <label className="block mb-4">
+                    <span className="block mb-1">Transition Type</span>
+                    <select
+                        value={settings.slideshow.transition.type}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            slideshow: {
+                                ...settings.slideshow,
+                                transition: {
+                                    ...settings.slideshow.transition,
+                                    type: e.target.value as 'fade' | 'slide' | 'none'
+                                }
+                            }
+                        })}
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                    >
+                        <option value="fade">Fade</option>
+                        <option value="slide">Slide</option>
+                        <option value="none">None</option>
+                    </select>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="block mb-1">Transition Duration (ms)</span>
+                    <input
+                        type="number"
+                        value={settings.slideshow.transition.duration}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            slideshow: {
+                                ...settings.slideshow,
+                                transition: {
+                                    ...settings.slideshow.transition,
+                                    duration: Number(e.target.value)
+                                }
+                            }
+                        })}
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                        min="100"
+                        step="100"
+                        disabled={settings.slideshow.transition.type === 'none'}
+                    />
+                </label>
             </div>
 
             {/* Photo Settings */}
