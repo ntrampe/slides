@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Base full-screen setup - prevents white flash on mobile */
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+/* iOS safe area support with fallbacks */
+@supports (padding: env(safe-area-inset-top)) {
+    body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+}
+
+/* Fallback for browsers without dvh support */
+@supports not (height: 100dvh) {
+    main {
+        height: 100vh !important;
+    }
+}
+
 /* Tailwind v4 Theme Definition */
 @theme {
     /* Color tokens - Tailwind will auto-generate utilities */

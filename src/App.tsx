@@ -24,10 +24,16 @@ function AppContent() {
   const isSettingsPanelVisible = isSettingsShown || showSettings;
 
   return (
-    <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
-      {/* Slideshow Container - shrinks when settings are visible */}
+    <main
+      className="select-none overflow-hidden relative bg-black"
+      style={{
+        // Use modern dynamic viewport height (fallback handled by CSS)
+        height: '100dvh',
+      }}
+    >
+      {/* Slideshow Container - extends to true edges, shrinks when settings visible */}
       <div
-        className="h-full transition-all duration-500 ease-in-out"
+        className="absolute inset-0 transition-all duration-500 ease-in-out"
         style={{
           width: isSettingsPanelVisible ? 'calc(100% - 320px)' : '100%'
         }}
@@ -35,12 +41,14 @@ function AppContent() {
         <Slideshow />
       </div>
 
-      {/* Settings Button */}
+      {/* Settings Button - with safe area awareness and fallback */}
       <button
         onClick={toggleSettings}
-        className={`absolute top-4 transition-all duration-500 ease-in-out text-white hover:bg-white/20 rounded-full p-3 z-10 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`absolute transition-all duration-500 ease-in-out text-white hover:bg-white/20 rounded-full p-3 z-10 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         style={{
+          // Safe area aware positioning (falls back to 1rem on unsupported browsers)
+          top: 'max(1rem, env(safe-area-inset-top, 0px))',
           right: isSettingsPanelVisible ? 'calc(320px + 1rem)' : '1rem'
         }}
         aria-label="Settings"
@@ -48,11 +56,16 @@ function AppContent() {
         <Settings size={24} strokeWidth={2} />
       </button>
 
-      {/* Settings Panel - always rendered, positioned absolutely */}
+      {/* Settings Panel - always rendered, positioned absolutely with safe area padding */}
       <div
-        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out"
+        className="absolute right-0 w-80 transition-transform duration-500 ease-in-out"
         style={{
-          transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)'
+          top: '0',
+          height: '100dvh',
+          transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
+          // Safe area padding for iOS
+          paddingTop: 'max(0px, env(safe-area-inset-top, 0px))',
+          paddingBottom: 'max(0px, env(safe-area-inset-bottom, 0px))'
         }}
       >
         <SettingsPanel />
