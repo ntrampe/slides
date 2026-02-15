@@ -14,13 +14,13 @@ export const Overlay = ({ progress }: { progress: number }) => {
         refetchInterval: 1000 * 60 * 15, // Update weather every 15 mins
     });
 
-    const timeFormat = settings.clock.show24HourFormat ? 'HH:mm' : 'h:mm a';
+    const timeFormat = settings.clock.use24HourFormat ? 'HH:mm' : 'h:mm a';
     const now = new Date();
 
     return (
         <div className="absolute inset-0 p-12 flex flex-col justify-between pointer-events-none z-10">
             <div className="flex justify-between items-start">
-                {settings.ui.showClock &&
+                {settings.clock.enabled &&
                     <div className="flex flex-col">
                         <div className="text-7xl font-light text-white drop-shadow-2xl">
                             {format(now, timeFormat)}
@@ -30,13 +30,13 @@ export const Overlay = ({ progress }: { progress: number }) => {
                         </div>
                     </div>
                 }
-                {settings.ui.showWeather &&
+                {settings.weather.enabled &&
                     <WeatherDisplay {...weather} />
                 }
             </div>
 
             {/* Timer Progress Bar */}
-            {settings.ui.showProgressBar &&
+            {settings.slideshow.ui.showProgressBar &&
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
                     <div
                         className="h-full bg-white transition-all duration-100 ease-linear"

@@ -34,7 +34,7 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
             />
 
             {/* Date & Location Metadata Overlay */}
-            {settings.ui.showPhotoMetadata &&
+            {settings.photos.display.showMetadata &&
                 <PhotoMetadataOverlay
                     createdAt={photo.createdAt}
                     location={photo.location}

@@ -2,6 +2,7 @@ import type { LayoutMode, ObjectFit, SlideshowFilter } from "../../shared/types/
 import type { ThemeMode } from "../theme";
 
 export interface AppSettings {
+    // Slideshow feature
     slideshow: {
         layout: LayoutMode;
         intervalMs: number;
@@ -12,34 +13,50 @@ export interface AppSettings {
             type: 'fade' | 'slide' | 'none';
             duration: number; // in milliseconds
         };
+        ui: {
+            showProgressBar: boolean;
+        }
     };
-    photo: {
-        fit: ObjectFit;
+
+    // Photos feature
+    photos: {
+        display: {
+            fit: ObjectFit;
+            showMetadata: boolean;
+        }
         dateFormat: string;
-    },
+    };
+
+    // Clock feature
     clock: {
-        show24HourFormat: boolean;
+        enabled: boolean;
+        use24HourFormat: boolean;
         dateFormat: string;
-    },
+    };
+
+    // Weather feature
     weather: {
+        enabled: boolean;
         location: {
             lat: number;
             lng: number;
-        },
-    },
+        };
+    };
+
+    // UI feature (shared/global UI settings)
     ui: {
-        showClock: boolean;
-        showWeather: boolean;
-        showProgressBar: boolean;
-        showPhotoMetadata: boolean;
         fontSize: 'sm' | 'base' | 'lg' | 'xl';
     };
+
+    // Theme feature
     theme: {
         mode: ThemeMode;
-    },
+    };
+
+    // Debug feature
     debug: {
         showDebugStats: boolean;
-    },
+    };
 }
 
 export interface SettingsService {

@@ -108,8 +108,8 @@ export const SettingsPanel = () => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.ui.showClock}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showClock: e.target.checked } })}
+                        checked={settings.clock.enabled}
+                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, enabled: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Clock</span>
@@ -118,8 +118,8 @@ export const SettingsPanel = () => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.ui.showWeather}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showWeather: e.target.checked } })}
+                        checked={settings.weather.enabled}
+                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, enabled: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Weather</span>
@@ -128,8 +128,17 @@ export const SettingsPanel = () => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.ui.showProgressBar}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showProgressBar: e.target.checked } })}
+                        checked={settings.slideshow.ui.showProgressBar}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            slideshow: {
+                                ...settings.slideshow,
+                                ui: {
+                                    ...settings.slideshow.ui,
+                                    showProgressBar: e.target.checked
+                                }
+                            }
+                        })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Progress Bar</span>
@@ -138,8 +147,17 @@ export const SettingsPanel = () => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.ui.showPhotoMetadata}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, showPhotoMetadata: e.target.checked } })}
+                        checked={settings.photos.display.showMetadata}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            photos: {
+                                ...settings.photos,
+                                display: {
+                                    ...settings.photos.display,
+                                    showMetadata: e.target.checked
+                                }
+                            }
+                        })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Photo Metadata</span>
@@ -165,8 +183,17 @@ export const SettingsPanel = () => {
                 <label className="block">
                     <span className="block mb-1">Photo Fit</span>
                     <select
-                        value={settings.photo.fit}
-                        onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, fit: e.target.value as any } })}
+                        value={settings.photos.display.fit}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            photos: {
+                                ...settings.photos,
+                                display: {
+                                    ...settings.photos.display,
+                                    fit: e.target.value as any
+                                }
+                            }
+                        })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="contain">Contain (show full photo)</option>
@@ -179,8 +206,14 @@ export const SettingsPanel = () => {
                     <span className="block mb-1">Date Format</span>
                     <input
                         type="text"
-                        value={settings.photo.dateFormat}
-                        onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, dateFormat: e.target.value } })}
+                        value={settings.photos.dateFormat}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            photos: {
+                                ...settings.photos,
+                                dateFormat: e.target.value
+                            }
+                        })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM dd, yyyy"
                     />
@@ -240,8 +273,8 @@ export const SettingsPanel = () => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.clock.show24HourFormat}
-                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, show24HourFormat: e.target.checked } })}
+                        checked={settings.clock.use24HourFormat}
+                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, use24HourFormat: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>24-Hour Format</span>

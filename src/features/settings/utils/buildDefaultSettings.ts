@@ -59,26 +59,30 @@ export function buildDefaultSettings(): AppSettings {
                 type: (env.VITE_DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',
                 duration: parseNumber(env.VITE_DEFAULT_TRANSITION_DURATION, 500),
             },
+            ui: {
+                showProgressBar: parseBool(env.VITE_DEFAULT_SHOW_PROGRESS_BAR, true),
+            }
         },
-        photo: {
-            fit: (env.VITE_DEFAULT_OBJECT_FIT as AppSettings['photo']['fit']) || 'cover',
+        photos: {
+            display: {
+                fit: (env.VITE_DEFAULT_OBJECT_FIT as AppSettings['photos']['display']['fit']) || 'cover',
+                showMetadata: parseBool(env.VITE_DEFAULT_SHOW_PHOTO_METADATA, true),
+            },
             dateFormat: 'MMM dd, yyyy',
         },
         clock: {
-            show24HourFormat: parseBool(env.VITE_DEFAULT_24_HOUR_FORMAT, false),
+            enabled: parseBool(env.VITE_DEFAULT_SHOW_CLOCK, true),
+            use24HourFormat: parseBool(env.VITE_DEFAULT_24_HOUR_FORMAT, false),
             dateFormat: 'MMM dd, yyyy',
         },
         weather: {
+            enabled: parseBool(env.VITE_DEFAULT_SHOW_WEATHER, false),
             location: {
                 lat: parseFloat(env.VITE_DEFAULT_WEATHER_LAT, 51.5074),
                 lng: parseFloat(env.VITE_DEFAULT_WEATHER_LNG, -0.1278),
             },
         },
         ui: {
-            showClock: parseBool(env.VITE_DEFAULT_SHOW_CLOCK, true),
-            showWeather: parseBool(env.VITE_DEFAULT_SHOW_WEATHER, false),
-            showProgressBar: parseBool(env.VITE_DEFAULT_SHOW_PROGRESS_BAR, true),
-            showPhotoMetadata: parseBool(env.VITE_DEFAULT_SHOW_PHOTO_METADATA, true),
             fontSize: (env.VITE_DEFAULT_FONT_SIZE as AppSettings['ui']['fontSize']) || 'base',
         },
         theme: {
