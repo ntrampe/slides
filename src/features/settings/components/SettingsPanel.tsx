@@ -18,7 +18,7 @@ export const SettingsPanel = () => {
             </div>
 
             {/* Photo Filters - Most commonly changed, expanded by default */}
-            <CollapsibleSection title="Photo Filters" defaultExpanded={true}>
+            <CollapsibleSection title="Photo Filters">
                 <AlbumPicker
                     label="Albums"
                     selectedIds={settings.slideshow.filter.albumIds || []}
@@ -57,7 +57,7 @@ export const SettingsPanel = () => {
             </CollapsibleSection>
 
             {/* Slideshow Behavior - Commonly changed, expanded by default */}
-            <CollapsibleSection title="Slideshow Behavior" defaultExpanded={true}>
+            <CollapsibleSection title="Slideshow Behavior">
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -66,6 +66,25 @@ export const SettingsPanel = () => {
                         className="mr-2 w-4 h-4"
                     />
                     <span>Shuffle Photos</span>
+                </label>
+
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.slideshow.ui.showProgressBar}
+                        onChange={(e) => updateSettings({
+                            ...settings,
+                            slideshow: {
+                                ...settings.slideshow,
+                                ui: {
+                                    ...settings.slideshow.ui,
+                                    showProgressBar: e.target.checked
+                                }
+                            }
+                        })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Progress Bar</span>
                 </label>
 
                 <label className="flex items-center cursor-pointer">
@@ -104,46 +123,25 @@ export const SettingsPanel = () => {
             </CollapsibleSection>
 
             {/* Display Options - Commonly changed */}
-            <CollapsibleSection title="Display Options" defaultExpanded={true}>
-                <label className="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={settings.clock.enabled}
-                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, enabled: e.target.checked } })}
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Clock</span>
-                </label>
+            <CollapsibleSection title="Display Options">
 
-                <label className="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={settings.weather.enabled}
-                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, enabled: e.target.checked } })}
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Weather</span>
+                <label className="block">
+                    <span className="block mb-1">Font Size</span>
+                    <select
+                        value={settings.ui.fontSize}
+                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, fontSize: e.target.value as any } })}
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                    >
+                        <option value="sm">Small</option>
+                        <option value="base">Base</option>
+                        <option value="lg">Large</option>
+                        <option value="xl">Extra Large</option>
+                    </select>
                 </label>
+            </CollapsibleSection>
 
-                <label className="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={settings.slideshow.ui.showProgressBar}
-                        onChange={(e) => updateSettings({
-                            ...settings,
-                            slideshow: {
-                                ...settings.slideshow,
-                                ui: {
-                                    ...settings.slideshow.ui,
-                                    showProgressBar: e.target.checked
-                                }
-                            }
-                        })}
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Progress Bar</span>
-                </label>
-
+            {/* Photo Display - Less commonly changed */}
+            <CollapsibleSection title="Photo Display">
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -163,23 +161,6 @@ export const SettingsPanel = () => {
                     <span>Show Photo Metadata</span>
                 </label>
 
-                <label className="block">
-                    <span className="block mb-1">Font Size</span>
-                    <select
-                        value={settings.ui.fontSize}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, fontSize: e.target.value as any } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    >
-                        <option value="sm">Small</option>
-                        <option value="base">Base</option>
-                        <option value="lg">Large</option>
-                        <option value="xl">Extra Large</option>
-                    </select>
-                </label>
-            </CollapsibleSection>
-
-            {/* Photo Display - Less commonly changed */}
-            <CollapsibleSection title="Photo Display">
                 <label className="block">
                     <span className="block mb-1">Photo Fit</span>
                     <select
@@ -269,7 +250,17 @@ export const SettingsPanel = () => {
             </CollapsibleSection>
 
             {/* Clock Format - Less commonly changed */}
-            <CollapsibleSection title="Clock Format">
+            <CollapsibleSection title="Clock">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.clock.enabled}
+                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, enabled: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Clock</span>
+                </label>
+
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -293,8 +284,18 @@ export const SettingsPanel = () => {
                 </label>
             </CollapsibleSection>
 
-            {/* Weather Location - Less commonly changed */}
-            <CollapsibleSection title="Weather Location">
+            {/* Weather - Less commonly changed */}
+            <CollapsibleSection title="Weather">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.weather.enabled}
+                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, enabled: e.target.checked } })}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Weather</span>
+                </label>
+
                 <label className="block">
                     <span className="block mb-1">Latitude</span>
                     <input
