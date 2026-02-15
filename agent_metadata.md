@@ -13,12 +13,13 @@
 2. [Folder Structure](#folder-structure)
 3. [Naming Conventions](#naming-conventions)
 4. [Component Patterns](#component-patterns)
-5. [Hook Patterns](#hook-patterns)
-6. [Service Layer](#service-layer)
-7. [Type System](#type-system)
-8. [State Management](#state-management)
-9. [Testing Approach](#testing-approach)
-10. [Common Patterns](#common-patterns)
+5. [Theme Patterns](#theme-patterns)
+6. [Hook Patterns](#hook-patterns)
+7. [Service Layer](#service-layer)
+8. [Type System](#type-system)
+9. [State Management](#state-management)
+10. [Testing Approach](#testing-approach)
+11. [Common Patterns](#common-patterns)
 
 ---
 
@@ -204,6 +205,380 @@ export const Slideshow = () => {
     return <div>...</div>;
 };
 ```
+
+---
+
+## Theme System & Styling Best Practices
+
+### Architecture Overview
+
+This project uses **Tailwind CSS v4** with a **CSS-based semantic theming system**. Themes are defined using CSS custom properties and switched via a `data-theme` attribute on the root element.
+
+### Theme Structure
+
+```
+src/features/theme/
+├── components/
+│   └── ThemeSelector.tsx     # UI for theme switching
+├── hooks/
+│   ├── useTheme.ts           # Main theme hook
+│   ├── types.ts              # Hook return types
+│   └── index.ts              # Exports
+├── types.ts                  # ThemeMode type
+└── index.ts                  # Public API
+```
+
+### Theme Configuration (CSS)
+
+Themes are defined in `src/index.css` using Tailwind v4's `@theme` directive:
+
+```css
+@theme {
+    /* Semantic color tokens mapped to theme-aware variables */
+    --color-background: var(--bg-default);
+    --color-surface: var(--surface-default);
+    --color-surface-hover: var(--surface-hover-default);
+
+    --color-text-primary: var(--text-primary-default);
+    --color-text-secondary: var(--text-secondary-default);
+    --color-text-tertiary: var(--text-tertiary-default);
+    --color-text-inverse: var(--text-inverse-default);
+
+    --color-primary-500: var(--primary-500-default);
+    --color-primary-600: var(--primary-600-default);
+
+    --color-border: var(--border-default);
+    --color-success: var(--success-default);
+    --color-warning: var(--warning-default);
+    --color-error: var(--error-default);
+    --color-info: var(--info-default);
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+    --bg-default: #ffffff;
+    --surface-default: #f8fafc;
+    --text-primary-default: #0f172a;
+    /* ... */
+}
+
+/* Dark Theme */
+:root[data-theme="dark"] {
+    --bg-default: #0f172a;
+    --surface-default: #1e293b;
+    --text-primary-default: #f8fafc;
+    /* ... */
+}
+```
+
+---
+
+## Semantic Theme Variables
+
+### ✅ Always Use Semantic Variables
+
+Use semantic theme variables that adapt to the current theme automatically:
+
+| Category | Variable | Usage |
+|----------|----------|-------|
+| **Background** | `bg-background` | Main app background |
+| **Surface** | `bg-surface` | Cards, panels, elevated surfaces |
+| **Surface Hover** | `bg-surface-hover` | Hover state for surfaces |
+| **Text** | `text-text-primary` | Primary text color |
+| | `text-text-secondary` | Secondary/muted text |
+| | `text-text-tertiary` | Disabled/placeholder text |
+| | `text-text-inverse` | Text on dark backgrounds (white in both themes) |
+| **Primary** | `bg-primary-500` | Primary action color |
+| | `bg-primary-600` | Primary action hover/active |
+| **Borders** | `border-border` | Default border color |
+| **Status** | `text-success`, `bg-success` | Success states |
+| | `text-warning`, `bg-warning` | Warning states |
+| | `text-error`, `bg-error` | Error states |
+| | `text-info`, `bg-info` | Informational states |
+
+### Pattern: Semantic Styling
+
+```tsx
+// ✅ GOOD: Use semantic variables
+export const SettingsPanel = () => {
+    return (
+        <div className="bg-surface border border-border text-text-primary p-4 rounded-lg">
+            <h2 className="text-text-primary font-bold mb-4">Settings</h2>
+            <p className="text-text-secondary">Configure your preferences</p>
+            
+            <button className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded">
+                Save
+            </button>
+            
+            <input 
+                className="bg-surface border border-border text-text-primary p-2 rounded"
+                placeholder="Enter value..."
+            />
+        </div>
+    );
+};
+```
+
+### Anti-Pattern: Hardcoded Colors
+
+```tsx
+// ❌ BAD: Hardcoded Tailwind colors (won't adapt to theme)
+export const SettingsPanel = () => {
+    return (
+        <div className="bg-slate-100 border border-gray-300 text-gray-900">
+            <h2 className="text-slate-900 font-bold">Settings</h2>
+            <p className="text-gray-600">Configure your preferences</p>
+            
+            <button className="bg-blue-500 hover:bg-blue-600 text-white">
+                Save
+            </button>
+        </div>
+    );
+};
+
+// ❌ BAD: Inline hex colors
+export const Card = () => {
+    return (
+        <div style={{ backgroundColor: '#f8fafc', color: '#0f172a' }}>
+            Content
+        </div>
+    );
+};
+```
+
+---
+
+## Theme Hook Pattern
+
+### Pattern: Using the Theme Hook
+
+```tsx
+import { useTheme } from '@/features/theme';
+
+export const ThemeToggle = () => {
+    const { mode, setMode } = useTheme();
+    
+    return (
+        <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}>
+            {mode === 'light' ? '🌙 Dark' : '☀️ Light'}
+        </button>
+    );
+};
+```
+
+### Implementation Details
+
+The `useTheme` hook:
+- ✅ Delegates persistence to settings system (no duplicate storage)
+- ✅ Applies theme by setting `data-theme` attribute on `<html>`
+- ✅ CSS handles all color changes automatically
+- ✅ No runtime JavaScript color calculations
+
+```typescript
+// features/theme/hooks/useTheme.ts
+export function useTheme(): UseThemeReturn {
+    const { settings, updateSettings } = useSettingsData();
+    const mode = settings.theme.mode;
+
+    // Apply theme to DOM
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', mode);
+    }, [mode]);
+
+    const setMode = useCallback((newMode: ThemeMode) => {
+        updateSettings({
+            ...settings,
+            theme: { mode: newMode },
+        });
+    }, [settings, updateSettings]);
+
+    return { mode, setMode };
+}
+```
+
+---
+
+## Special Cases: Overlay Components
+
+### Pattern: Overlay on Photos (Context-Specific)
+
+Some components (like slideshow overlays) need specific styling that works on dark photo backgrounds, independent of theme mode:
+
+```tsx
+// ✅ ACCEPTABLE: Overlay on photos (always dark background)
+export const PhotoMetadataOverlay = ({ photo }: PhotoMetadataOverlayProps) => {
+    return (
+        <div className="absolute bottom-6 left-6 bg-black/20 backdrop-blur-md border border-white/5 text-white">
+            <div className="text-sm opacity-90">{photo.location}</div>
+            <div className="text-xs opacity-70">{photo.date}</div>
+        </div>
+    );
+};
+
+// ✅ ACCEPTABLE: Slideshow controls (always on photos)
+export const SlideshowControls = () => {
+    return (
+        <button className="text-white hover:bg-white/20 rounded-full p-2">
+            <Play size={24} />
+        </button>
+    );
+};
+```
+
+**Rule**: Only use `text-white`, `bg-black`, etc. when the component is **always** displayed over photos/media, not when it's part of the UI chrome.
+
+### Pattern: Settings/UI Chrome
+
+Settings panels, forms, and UI chrome should **always** use semantic variables:
+
+```tsx
+// ✅ GOOD: Settings UI adapts to theme
+export const SettingsForm = () => {
+    return (
+        <div className="bg-surface p-8">
+            <h3 className="text-text-primary font-semibold mb-3 border-b border-border pb-2">
+                Display Settings
+            </h3>
+            
+            <input 
+                className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                type="text"
+            />
+            
+            <div className="text-text-secondary text-sm mt-2">
+                Adjust how content is displayed
+            </div>
+        </div>
+    );
+};
+```
+
+---
+
+## Component Styling Checklist
+
+When creating or updating components, ensure:
+
+- [ ] **Background**: Use `bg-background` or `bg-surface` (not `bg-white`, `bg-gray-100`)
+- [ ] **Text**: Use `text-text-primary`, `text-text-secondary` (not `text-gray-900`, `text-slate-600`)
+- [ ] **Borders**: Use `border-border` (not `border-gray-300`)
+- [ ] **Hover States**: Use `hover:bg-surface-hover` (not `hover:bg-gray-200`)
+- [ ] **Buttons**: Use `bg-primary-500` for primary actions (not `bg-blue-500`)
+- [ ] **Forms**: Use semantic variables for inputs, selects, textareas
+- [ ] **Status Colors**: Use `text-success`, `text-error`, etc. for semantic meaning
+- [ ] **Exception**: Only use hardcoded colors for overlays on photos/media
+
+---
+
+## Adding New Theme Variables
+
+If you need a new semantic variable:
+
+1. **Add to `@theme` in `src/index.css`**:
+   ```css
+   @theme {
+       --color-accent: var(--accent-default);
+   }
+   ```
+
+2. **Define in both theme modes**:
+   ```css
+   :root[data-theme="light"] {
+       --accent-default: #f59e0b;
+   }
+
+   :root[data-theme="dark"] {
+       --accent-default: #fbbf24;
+   }
+   ```
+
+3. **Document in this guide**
+
+4. **Use in components**: `bg-accent`, `text-accent`, `border-accent`
+
+---
+
+## Quick Reference: Common Patterns
+
+### Form Elements
+
+```tsx
+<input 
+    className="bg-surface border border-border text-text-primary p-2 rounded"
+    placeholder="Placeholder text"
+/>
+
+<select className="bg-surface border border-border text-text-primary p-2 rounded">
+    <option>Option 1</option>
+</select>
+
+<textarea className="bg-surface border border-border text-text-primary p-2 rounded" />
+```
+
+### Buttons
+
+```tsx
+// Primary action
+<button className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded">
+    Save
+</button>
+
+// Secondary action
+<button className="bg-surface hover:bg-surface-hover border border-border text-text-primary px-4 py-2 rounded">
+    Cancel
+</button>
+```
+
+### Cards/Panels
+
+```tsx
+<div className="bg-surface border border-border rounded-lg p-4">
+    <h3 className="text-text-primary font-semibold mb-2">Title</h3>
+    <p className="text-text-secondary text-sm">Description</p>
+</div>
+```
+
+### Lists
+
+```tsx
+<div className="bg-surface border border-border rounded">
+    {items.map(item => (
+        <div 
+            key={item.id}
+            className="p-2 hover:bg-surface-hover border-b border-border last:border-b-0"
+        >
+            <span className="text-text-primary">{item.label}</span>
+        </div>
+    ))}
+</div>
+```
+
+---
+
+## Testing Theme Support
+
+When implementing a component, manually test:
+
+1. **Light mode**: Does it look good with light backgrounds?
+2. **Dark mode**: Does it look good with dark backgrounds?
+3. **Transitions**: Does switching themes feel smooth?
+4. **Contrast**: Is text readable in both themes?
+
+Use the theme toggle in Settings to verify both modes.
+
+---
+
+## Notes for AI Coding Agents
+
+When working with styling:
+
+1. **Always use semantic theme variables** (`text-text-primary`, `bg-surface`, etc.)
+2. **Never use hardcoded Tailwind colors** (`text-gray-900`, `bg-slate-100`) in UI chrome
+3. **Exception**: Overlays on photos can use `text-white`, `bg-black/20` since they're always on dark media
+4. **Check existing components** for patterns (e.g., `SettingsPanel`, `ThemeSelector`)
+5. **When in doubt**, use semantic variables—they'll adapt correctly
+6. **Don't create inline styles** with hex colors—use Tailwind classes
+7. **Test both themes** conceptually when suggesting changes
 
 ---
 
