@@ -24,7 +24,7 @@ export const HudPanel = ({
         <div
             className={`
                 ${variantStyles[variant]} 
-                text-white rounded-2xl p-4 sm:p-6
+                text-white rounded-2xl p-2 sm:p-4
                 ${className}
             `.trim()}
         >
@@ -35,8 +35,8 @@ export const HudPanel = ({
 
 // Responsive text size utilities
 export const hudTextSizes: Record<HudSize, string> = {
-    display: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl',
-    heading: 'text-xl sm:text-2xl md:text-3xl',
-    body: 'text-base sm:text-lg md:text-xl',
-    caption: 'text-sm sm:text-base',
+    display: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl',
+    heading: 'text-lg sm:text-xl md:text-2xl',
+    body: 'text-sm sm:text-base md:text-lg',
+    caption: 'text-xs sm:text-sm',
 };
