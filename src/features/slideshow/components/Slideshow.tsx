@@ -2,11 +2,9 @@ import { PhotoDisplay } from '../../photos';
 import { Overlay } from '../components/Overlay';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { useSlideshow } from '../hooks/useSlideshow';
-import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import { DebugPanel } from '../../debug-panel';  // Add import
+import { DebugPanel } from '../../debug-panel';
 
 export const Slideshow = () => {
-    const { settings } = useSettingsData();
     const { state, actions, debug } = useSlideshow();
 
     // Handle loading/error states
@@ -22,7 +20,7 @@ export const Slideshow = () => {
         return <div className="text-text-inverse">Something went wrong.</div>;
     }
 
-    if (!state.currentPhoto) {
+    if (!state.currentPhoto || !state.displayedPhoto) {
         return (
             <div className="h-screen bg-black flex items-center justify-center text-text-inverse">
                 <div className="text-center">
@@ -37,18 +35,20 @@ export const Slideshow = () => {
         <div className="relative h-full w-full bg-black overflow-hidden">
             <Overlay progress={state.progress} />
 
-            <div className={`grid h-full w-full transition-all duration-1000 ${settings.slideshow.layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1'
-                }`}>
+            <div
+                className={`grid h-full w-full ${state.layoutClass}`}
+                style={state.transitionStyles}
+            >
                 <PhotoDisplay
-                    key={state.currentPhoto.id}
-                    photo={state.currentPhoto}
-                    objectFit={settings.photo.fit}
+                    key={state.displayedPhoto.id}
+                    photo={state.displayedPhoto}
+                    objectFit={state.objectFit}
                 />
-                {settings.slideshow.layout === 'split' && state.nextPhoto && (
+                {state.layoutClass.includes('grid-cols-2') && state.displayedNextPhoto && (
                     <PhotoDisplay
-                        key={state.nextPhoto.id}
-                        photo={state.nextPhoto}
-                        objectFit={settings.photo.fit}
+                        key={state.displayedNextPhoto.id}
+                        photo={state.displayedNextPhoto}
+                        objectFit={state.objectFit}
                     />
                 )}
             </div>

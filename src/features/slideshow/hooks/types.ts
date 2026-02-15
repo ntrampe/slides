@@ -29,6 +29,8 @@ export interface UseSlideshowReturn {
     state: {
         currentPhoto: Photo | undefined;
         nextPhoto: Photo | undefined;
+        displayedPhoto: Photo | undefined;
+        displayedNextPhoto: Photo | undefined;
         currentIndex: number;
         count: number;
         isLoading: boolean;
@@ -36,6 +38,10 @@ export interface UseSlideshowReturn {
         isPlaying: boolean;
         progress: number;
         areControlsVisible: boolean;
+        isTransitioning: boolean;
+        transitionStyles: React.CSSProperties;
+        layoutClass: string;
+        objectFit: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
     };
     actions: {
         goToPrevious: () => void;

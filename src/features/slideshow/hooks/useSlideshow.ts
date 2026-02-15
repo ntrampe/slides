@@ -4,6 +4,7 @@ import { useControls } from '../../../shared/hooks';
 import { useSlideshowData } from './useSlideshowData';
 import { useSlideshowTimer } from './useSlideshowTimer';
 import { useSlideshowKeyboard } from './useSlideshowKeyboard';
+import { useSlideshowTransition } from './useSlideshowTransition';
 import type { UseSlideshowReturn } from './types';
 
 export function useSlideshow(): UseSlideshowReturn {
@@ -20,11 +21,22 @@ export function useSlideshow(): UseSlideshowReturn {
         preloadBackward: 2,
     });
 
-    // Timer layer: autoplay, progress tracking
+    // Get next photo for split view
+    const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
+
+    // Transition layer: handles photo transitions with configurable effects
+    const transition = useSlideshowTransition({
+        currentPhoto: data.currentLoaded?.photo,
+        nextPhoto: nextLoaded?.photo,
+        transitionSettings: settings.slideshow.transition,
+    });
+
+    // Timer layer: autoplay, progress tracking (paused during transitions)
     const timer = useSlideshowTimer({
         onAdvance: data.goToNext,
         currentIndex: data.currentIndex,
         isCurrentPhotoLoaded: !!data.currentLoaded,
+        isTransitioning: transition.isTransitioning,
     });
 
     // Coordination: reset timer when manually navigating
@@ -46,13 +58,15 @@ export function useSlideshow(): UseSlideshowReturn {
         onReset: timer.reset,
     });
 
-    // Get next photo for split view
-    const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
+    // Layout calculation based on settings
+    const layoutClass = settings.slideshow.layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1';
 
     return {
         state: {
             currentPhoto: data.currentLoaded?.photo,
             nextPhoto: nextLoaded?.photo,
+            displayedPhoto: transition.displayedPhoto,
+            displayedNextPhoto: transition.displayedNextPhoto,
             currentIndex: data.currentIndex,
             count: data.count,
             isLoading: data.isLoading,
@@ -60,6 +74,10 @@ export function useSlideshow(): UseSlideshowReturn {
             isPlaying: timer.isPlaying,
             progress: timer.progress,
             areControlsVisible,
+            isTransitioning: transition.isTransitioning,
+            transitionStyles: transition.transitionStyles,
+            layoutClass,
+            objectFit: settings.photo.fit,
         },
         actions: {
             goToPrevious: handlePrevious,

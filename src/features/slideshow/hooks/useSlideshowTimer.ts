@@ -6,12 +6,14 @@ interface UseSlideshowTimerOptions {
     onAdvance: () => void;
     currentIndex: number;
     isCurrentPhotoLoaded: boolean;
+    isTransitioning?: boolean;
 }
 
 export function useSlideshowTimer({
     onAdvance,
     currentIndex,
     isCurrentPhotoLoaded,
+    isTransitioning = false,
 }: UseSlideshowTimerOptions): UseSlideshowTimerReturn {
     const { settings, updateSettings } = useSettingsData();
     const [progress, setProgress] = useState(0);
@@ -38,9 +40,12 @@ export function useSlideshowTimer({
 
     // Timer effect: handles progress tracking and auto-advance
     useEffect(() => {
-        // Don't run timer if paused or if current photo isn't loaded yet
-        if (!isPlaying || !isCurrentPhotoLoaded) {
-            setProgress(0);
+        // Don't run timer if paused, if current photo isn't loaded yet, or during transitions
+        if (!isPlaying || !isCurrentPhotoLoaded || isTransitioning) {
+            // Only reset progress if not transitioning (preserve progress during transitions)
+            if (!isTransitioning) {
+                setProgress(0);
+            }
             return;
         }
 
@@ -64,7 +69,7 @@ export function useSlideshowTimer({
             clearInterval(timer);
             clearInterval(progressInterval);
         };
-    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded]);
+    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded, isTransitioning]);
 
     return {
         isPlaying,

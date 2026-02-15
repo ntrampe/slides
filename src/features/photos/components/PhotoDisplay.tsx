@@ -25,7 +25,7 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
     const [showPhotoInfo, setShowPhotoInfo] = useState(false);
 
     return (
-        <div className={`relative h-full w-full overflow-hidden animate-in fade-in duration-1000`}>
+        <div className="relative h-full w-full overflow-hidden">
             {/* Photo Image */}
             <img
                 src={photo.url}
