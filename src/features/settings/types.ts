@@ -43,44 +43,5 @@ export interface SettingsService {
     saveSettings: (settings: AppSettings) => Promise<void>;
 }
 
-const defaultSettings: AppSettings = {
-    slideshow: {
-        layout: 'single',
-        intervalMs: 5000,
-        shuffle: true,
-        autoplay: true,
-        filter: {
-            albumIds: [],
-            personIds: [],
-        },
-    },
-    photo: {
-        fit: 'cover',
-        dateFormat: 'MMM dd, yyy',
-    },
-    clock: {
-        show24HourFormat: false,
-        dateFormat: 'MMM dd, yyy',
-    },
-    weather: {
-        location: {
-            lat: 51.5074,
-            lng: -0.1278,
-        },
-    },
-    ui: {
-        showClock: true,
-        showWeather: false,
-        showProgressBar: true,
-        showPhotoMetadata: true,
-        fontSize: 'base',
-    },
-    theme: {
-        mode: 'dark',
-    },
-    debug: {
-        showDebugStats: false,
-    }
-};
-
-export default defaultSettings;
+// Export the builder function for use by services
+export { buildDefaultSettings as getDefaultSettings } from './utils/buildDefaultSettings';

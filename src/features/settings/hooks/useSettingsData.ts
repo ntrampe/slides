@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useServices } from '../../../shared/context/ServiceContext';
 import type { AppSettings } from '../types';
-import defaultSettings from '../types';
+import { getDefaultSettings } from '../types';
 
 export function useSettingsData() {
     const { settings: service } = useServices();
@@ -17,5 +17,9 @@ export function useSettingsData() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
     });
 
-    return { settings: query.data ?? defaultSettings, updateSettings: mutation.mutate };
+    // Use environment-aware defaults as fallback
+    return {
+        settings: query.data ?? getDefaultSettings(),
+        updateSettings: mutation.mutate
+    };
 }
