@@ -2,6 +2,8 @@ import type { ItemDropdownProps, PickerItem } from './types';
 
 export function ItemDropdown<T extends PickerItem>({
     items,
+    selectedIds = [],
+    selectionMode = 'multiple',
     onSelect,
     onClose,
     noResultsMessage,
@@ -23,22 +25,28 @@ export function ItemDropdown<T extends PickerItem>({
                         {noResultsMessage}
                     </div>
                 ) : (
-                    items.map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => onSelect(item.id)}
-                            className="w-full flex items-center gap-2 p-2 hover:bg-surface-hover text-text-primary text-left"
-                        >
-                            {renderImage && (
-                                <div className="flex-shrink-0">
-                                    {renderImage(item)}
+                    items.map(item => {
+                        const isSelected = selectedIds.includes(item.id);
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => onSelect(item.id)}
+                                className={`w-full flex items-center gap-2 p-2 hover:bg-surface-hover text-left ${isSelected && selectionMode === 'single'
+                                        ? 'bg-primary-500/10 text-primary-500'
+                                        : 'text-text-primary'
+                                    }`}
+                            >
+                                {renderImage && (
+                                    <div className="flex-shrink-0">
+                                        {renderImage(item)}
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    {renderLabel ? renderLabel(item) : item.label}
                                 </div>
-                            )}
-                            <div className="flex-1">
-                                {renderLabel ? renderLabel(item) : item.label}
-                            </div>
-                        </button>
-                    ))
+                            </button>
+                        );
+                    })
                 )}
             </div>
         </>

@@ -11,6 +11,7 @@ export function ItemPicker<T extends PickerItem>({
     items,
     isLoading,
     error,
+    selectionMode = 'multiple',
     searchPlaceholder = "Search...",
     emptyMessage = "No items selected. Leave empty to show all.",
     noResultsMessage = "No items found",
@@ -35,17 +36,28 @@ export function ItemPicker<T extends PickerItem>({
         return items.filter(item => selectedIds.includes(item.id));
     }, [items, selectedIds]);
 
-    // Available items (not selected)
+    // Available items
     const availableItems = useMemo(() => {
+        if (selectionMode === 'single') {
+            // In single mode, show all filtered items (user can replace selection)
+            return filteredItems;
+        }
+        // In multiple mode, hide already selected items
         return filteredItems.filter(item => !selectedIds.includes(item.id));
-    }, [filteredItems, selectedIds]);
+    }, [filteredItems, selectedIds, selectionMode]);
 
     const handleRemove = (itemId: string) => {
         onChange(selectedIds.filter(id => id !== itemId));
     };
 
     const handleSelect = (itemId: string) => {
-        onChange([...selectedIds, itemId]);
+        if (selectionMode === 'single') {
+            // Replace selection
+            onChange([itemId]);
+        } else {
+            // Add to selection
+            onChange([...selectedIds, itemId]);
+        }
         setSearchQuery('');
     };
 
@@ -65,6 +77,7 @@ export function ItemPicker<T extends PickerItem>({
             <SelectedItems
                 items={selectedItems}
                 onRemove={handleRemove}
+                selectionMode={selectionMode}
                 renderImage={renderImage}
                 renderLabel={renderLabel}
             />
@@ -84,6 +97,8 @@ export function ItemPicker<T extends PickerItem>({
                 {isDropdownOpen && !isLoading && (
                     <ItemDropdown
                         items={availableItems}
+                        selectedIds={selectedIds}
+                        selectionMode={selectionMode}
                         onSelect={handleSelect}
                         onClose={() => setIsDropdownOpen(false)}
                         noResultsMessage={searchQuery ? noResultsMessage : 'All items selected'}
