@@ -1,6 +1,7 @@
 import { useSettingsData } from "../hooks/useSettingsData";
 import { PeoplePicker } from "../../people/components/PeoplePicker";
 import { AlbumPicker } from "../../albums/components/AlbumPicker";
+import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 
 export const SettingsPanel = () => {
@@ -39,6 +40,18 @@ export const SettingsPanel = () => {
                         slideshow: {
                             ...settings.slideshow,
                             filter: { ...settings.slideshow.filter, personIds }
+                        }
+                    })}
+                />
+
+                <LocationPicker
+                    label="Location"
+                    selection={settings.slideshow.filter.location || {}}
+                    onChange={(location) => updateSettings({
+                        ...settings,
+                        slideshow: {
+                            ...settings.slideshow,
+                            filter: { ...settings.slideshow.filter, location }
                         }
                     })}
                 />
