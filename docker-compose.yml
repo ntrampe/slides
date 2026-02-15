@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: immich-slideshow
     ports:
-      - "3000:3000"  # Change left port if needed
+      - "${PORT}:${PORT}"
     environment:
       # Required - Point to your Immich instance
       - IMMICH_URL=${IMMICH_URL}
@@ -42,7 +42,7 @@ services:
       
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + process.env.PORT, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
       timeout: 3s
       start_period: 5s
