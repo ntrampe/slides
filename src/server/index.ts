@@ -40,16 +40,16 @@ const proxyOptions: Options = {
     },
     on: {
         proxyReq: (proxyReq, req, _res) => {
-            console.log(`[Proxy] ${req.method} ${req.url} -> ${IMMICH_URL}${req.url.replace('/immich', '')}`);
+            console.log(`[Proxy] ${req.method} ${req.url || ''} -> ${IMMICH_URL}${req.url ? req.url.replace('/immich', '') : ''}`);
             if (IMMICH_API_KEY) {
                 proxyReq.setHeader('x-api-key', IMMICH_API_KEY);
             }
         },
         proxyRes: (proxyRes, req, _res) => {
-            console.log(`[Proxy] Response: ${proxyRes.statusCode} for ${req.url}`);
+            console.log(`[Proxy] Response: ${proxyRes.statusCode} for ${req.url || ''}`);
         },
         error: (err, req, _res) => {
-            console.error(`[Proxy] Error for ${req.url}:`, err.message);
+            console.error(`[Proxy] Error for ${req.url || ''}:`, err.message);
         },
     },
 };
