@@ -147,6 +147,105 @@ export const useServices = () => useContext(ServiceContext);
 
 ---
 
+## Settings Architecture
+
+Settings are persisted in localStorage and loaded via TanStack Query. Defaults can be configured via environment variables.
+
+### Adding a New Setting
+
+1. **Update the type** in `features/settings/types.ts`:
+
+```typescript
+export interface AppSettings {
+    // ... existing settings ...
+    myFeature: {
+        enabled: boolean;
+        threshold: number;
+    };
+}
+```
+
+2. **Add default value** in `features/settings/utils/buildDefaultSettings.ts`:
+
+```typescript
+export function buildDefaultSettings(): AppSettings {
+    const env = import.meta.env;
+    
+    return {
+        // ... existing defaults ...
+        myFeature: {
+            enabled: parseBool(env.VITE_DEFAULT_MY_FEATURE_ENABLED, true),
+            threshold: parseNumber(env.VITE_DEFAULT_MY_FEATURE_THRESHOLD, 50),
+        },
+    };
+}
+```
+
+3. **Add env var types** in `src/env.d.ts`:
+
+```typescript
+interface ImportMetaEnv {
+    // ... existing vars ...
+    readonly VITE_DEFAULT_MY_FEATURE_ENABLED?: string;
+    readonly VITE_DEFAULT_MY_FEATURE_THRESHOLD?: string;
+}
+```
+
+### Using Settings
+
+**In hooks** (business logic):
+
+```typescript
+export function useMyFeature() {
+    const { settings } = useSettingsData();
+    const { enabled, threshold } = settings.myFeature;
+    
+    // Use settings in logic
+    if (!enabled) return { state: { disabled: true } };
+    
+    return { state: { threshold, result: calculate(threshold) } };
+}
+```
+
+**In components** (via facade hook):
+
+```typescript
+export const MyComponent = () => {
+    const { state } = useMyFeature(); // Settings accessed via facade
+    
+    if (state.disabled) return null;
+    return <div>Threshold: {state.threshold}</div>;
+};
+```
+
+**Updating settings**:
+
+```typescript
+const { settings, updateSettings } = useSettingsData();
+
+updateSettings({
+    ...settings,
+    myFeature: { enabled: false, threshold: 75 }
+});
+```
+
+**Environment variables** (`.env`):
+
+```bash
+VITE_DEFAULT_MY_FEATURE_ENABLED=true
+VITE_DEFAULT_MY_FEATURE_THRESHOLD=50
+```
+
+### Settings Pattern Rules
+
+- ✅ Access via `useSettingsData()` hook
+- ✅ Define defaults in `buildDefaultSettings()`
+- ✅ Use env vars for deployment-specific defaults
+- ❌ Never hardcode defaults in components
+- ❌ Never access localStorage directly
+
+---
+
 ## Naming Conventions
 
 | Type | Pattern | Example |
