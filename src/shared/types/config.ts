@@ -8,4 +8,9 @@ export type LayoutMode = 'single' | 'split';
 export interface SlideshowFilter {
     albumIds?: string[];
     personIds?: string[];
+    location?: {
+        country?: string;
+        state?: string;
+        city?: string;
+    };
 }

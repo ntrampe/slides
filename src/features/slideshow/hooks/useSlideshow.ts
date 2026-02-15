@@ -15,6 +15,7 @@ export function useSlideshow(): UseSlideshowReturn {
     const data = useSlideshowData({
         ...(settings.slideshow.filter.albumIds?.length && { albumIds: settings.slideshow.filter.albumIds }),
         ...(settings.slideshow.filter.personIds?.length && { personIds: settings.slideshow.filter.personIds }),
+        ...(settings.slideshow.filter.location && { location: settings.slideshow.filter.location }),
         pageSize: 1000,
         shuffle: settings.slideshow.shuffle,
         preloadForward: 5,

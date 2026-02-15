@@ -22,6 +22,9 @@ interface ImportMetaEnv {
     readonly VITE_DEFAULT_WEATHER_LNG?: string;
     readonly VITE_DEFAULT_ALBUM_IDS?: string; // Comma-separated
     readonly VITE_DEFAULT_PERSON_IDS?: string; // Comma-separated
+    readonly VITE_DEFAULT_LOCATION_COUNTRY?: string;
+    readonly VITE_DEFAULT_LOCATION_STATE?: string;
+    readonly VITE_DEFAULT_LOCATION_CITY?: string;
     readonly VITE_DEFAULT_TRANSITION_TYPE?: 'fade' | 'slide' | 'none';
     readonly VITE_DEFAULT_TRANSITION_DURATION?: string;
 }

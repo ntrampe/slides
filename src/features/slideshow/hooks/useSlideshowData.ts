@@ -14,6 +14,7 @@ interface UseSlideshowDataOptions extends SlideshowFilter {
 export function useSlideshowData({
     albumIds,
     personIds,
+    location,
     pageSize = 1000,
     shuffle = false,
     preloadForward = 5,
@@ -30,6 +31,7 @@ export function useSlideshowData({
     } = useInfinitePhotosFlattened({
         albumIds,
         personIds,
+        location,
         pageSize,
     });
 

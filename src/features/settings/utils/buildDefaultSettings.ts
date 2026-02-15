@@ -34,6 +34,12 @@ export function buildDefaultSettings(): AppSettings {
         return value.split(',').map(id => id.trim()).filter(Boolean);
     };
 
+    // Helper to parse optional string
+    const parseString = (value: string | undefined): string | undefined => {
+        if (!value) return undefined;
+        return value.trim() || undefined;
+    };
+
     return {
         slideshow: {
             layout: (env.VITE_DEFAULT_LAYOUT as AppSettings['slideshow']['layout']) || 'single',
@@ -43,6 +49,11 @@ export function buildDefaultSettings(): AppSettings {
             filter: {
                 albumIds: parseIdArray(env.VITE_DEFAULT_ALBUM_IDS),
                 personIds: parseIdArray(env.VITE_DEFAULT_PERSON_IDS),
+                location: {
+                    country: parseString(env.VITE_DEFAULT_LOCATION_COUNTRY),
+                    state: parseString(env.VITE_DEFAULT_LOCATION_STATE),
+                    city: parseString(env.VITE_DEFAULT_LOCATION_CITY),
+                },
             },
             transition: {
                 type: (env.VITE_DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',

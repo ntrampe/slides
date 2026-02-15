@@ -9,6 +9,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
             pageSize = 100,
             albumIds,
             personIds,
+            location,
         } = params;
 
         const searchBody: any = {
@@ -20,6 +21,11 @@ export class ImmichPhotoRepo implements PhotoRepo {
 
         if (albumIds && albumIds.length > 0) searchBody.albumIds = albumIds;
         if (personIds && personIds.length > 0) searchBody.personIds = personIds;
+
+        // Add location filters if provided
+        if (location?.country) searchBody.country = location.country;
+        if (location?.state) searchBody.state = location.state;
+        if (location?.city) searchBody.city = location.city;
 
         const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
             method: "POST",
