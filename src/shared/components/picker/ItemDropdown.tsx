@@ -17,9 +17,9 @@ export function ItemDropdown<T extends PickerItem>({
             />
 
             {/* Dropdown content */}
-            <div className="absolute z-20 w-full mt-1 bg-slate-800 border border-slate-700 rounded max-h-64 overflow-y-auto">
+            <div className="absolute z-20 w-full mt-1 bg-surface border border-border rounded max-h-64 overflow-y-auto">
                 {items.length === 0 ? (
-                    <div className="p-3 text-sm text-slate-400">
+                    <div className="p-3 text-sm text-text-tertiary">
                         {noResultsMessage}
                     </div>
                 ) : (
@@ -27,7 +27,7 @@ export function ItemDropdown<T extends PickerItem>({
                         <button
                             key={item.id}
                             onClick={() => onSelect(item.id)}
-                            className="w-full flex items-center gap-2 p-2 hover:bg-slate-700 text-left"
+                            className="w-full flex items-center gap-2 p-2 hover:bg-surface-hover text-text-primary text-left"
                         >
                             {renderImage && (
                                 <div className="flex-shrink-0">

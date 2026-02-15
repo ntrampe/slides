@@ -52,8 +52,8 @@ export function ItemPicker<T extends PickerItem>({
     if (error) {
         return (
             <div className="mb-4">
-                <span className="block mb-2 text-red-400">{label} (Error loading)</span>
-                <p className="text-sm text-red-400">Failed to load items</p>
+                <span className="block mb-2 text-error">{label} (Error loading)</span>
+                <p className="text-sm text-error">Failed to load items</p>
             </div>
         );
     }
@@ -94,7 +94,7 @@ export function ItemPicker<T extends PickerItem>({
             </div>
 
             {selectedIds.length === 0 && (
-                <p className="text-xs text-slate-400 mt-1">{emptyMessage}</p>
+                <p className="text-xs text-text-tertiary mt-1">{emptyMessage}</p>
             )}
         </div>
     );

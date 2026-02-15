@@ -51,7 +51,7 @@ export const AlbumPicker = ({ selectedIds, onChange, label }: AlbumPickerProps) 
                 <div>
                     <div>{item.label}</div>
                     {item.subtitle && (
-                        <div className="text-xs text-slate-400">{item.subtitle}</div>
+                        <div className="text-xs text-text-tertiary">{item.subtitle}</div>
                     )}
                 </div>
             )}

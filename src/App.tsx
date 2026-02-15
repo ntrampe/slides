@@ -7,11 +7,15 @@ import { useKeyToggle, useControls } from './shared/hooks';
 import { SettingsPanel } from './features/settings';
 import { Settings } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from './features/theme';
 
 const queryClient = new QueryClient();
 
 
 function AppContent() {
+  // Apply theme at app level
+  useTheme();
+
   const { isActive: isSettingsShown } = useKeyToggle('s');
   const [showSettings, setShowSettings] = useState(false);
   const { areControlsVisible } = useControls();
@@ -20,7 +24,7 @@ function AppContent() {
   const isSettingsPanelVisible = isSettingsShown || showSettings;
 
   return (
-    <main className="h-screen w-screen bg-black select-none overflow-hidden relative">
+    <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
       {/* Slideshow Container - shrinks when settings are visible */}
       <div
         className="h-full transition-all duration-500 ease-in-out"

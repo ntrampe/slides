@@ -1,1 +1,92 @@
 @import "tailwindcss";
+
+/* Tailwind v4 Theme Definition */
+@theme {
+    /* Color tokens - Tailwind will auto-generate utilities */
+    --color-background: var(--bg-default);
+    --color-surface: var(--surface-default);
+    --color-surface-hover: var(--surface-hover-default);
+
+    --color-text-primary: var(--text-primary-default);
+    --color-text-secondary: var(--text-secondary-default);
+    --color-text-tertiary: var(--text-tertiary-default);
+    --color-text-inverse: var(--text-inverse-default);
+
+    --color-primary-500: var(--primary-500-default);
+    --color-primary-600: var(--primary-600-default);
+
+    --color-border: var(--border-default);
+    --color-success: var(--success-default);
+    --color-warning: var(--warning-default);
+    --color-error: var(--error-default);
+    --color-info: var(--info-default);
+
+    /* Typography */
+    --font-sans: "Inter", system-ui, sans-serif;
+
+    /* Border radius */
+    --radius-default: 0.5rem;
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+    --bg-default: #ffffff;
+    --surface-default: #f8fafc;
+    --surface-hover-default: #f1f5f9;
+
+    --text-primary-default: #0f172a;
+    --text-secondary-default: #64748b;
+    --text-tertiary-default: #cbd5e1;
+    --text-inverse-default: #ffffff;
+
+    --primary-500-default: #0ea5e9;
+    --primary-600-default: #0284c7;
+
+    --border-default: #e2e8f0;
+    --success-default: #10b981;
+    --warning-default: #f59e0b;
+    --error-default: #ef4444;
+    --info-default: #3b82f6;
+}
+
+/* Dark Theme */
+:root[data-theme="dark"] {
+    --bg-default: #0f172a;
+    --surface-default: #1e293b;
+    --surface-hover-default: #334155;
+
+    --text-primary-default: #f8fafc;
+    --text-secondary-default: #94a3b8;
+    --text-tertiary-default: #475569;
+    --text-inverse-default: #0f172a;
+
+    --primary-500-default: #0ea5e9;
+    --primary-600-default: #0284c7;
+
+    --border-default: #334155;
+    --success-default: #10b981;
+    --warning-default: #f59e0b;
+    --error-default: #ef4444;
+    --info-default: #3b82f6;
+}
+
+/* Default to light theme if no attribute is set */
+:root:not([data-theme]) {
+    --bg-default: #ffffff;
+    --surface-default: #f8fafc;
+    --surface-hover-default: #f1f5f9;
+
+    --text-primary-default: #0f172a;
+    --text-secondary-default: #64748b;
+    --text-tertiary-default: #cbd5e1;
+    --text-inverse-default: #ffffff;
+
+    --primary-500-default: #0ea5e9;
+    --primary-600-default: #0284c7;
+
+    --border-default: #e2e8f0;
+    --success-default: #10b981;
+    --warning-default: #f59e0b;
+    --error-default: #ef4444;
+    --info-default: #3b82f6;
+}

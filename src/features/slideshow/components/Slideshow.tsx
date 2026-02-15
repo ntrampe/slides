@@ -12,19 +12,19 @@ export const Slideshow = () => {
     // Handle loading/error states
     if (state.isLoading) {
         return (
-            <div className="h-screen bg-black flex items-center justify-center text-white">
+            <div className="h-screen bg-black flex items-center justify-center text-text-inverse">
                 Loading metadata...
             </div>
         );
     }
 
     if (state.isError) {
-        return <div className="text-white">Something went wrong.</div>;
+        return <div className="text-text-inverse">Something went wrong.</div>;
     }
 
     if (!state.currentPhoto) {
         return (
-            <div className="h-screen bg-black flex items-center justify-center text-white">
+            <div className="h-screen bg-black flex items-center justify-center text-text-inverse">
                 <div className="text-center">
                     <div className="text-xl mb-2">Loading photo...</div>
                     <div className="text-sm opacity-60">{state.currentIndex + 1} / {state.count}</div>

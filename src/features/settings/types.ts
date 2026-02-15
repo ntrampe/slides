@@ -1,4 +1,5 @@
 import type { LayoutMode, ObjectFit, SlideshowFilter } from "../../shared/types/config";
+import type { ThemeMode } from "../theme";
 
 export interface AppSettings {
     slideshow: {
@@ -29,6 +30,9 @@ export interface AppSettings {
         showPhotoMetadata: boolean;
         fontSize: 'sm' | 'base' | 'lg' | 'xl';
     };
+    theme: {
+        mode: ThemeMode;
+    },
     debug: {
         showDebugStats: boolean;
     },
@@ -70,6 +74,9 @@ const defaultSettings: AppSettings = {
         showProgressBar: true,
         showPhotoMetadata: true,
         fontSize: 'base',
+    },
+    theme: {
+        mode: 'dark',
     },
     debug: {
         showDebugStats: false,

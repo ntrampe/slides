@@ -1,17 +1,23 @@
 import { useSettingsData } from "../hooks/useSettingsData";
 import { PeoplePicker } from "../../people/components/PeoplePicker";
 import { AlbumPicker } from "../../albums/components/AlbumPicker";
+import { ThemeSelector } from "../../theme/components/ThemeSelector";
 
 export const SettingsPanel = () => {
     const { settings, updateSettings } = useSettingsData();
 
     return (
-        <div className="h-full w-full bg-slate-900/90 p-8 text-white overflow-y-auto">
-            <h2 className="text-xl font-bold mb-6">Settings</h2>
+        <div className="h-full w-full bg-surface/95 backdrop-blur-sm p-8 text-text-primary overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-6">Settings</h2>
+
+            {/* Theme Settings */}
+            <div className="mb-6">
+                <ThemeSelector />
+            </div>
 
             {/* Slideshow Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Slideshow</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">Slideshow</h3>
 
                 <AlbumPicker
                     label="Albums"
@@ -42,7 +48,7 @@ export const SettingsPanel = () => {
                     <select
                         value={settings.slideshow.layout}
                         onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, layout: e.target.value as any } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="single">Single Image</option>
                         <option value="split">Split View</option>
@@ -55,7 +61,7 @@ export const SettingsPanel = () => {
                         type="number"
                         value={settings.slideshow.intervalMs}
                         onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, intervalMs: Number(e.target.value) } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         min="1000"
                         step="1000"
                     />
@@ -84,14 +90,14 @@ export const SettingsPanel = () => {
 
             {/* Photo Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Photo</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">Photo</h3>
 
                 <label className="block mb-4">
                     <span className="block mb-1">Photo Fit</span>
                     <select
                         value={settings.photo.fit}
                         onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, fit: e.target.value as any } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="contain">Contain</option>
                         <option value="cover">Cover</option>
@@ -105,7 +111,7 @@ export const SettingsPanel = () => {
                         type="text"
                         value={settings.photo.dateFormat}
                         onChange={(e) => updateSettings({ ...settings, photo: { ...settings.photo, dateFormat: e.target.value } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM dd, yyyy"
                     />
                 </label>
@@ -113,7 +119,7 @@ export const SettingsPanel = () => {
 
             {/* Clock Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Clock</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">Clock</h3>
 
                 <label className="flex items-center mb-3 cursor-pointer">
                     <input
@@ -131,7 +137,7 @@ export const SettingsPanel = () => {
                         type="text"
                         value={settings.clock.dateFormat}
                         onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, dateFormat: e.target.value } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM DD, YYYY"
                     />
                 </label>
@@ -139,7 +145,7 @@ export const SettingsPanel = () => {
 
             {/* Weather Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Weather</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">Weather</h3>
 
                 <label className="block mb-4">
                     <span className="block mb-1">Latitude</span>
@@ -147,7 +153,7 @@ export const SettingsPanel = () => {
                         type="number"
                         value={settings.weather.location.lat}
                         onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lat: Number(e.target.value) } } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
                         placeholder="0.0000"
                     />
@@ -159,7 +165,7 @@ export const SettingsPanel = () => {
                         type="number"
                         value={settings.weather.location.lng}
                         onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lng: Number(e.target.value) } } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
                         placeholder="0.0000"
                     />
@@ -168,7 +174,7 @@ export const SettingsPanel = () => {
 
             {/* UI Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">UI</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">UI</h3>
 
                 <label className="flex items-center mb-3 cursor-pointer">
                     <input
@@ -215,7 +221,7 @@ export const SettingsPanel = () => {
                     <select
                         value={settings.ui.fontSize}
                         onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, fontSize: e.target.value as any } })}
-                        className="bg-slate-800 w-full p-2 rounded"
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="sm">Small</option>
                         <option value="base">Base</option>
@@ -227,7 +233,7 @@ export const SettingsPanel = () => {
 
             {/* Debug Settings */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3 border-b border-slate-700 pb-2">Debug</h3>
+                <h3 className="text-lg font-semibold mb-3 border-b border-border pb-2">Debug</h3>
 
                 <label className="flex items-center mb-3 cursor-pointer">
                     <input
