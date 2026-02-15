@@ -22,6 +22,12 @@ export function usePhotoPool(
     const poolRef = useRef<Map<string, LoadedPhoto>>(new Map());
     const [, forceRender] = useState(0); // minimal state signal
 
+    // Reset index when photos array changes (filters, new data, etc.)
+    useEffect(() => {
+        setIndex(0);
+        poolRef.current.clear();
+    }, [orderedPhotos]);
+
     const windowStart = Math.max(0, index - preloadBackward);
     const windowEnd = Math.min(
         orderedPhotos.length - 1,
