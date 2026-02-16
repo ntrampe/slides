@@ -14,7 +14,9 @@ import { ImmichAlbumRepo } from '../../features/albums/repos/ImmichAlbumRepo';
 import type { LocationRepo } from '../../features/locations/types';
 import { MockLocationRepo } from '../../features/locations/repos/MockLocationRepo';
 import { ImmichLocationRepo } from '../../features/locations/repos/ImmichLocationRepo';
-import type { SettingsService } from '../../features/settings';
+import type { ConfigService, SettingsService } from '../../features/settings';
+import { ApiConfigService } from '../../features/settings/services/ApiConfigService';
+import { MockConfigService } from '../../features/settings/services/MockConfigService';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
@@ -26,6 +28,7 @@ export type AppServices = {
     people: PeopleRepo;
     albums: AlbumRepo;
     locations: LocationRepo;
+    config: ConfigService;
 };
 
 // Mock services
@@ -35,7 +38,8 @@ const mockServices: AppServices = {
     settings: new LocalSettingsService(),
     people: new MockPeopleRepo(),
     albums: new MockAlbumRepo(),
-    locations: new MockLocationRepo()
+    locations: new MockLocationRepo(),
+    config: new MockConfigService()
 };
 
 // Live services
@@ -45,7 +49,8 @@ const liveServices: AppServices = {
     settings: new LocalSettingsService(),
     people: new ImmichPeopleRepo(),
     albums: new ImmichAlbumRepo(),
-    locations: new ImmichLocationRepo()
+    locations: new ImmichLocationRepo(),
+    config: new ApiConfigService()
 };
 
 // Select services based on flag

@@ -59,6 +59,10 @@ export interface AppSettings {
     };
 }
 
+export interface ConfigService {
+    fetchDefaultConfig(): Promise<AppSettings>;
+}
+
 export interface SettingsService {
     /** Load settings from localStorage. Returns null if none saved. */
     loadSettings: () => Promise<AppSettings | null>;
