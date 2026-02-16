@@ -20,23 +20,14 @@ function AppContent() {
   return (
     <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
       {/* Slideshow Container - shrinks when settings are visible */}
-      <div
-        className="h-full transition-all duration-500 ease-in-out"
-        style={{
-          width: isSettingsPanelVisible ? 'calc(100% - 320px)' : '100%'
-        }}
-      >
+      <div className="h-full transition-all duration-500 ease-in-out">
         <Slideshow />
       </div>
 
       {/* Settings Button */}
       <button
         onClick={toggleSettings}
-        className={`absolute top-4 transition-all duration-500 ease-in-out text-white hover:bg-white/20 rounded-full p-3 z-10 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        style={{
-          right: isSettingsPanelVisible ? 'calc(320px + 1rem)' : '1rem'
-        }}
+        className={`absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-3 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         aria-label="Settings"
       >
         <Settings size={24} strokeWidth={2} />
