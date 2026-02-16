@@ -23,9 +23,10 @@ export function loadConfig(): ServerConfig {
         console.error('ERROR: IMMICH_URL is not set in environment variables!');
         process.exit(1);
     }
-    
+
     if (!IMMICH_API_KEY) {
-        console.warn('WARNING: IMMICH_API_KEY is not set - requests may fail');
+        console.warn('WARNING: IMMICH_API_KEY is not set in environment variables!');
+        process.exit(1);
     }
 
     // Log configuration (redact sensitive values)
