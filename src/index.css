@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tailwindcss-safe-area";
 
 /* Tailwind v4 Theme Definition */
 @theme {

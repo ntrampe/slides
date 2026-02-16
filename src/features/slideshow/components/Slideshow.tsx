@@ -33,7 +33,7 @@ export const Slideshow = () => {
     }
 
     return (
-        <div className="relative h-full w-full bg-black overflow-hidden">
+        <div className="fixed inset-0 bg-black overflow-hidden">
             <Overlay progress={state.progress} />
 
             <div
