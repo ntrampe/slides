@@ -34,5 +34,6 @@ app.listen(config.PORT, () => {
     console.log(`API Endpoints:`);
     console.log(`  - /api/immich/* -> ${config.IMMICH_URL}`);
     console.log(`  - /api/weather -> OpenWeatherMap`);
+    console.log(`  - /api/config -> Default Settings`);
     console.log(`=================================\n`);
 });

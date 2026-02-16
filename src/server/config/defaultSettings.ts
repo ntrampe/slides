@@ -1,0 +1,87 @@
+import type { AppSettings } from '../../features/settings/types';
+
+// Helper functions (same as current frontend)
+const parseBool = (value: string | undefined, fallback: boolean): boolean => {
+    if (!value) return fallback;
+    return value.toLowerCase() === 'true';
+};
+
+const parseNumber = (value: string | undefined, fallback: number): number => {
+    if (!value) return fallback;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? fallback : parsed;
+};
+
+const parseFloat = (value: string | undefined, fallback: number): number => {
+    if (!value) return fallback;
+    const parsed = Number(value);
+    return isNaN(parsed) ? fallback : parsed;
+};
+
+const parseIdArray = (value: string | undefined): string[] => {
+    if (!value) return [];
+    return value.split(',').map(id => id.trim()).filter(Boolean);
+};
+
+const parseString = (value: string | undefined): string | undefined => {
+    if (!value) return undefined;
+    return value.trim() || undefined;
+};
+
+/**
+ * Build default settings from server environment variables
+ */
+export function buildDefaultSettings(): AppSettings {
+    return {
+        slideshow: {
+            layout: (process.env.DEFAULT_LAYOUT as AppSettings['slideshow']['layout']) || 'single',
+            intervalMs: parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000),
+            shuffle: parseBool(process.env.DEFAULT_SHUFFLE, true),
+            autoplay: parseBool(process.env.DEFAULT_AUTOPLAY, true),
+            filter: {
+                albumIds: parseIdArray(process.env.DEFAULT_ALBUM_IDS),
+                personIds: parseIdArray(process.env.DEFAULT_PERSON_IDS),
+                location: {
+                    country: parseString(process.env.DEFAULT_LOCATION_COUNTRY),
+                    state: parseString(process.env.DEFAULT_LOCATION_STATE),
+                    city: parseString(process.env.DEFAULT_LOCATION_CITY),
+                },
+            },
+            transition: {
+                type: (process.env.DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',
+                duration: parseNumber(process.env.DEFAULT_TRANSITION_DURATION, 500),
+            },
+            ui: {
+                showProgressBar: parseBool(process.env.DEFAULT_SHOW_PROGRESS_BAR, true),
+            }
+        },
+        photos: {
+            display: {
+                fit: (process.env.DEFAULT_OBJECT_FIT as AppSettings['photos']['display']['fit']) || 'cover',
+                showMetadata: parseBool(process.env.DEFAULT_SHOW_PHOTO_METADATA, true),
+            },
+            dateFormat: 'MMM dd, yyyy',
+        },
+        clock: {
+            enabled: parseBool(process.env.DEFAULT_SHOW_CLOCK, true),
+            use24HourFormat: parseBool(process.env.DEFAULT_24_HOUR_FORMAT, false),
+            dateFormat: 'MMM dd, yyyy',
+        },
+        weather: {
+            enabled: parseBool(process.env.DEFAULT_SHOW_WEATHER, false),
+            location: {
+                lat: parseFloat(process.env.DEFAULT_WEATHER_LAT, 51.5074),
+                lng: parseFloat(process.env.DEFAULT_WEATHER_LNG, -0.1278),
+            },
+        },
+        ui: {
+            fontSize: (process.env.DEFAULT_FONT_SIZE as AppSettings['ui']['fontSize']) || 'base',
+        },
+        theme: {
+            mode: (process.env.DEFAULT_THEME as AppSettings['theme']['mode']) || 'dark',
+        },
+        debug: {
+            showDebugStats: false,
+        },
+    };
+}
