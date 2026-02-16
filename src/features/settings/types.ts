@@ -60,9 +60,8 @@ export interface AppSettings {
 }
 
 export interface SettingsService {
-    loadSettings: () => Promise<AppSettings>;
+    /** Load settings from localStorage. Returns null if none saved. */
+    loadSettings: () => Promise<AppSettings | null>;
+    /** Save settings to localStorage */
     saveSettings: (settings: AppSettings) => Promise<void>;
 }
-
-// Export the builder function for use by services
-export { buildDefaultSettings as getDefaultSettings } from './utils/buildDefaultSettings';

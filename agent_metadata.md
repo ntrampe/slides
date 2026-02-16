@@ -149,7 +149,7 @@ export const useServices = () => useContext(ServiceContext);
 
 ## Settings Architecture
 
-Settings are persisted in localStorage and loaded via TanStack Query. Defaults can be configured via environment variables.
+Settings are persisted in localStorage and loaded via TanStack Query. Defaults are configured at **build time** via `VITE_*` environment variables.
 
 ### Adding a New Setting
 
@@ -165,20 +165,16 @@ export interface AppSettings {
 }
 ```
 
-2. **Add default value** in `features/settings/utils/buildDefaultSettings.ts`:
+2. **Add default value** in `features/settings/constants.ts`:
 
 ```typescript
-export function buildDefaultSettings(): AppSettings {
-    const env = import.meta.env;
-    
-    return {
-        // ... existing defaults ...
-        myFeature: {
-            enabled: parseBool(env.VITE_DEFAULT_MY_FEATURE_ENABLED, true),
-            threshold: parseNumber(env.VITE_DEFAULT_MY_FEATURE_THRESHOLD, 50),
-        },
-    };
-}
+export const DEFAULT_APP_SETTINGS: AppSettings = {
+    // ... existing defaults ...
+    myFeature: {
+        enabled: parseBool(import.meta.env.VITE_DEFAULT_MY_FEATURE_ENABLED, true),
+        threshold: parseNumber(import.meta.env.VITE_DEFAULT_MY_FEATURE_THRESHOLD, 50),
+    },
+};
 ```
 
 3. **Add env var types** in `src/env.d.ts`:
@@ -236,11 +232,21 @@ VITE_DEFAULT_MY_FEATURE_ENABLED=true
 VITE_DEFAULT_MY_FEATURE_THRESHOLD=50
 ```
 
+**Docker build args** (`docker build --build-arg`):
+
+```dockerfile
+ARG VITE_DEFAULT_MY_FEATURE_ENABLED=true
+ARG VITE_DEFAULT_MY_FEATURE_THRESHOLD=50
+ENV VITE_DEFAULT_MY_FEATURE_ENABLED=$VITE_DEFAULT_MY_FEATURE_ENABLED
+ENV VITE_DEFAULT_MY_FEATURE_THRESHOLD=$VITE_DEFAULT_MY_FEATURE_THRESHOLD
+```
+
 ### Settings Pattern Rules
 
 - ✅ Access via `useSettingsData()` hook
-- ✅ Define defaults in `buildDefaultSettings()`
-- ✅ Use env vars for deployment-specific defaults
+- ✅ Define defaults in `constants.ts` using `VITE_*` env vars
+- ✅ All env vars must start with `VITE_` prefix (Vite requirement)
+- ✅ Defaults are baked into build (no runtime config fetch)
 - ❌ Never hardcode defaults in components
 - ❌ Never access localStorage directly
 

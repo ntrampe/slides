@@ -1,18 +1,15 @@
 import type { AppSettings, SettingsService } from "../types";
-import { getDefaultSettings } from "../types";
 
+/**
+ * Manages settings persistence in localStorage.
+ * Does not handle defaults - that's done by useSettingsData hook.
+ */
 export class LocalSettingsService implements SettingsService {
     private KEY = 'immich_slides_settings';
-    private defaultSettings: AppSettings;
 
-    constructor() {
-        // Build defaults from environment variables once during construction
-        this.defaultSettings = getDefaultSettings();
-    }
-
-    async loadSettings(): Promise<AppSettings> {
+    async loadSettings(): Promise<AppSettings | null> {
         const data = localStorage.getItem(this.KEY);
-        return data ? JSON.parse(data) : this.defaultSettings;
+        return data ? JSON.parse(data) : null;
     }
 
     async saveSettings(settings: AppSettings): Promise<void> {

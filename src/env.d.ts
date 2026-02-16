@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-    // Existing
     readonly VITE_USE_MOCK?: string;
 
     // Settings Defaults

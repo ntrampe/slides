@@ -4,7 +4,6 @@ import { ImmichPhotoRepo, MockPhotoRepo, type PhotoRepo } from "../../features/p
 import { MockWeatherService } from "../../features/weather/services/MockWeatherService";
 import { OWMWeatherService } from "../../features/weather/services/OWMWeatherService";
 import type { WeatherService } from "../../features/weather/types";
-import type { SettingsService } from '../../features/settings';
 import { LocalSettingsService } from '../../features/settings/services/LocalStorageSettingsService';
 import type { PeopleRepo } from '../../features/people/types';
 import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
@@ -15,6 +14,7 @@ import { ImmichAlbumRepo } from '../../features/albums/repos/ImmichAlbumRepo';
 import type { LocationRepo } from '../../features/locations/types';
 import { MockLocationRepo } from '../../features/locations/repos/MockLocationRepo';
 import { ImmichLocationRepo } from '../../features/locations/repos/ImmichLocationRepo';
+import type { SettingsService } from '../../features/settings';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 

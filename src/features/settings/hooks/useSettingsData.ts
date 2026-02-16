@@ -1,13 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useServices } from '../../../shared/context/ServiceContext';
 import type { AppSettings } from '../types';
-import { getDefaultSettings } from '../types';
+import { DEFAULT_APP_SETTINGS } from '../constants';
 
-export function useSettingsData() {
+export interface UseSettingsDataReturn {
+    /** Current settings (saved → defaults) */
+    settings: AppSettings;
+    /** Update and persist settings to localStorage */
+    updateSettings: (newSettings: AppSettings) => void;
+}
+
+/**
+ * Provides access to app settings with fallback:
+ * 1. Saved settings (localStorage)
+ * 2. Default settings (build-time env vars)
+ */
+export function useSettingsData(): UseSettingsDataReturn {
     const { settings: service } = useServices();
     const queryClient = useQueryClient();
 
-    const query = useQuery({
+    const settingsQuery = useQuery({
         queryKey: ['settings'],
         queryFn: () => service.loadSettings(),
     });
@@ -17,9 +29,10 @@ export function useSettingsData() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
     });
 
-    // Use environment-aware defaults as fallback
+    const settings = settingsQuery.data ?? DEFAULT_APP_SETTINGS;
+
     return {
-        settings: query.data ?? getDefaultSettings(),
-        updateSettings: mutation.mutate
+        settings,
+        updateSettings: mutation.mutate,
     };
 }
