@@ -3,25 +3,19 @@ import { ServiceContext, services } from './shared/context/ServiceContext';
 import { ControlsProvider } from './shared/context/ControlsContext';
 import { Slideshow } from './features/slideshow';
 
-import { useKeyToggle, useControls } from './shared/hooks';
-import { SettingsPanel } from './features/settings';
+import { useControls } from './shared/hooks';
+import { SettingsPanel, useSettingsPanel } from './features/settings';
 import { Settings } from 'lucide-react';
-import { useState } from 'react';
 import { useTheme } from './features/theme';
 
 const queryClient = new QueryClient();
-
 
 function AppContent() {
   // Apply theme at app level
   useTheme();
 
-  const { isActive: isSettingsShown } = useKeyToggle('s');
-  const [showSettings, setShowSettings] = useState(false);
+  const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();
   const { areControlsVisible } = useControls();
-
-  const toggleSettings = () => setShowSettings(prev => !prev);
-  const isSettingsPanelVisible = isSettingsShown || showSettings;
 
   return (
     <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
@@ -55,7 +49,7 @@ function AppContent() {
           transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)'
         }}
       >
-        <SettingsPanel />
+        <SettingsPanel onClose={closeSettings} />
       </div>
     </main>
   );

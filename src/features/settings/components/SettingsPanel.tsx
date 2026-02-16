@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useSettingsData } from "../hooks/useSettingsData";
 import { PeoplePicker } from "../../people/components/PeoplePicker";
 import { AlbumPicker } from "../../albums/components/AlbumPicker";
@@ -5,12 +6,26 @@ import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
 
-export const SettingsPanel = () => {
+export interface SettingsPanelProps {
+    onClose: () => void;
+}
+
+export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     const { settings, updateSettings } = useSettingsData();
 
     return (
         <div className="h-full w-full bg-surface/95 backdrop-blur-sm p-8 text-text-primary overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-6">Settings</h2>
+            {/* Header with title and close button */}
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Settings</h2>
+                <button
+                    onClick={onClose}
+                    className="text-text-secondary hover:text-text-primary hover:bg-surface rounded-full p-2 transition-colors"
+                    aria-label="Close settings"
+                >
+                    <X size={24} />
+                </button>
+            </div>
 
             {/* Theme - Always visible */}
             <div className="mb-6">

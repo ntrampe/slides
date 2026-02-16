@@ -1,2 +1,3 @@
-export * from './components/SettingsPanel.tsx';
-export * from './types.ts';
+export * from './components/SettingsPanel';
+export * from './hooks/useSettingsPanel';
+export * from './types';
