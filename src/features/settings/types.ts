@@ -59,11 +59,11 @@ export interface AppSettings {
     };
 }
 
-export interface ConfigService {
+export interface ConfigRepo {
     fetchDefaultConfig(): Promise<AppSettings>;
 }
 
-export interface SettingsService {
+export interface SettingsRepo {
     /** Load settings from localStorage. Returns null if none saved. */
     loadSettings: () => Promise<AppSettings | null>;
     /** Save settings to localStorage */

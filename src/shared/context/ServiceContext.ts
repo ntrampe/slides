@@ -4,7 +4,7 @@ import { ImmichPhotoRepo, MockPhotoRepo, type PhotoRepo } from "../../features/p
 import { MockWeatherService } from "../../features/weather/services/MockWeatherService";
 import { OWMWeatherService } from "../../features/weather/services/OWMWeatherService";
 import type { WeatherService } from "../../features/weather/types";
-import { LocalSettingsService } from '../../features/settings/services/LocalStorageSettingsService';
+import { LocalSettingsRepo } from '../../features/settings/repos/LocalStorageSettingsRepo';
 import type { PeopleRepo } from '../../features/people/types';
 import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
 import { ImmichPeopleRepo } from '../../features/people/repos/ImmichPeopleRepo';
@@ -14,9 +14,9 @@ import { ImmichAlbumRepo } from '../../features/albums/repos/ImmichAlbumRepo';
 import type { LocationRepo } from '../../features/locations/types';
 import { MockLocationRepo } from '../../features/locations/repos/MockLocationRepo';
 import { ImmichLocationRepo } from '../../features/locations/repos/ImmichLocationRepo';
-import type { ConfigService, SettingsService } from '../../features/settings';
-import { ApiConfigService } from '../../features/settings/services/ApiConfigService';
-import { MockConfigService } from '../../features/settings/services/MockConfigService';
+import type { ConfigRepo, SettingsRepo } from '../../features/settings';
+import { ApiConfigRepo } from '../../features/settings/repos/ApiConfigRepo';
+import { MockConfigRepo } from '../../features/settings/repos/MockConfigRepo';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
@@ -24,33 +24,33 @@ const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 export type AppServices = {
     photos: PhotoRepo;
     weather: WeatherService;
-    settings: SettingsService;
+    settings: SettingsRepo;
     people: PeopleRepo;
     albums: AlbumRepo;
     locations: LocationRepo;
-    config: ConfigService;
+    config: ConfigRepo;
 };
 
 // Mock services
 const mockServices: AppServices = {
     photos: new MockPhotoRepo(),
     weather: new MockWeatherService(),
-    settings: new LocalSettingsService(),
+    settings: new LocalSettingsRepo(),
     people: new MockPeopleRepo(),
     albums: new MockAlbumRepo(),
     locations: new MockLocationRepo(),
-    config: new MockConfigService()
+    config: new MockConfigRepo()
 };
 
 // Live services
 const liveServices: AppServices = {
     photos: new ImmichPhotoRepo(),
     weather: new OWMWeatherService(),
-    settings: new LocalSettingsService(),
+    settings: new LocalSettingsRepo(),
     people: new ImmichPeopleRepo(),
     albums: new ImmichAlbumRepo(),
     locations: new ImmichLocationRepo(),
-    config: new ApiConfigService()
+    config: new ApiConfigRepo()
 };
 
 // Select services based on flag

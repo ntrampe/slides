@@ -1,13 +1,9 @@
-import type { AppSettings } from '../types';
-
-export interface ConfigService {
-    fetchDefaultConfig(): Promise<AppSettings>;
-}
+import type { AppSettings, ConfigRepo } from '../types';
 
 /**
  * Fetches default configuration from server
  */
-export class ApiConfigService implements ConfigService {
+export class ApiConfigRepo implements ConfigRepo {
     async fetchDefaultConfig(): Promise<AppSettings> {
         const response = await fetch('/api/config');
 

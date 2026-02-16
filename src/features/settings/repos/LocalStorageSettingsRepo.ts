@@ -1,10 +1,10 @@
-import type { AppSettings, SettingsService } from "../types";
+import type { AppSettings, SettingsRepo } from "../types";
 
 /**
  * Manages settings persistence in localStorage.
  * Does not handle defaults - that's done by useSettingsData hook.
  */
-export class LocalSettingsService implements SettingsService {
+export class LocalSettingsRepo implements SettingsRepo {
     private KEY = 'immich_slides_settings';
 
     async loadSettings(): Promise<AppSettings | null> {
