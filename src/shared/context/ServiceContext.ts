@@ -41,7 +41,7 @@ const mockServices: AppServices = {
 // Live services
 const liveServices: AppServices = {
     photos: new ImmichPhotoRepo(),
-    weather: new OWMWeatherService(import.meta.env.VITE_OWM_KEY || ''),
+    weather: new OWMWeatherService(),
     settings: new LocalSettingsService(),
     people: new ImmichPeopleRepo(),
     albums: new ImmichAlbumRepo(),

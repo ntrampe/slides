@@ -15,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const IMMICH_URL = process.env.IMMICH_URL;
 const IMMICH_API_KEY = process.env.IMMICH_API_KEY;
+const OWM_KEY = process.env.OWM_KEY;
 
 // Validate configuration
 if (!IMMICH_URL) {
@@ -28,6 +29,7 @@ if (!IMMICH_API_KEY) {
 console.log('Configuration:');
 console.log('- IMMICH_URL:', IMMICH_URL);
 console.log('- IMMICH_API_KEY:', IMMICH_API_KEY ? '***set***' : 'NOT SET');
+console.log('- OWM_KEY:', OWM_KEY ? '***set***' : 'NOT SET');
 
 // 1. The Immich Proxy
 // This transforms /immich/... into IMMICH_URL/... 
@@ -56,7 +58,38 @@ const proxyOptions: Options = {
 
 app.use('/immich', createProxyMiddleware(proxyOptions));
 
-// 2. Serve the React Production Build
+// 2. Weather API endpoint
+// Proxies to OpenWeatherMap with server-side API key
+app.get('/api/weather', async (req, res) => {
+    const { lat, lon } = req.query;
+
+    console.log('[Proxy] Fetching weather from OpenWeatherMap...');
+
+    if (!lat || !lon) {
+        return res.status(400).json({ error: 'Missing lat or lon parameters' });
+    }
+
+    if (!OWM_KEY) {
+        return res.status(503).json({ error: 'Weather service not configured' });
+    }
+
+    try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`OpenWeatherMap API failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('[Weather API] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch weather data' });
+    }
+});
+
+// 3. Serve the React Production Build
 // __dirname is src/server, so we need to go up two levels to reach project root
 const buildPath = path.join(__dirname, '../../dist');
 app.use(express.static(buildPath));

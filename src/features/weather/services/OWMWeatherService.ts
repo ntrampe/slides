@@ -1,17 +1,19 @@
 import type { WeatherCondition, WeatherData, WeatherService } from "../types";
 
 export class OWMWeatherService implements WeatherService {
-    private apiKey: string;
-
-    constructor(apiKey: string) {
-        this.apiKey = apiKey;
-    }
-
     async getWeather(lat: number, lon: number): Promise<WeatherData> {
+        // Call our backend endpoint instead of OpenWeatherMap directly
         const res = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`
+            `/api/weather?lat=${lat}&lon=${lon}`
         );
+
+        if (!res.ok) {
+            throw new Error(`Weather API failed: ${res.status}`);
+        }
+
         const data = await res.json();
+
+        console.log('Weather data received:', data); // Log the
 
         return {
             temp: Math.round(data.main.temp),

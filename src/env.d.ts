@@ -3,7 +3,6 @@
 interface ImportMetaEnv {
     // Existing
     readonly VITE_USE_MOCK?: string;
-    readonly VITE_OWM_KEY?: string;
 
     // Settings Defaults
     readonly VITE_DEFAULT_LAYOUT?: 'single' | 'split';
