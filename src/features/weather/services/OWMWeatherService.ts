@@ -13,8 +13,6 @@ export class OWMWeatherService implements WeatherService {
 
         const data = await res.json();
 
-        console.log('Weather data received:', data); // Log the
-
         return {
             temp: Math.round(data.main.temp),
             city: data.name,

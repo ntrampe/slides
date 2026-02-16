@@ -1,7 +1,7 @@
 import type { PhotoRepo, PaginationParams, PaginatedPhotos } from "../types";
 
 export class ImmichPhotoRepo implements PhotoRepo {
-    private proxyUrl = "/immich";
+    private proxyUrl = "/api/immich";
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
         const {

@@ -1,7 +1,7 @@
 import type { PeopleRepo, Person } from '../types';
 
 export class ImmichPeopleRepo implements PeopleRepo {
-    private proxyUrl = "/immich";
+    private proxyUrl = "/api/immich";
 
     async getPeople(): Promise<Person[]> {
         const res = await fetch(`${this.proxyUrl}/api/people`, {

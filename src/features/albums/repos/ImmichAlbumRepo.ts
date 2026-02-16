@@ -1,7 +1,7 @@
 import type { AlbumRepo, Album } from '../types';
 
 export class ImmichAlbumRepo implements AlbumRepo {
-    private proxyUrl = "/immich";
+    private proxyUrl = "/api/immich";
 
     async getAlbums(): Promise<Album[]> {
         const res = await fetch(`${this.proxyUrl}/api/albums`, {
@@ -20,7 +20,7 @@ export class ImmichAlbumRepo implements AlbumRepo {
             id: album.id,
             name: album.albumName,
             description: album.description ?? null,
-            thumbnailUrl: album.albumThumbnailAssetId 
+            thumbnailUrl: album.albumThumbnailAssetId
                 ? `${this.proxyUrl}/api/assets/${album.albumThumbnailAssetId}/thumbnail?size=preview`
                 : '',
             assetCount: album.assetCount ?? 0,

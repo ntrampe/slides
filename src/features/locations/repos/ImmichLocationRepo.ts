@@ -1,7 +1,7 @@
 import type { LocationRepo, MapMarker, LocationHierarchy, LocationItem, LocationSelection } from '../types';
 
 export class ImmichLocationRepo implements LocationRepo {
-    private proxyUrl = "/immich";
+    private proxyUrl = "/api/immich";
 
     async getMapMarkers(): Promise<MapMarker[]> {
         const res = await fetch(`${this.proxyUrl}/api/map/markers`, {
