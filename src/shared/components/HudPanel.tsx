@@ -35,8 +35,8 @@ export const HudPanel = ({
 
 // Responsive text size utilities
 export const hudTextSizes: Record<HudSize, string> = {
-    display: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl',
-    heading: 'text-lg sm:text-xl md:text-2xl',
-    body: 'text-sm sm:text-base md:text-lg',
-    caption: 'text-xs sm:text-sm',
+    display: 'text-lg sm:text-2xl md:text-4xl lg:text-5xl',
+    heading: 'text-sm sm:text-base md:text-xl',
+    body: 'text-[11px] sm:text-xs md:text-base',
+    caption: 'text-[9px] sm:text-[10px]',
 };
