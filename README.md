@@ -166,7 +166,7 @@ Each feature is self-contained with:
 - `services/` - External services
 - `types.ts` - Type definitions
 
-See [agent_metadata.md](agent_metadata.md) for detailed patterns.
+See [best_practices.md](best_practices.md) for detailed patterns.
 
 ## 🛠️ Tech Stack
 
@@ -192,7 +192,7 @@ Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
-3. Follow the architecture patterns in [agent_metadata.md](agent_metadata.md)
+3. Follow the architecture patterns in [best_practices.md](best_practices.md)
 4. Test thoroughly
 5. Submit a pull request
 
