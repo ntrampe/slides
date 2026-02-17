@@ -57,7 +57,7 @@ export function useSlideshowTransition({
             clearTimeout(updateTimeout);
             clearTimeout(completeTimeout);
         };
-    }, [currentPhoto?.id, nextPhoto?.id, transitionSettings]);
+    }, [currentPhoto?.id, nextPhoto?.id, transitionSettings.type, transitionSettings.duration]);
 
     // Calculate transition styles based on settings
     const getTransitionStyles = (): React.CSSProperties => {

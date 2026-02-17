@@ -38,11 +38,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     label="Albums"
                     selectedIds={settings.slideshow.filter.albumIds || []}
                     onChange={(albumIds) => updateSettings({
-                        ...settings,
-                        slideshow: {
-                            ...settings.slideshow,
-                            filter: { ...settings.slideshow.filter, albumIds }
-                        }
+                        slideshow: { filter: { albumIds } }
                     })}
                 />
 
@@ -50,11 +46,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     label="People"
                     selectedIds={settings.slideshow.filter.personIds || []}
                     onChange={(personIds) => updateSettings({
-                        ...settings,
-                        slideshow: {
-                            ...settings.slideshow,
-                            filter: { ...settings.slideshow.filter, personIds }
-                        }
+                        slideshow: { filter: { personIds } }
                     })}
                 />
 
@@ -62,11 +54,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     label="Location"
                     selection={settings.slideshow.filter.location || {}}
                     onChange={(location) => updateSettings({
-                        ...settings,
-                        slideshow: {
-                            ...settings.slideshow,
-                            filter: { ...settings.slideshow.filter, location }
-                        }
+                        slideshow: { filter: { location } }
                     })}
                 />
             </CollapsibleSection>
@@ -77,7 +65,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.slideshow.shuffle}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, shuffle: e.target.checked } })}
+                        onChange={(e) => updateSettings({ slideshow: { shuffle: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Shuffle Photos</span>
@@ -88,14 +76,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={settings.slideshow.ui.showProgressBar}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            slideshow: {
-                                ...settings.slideshow,
-                                ui: {
-                                    ...settings.slideshow.ui,
-                                    showProgressBar: e.target.checked
-                                }
-                            }
+                            slideshow: { ui: { showProgressBar: e.target.checked } }
                         })}
                         className="mr-2 w-4 h-4"
                     />
@@ -106,7 +87,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.slideshow.autoplay}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, autoplay: e.target.checked } })}
+                        onChange={(e) => updateSettings({ slideshow: { autoplay: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Autoplay</span>
@@ -117,7 +98,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         value={settings.slideshow.intervalMs / 1000}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, intervalMs: Number(e.target.value) * 1000 } })}
+                        onChange={(e) => updateSettings({ slideshow: { intervalMs: Number(e.target.value) * 1000 } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         min="1"
                         step="1"
@@ -128,7 +109,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Layout</span>
                     <select
                         value={settings.slideshow.layout}
-                        onChange={(e) => updateSettings({ ...settings, slideshow: { ...settings.slideshow, layout: e.target.value as any } })}
+                        onChange={(e) => updateSettings({ slideshow: { layout: e.target.value as any } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="single">Single Image</option>
@@ -144,7 +125,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Font Size</span>
                     <select
                         value={settings.ui.fontSize}
-                        onChange={(e) => updateSettings({ ...settings, ui: { ...settings.ui, fontSize: e.target.value as any } })}
+                        onChange={(e) => updateSettings({ ui: { fontSize: e.target.value as any } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
                         <option value="sm">Small</option>
@@ -162,14 +143,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={settings.photos.display.showMetadata}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            photos: {
-                                ...settings.photos,
-                                display: {
-                                    ...settings.photos.display,
-                                    showMetadata: e.target.checked
-                                }
-                            }
+                            photos: { display: { showMetadata: e.target.checked } }
                         })}
                         className="mr-2 w-4 h-4"
                     />
@@ -181,14 +155,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <select
                         value={settings.photos.display.fit}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            photos: {
-                                ...settings.photos,
-                                display: {
-                                    ...settings.photos.display,
-                                    fit: e.target.value as any
-                                }
-                            }
+                            photos: { display: { fit: e.target.value as any } }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
@@ -204,11 +171,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="text"
                         value={settings.photos.dateFormat}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            photos: {
-                                ...settings.photos,
-                                dateFormat: e.target.value
-                            }
+                            photos: { dateFormat: e.target.value }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM dd, yyyy"
@@ -224,14 +187,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <select
                         value={settings.slideshow.transition.type}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            slideshow: {
-                                ...settings.slideshow,
-                                transition: {
-                                    ...settings.slideshow.transition,
-                                    type: e.target.value as 'fade' | 'slide' | 'none'
-                                }
-                            }
+                            slideshow: { transition: { type: e.target.value as 'fade' | 'slide' | 'none' } }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
@@ -247,14 +203,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="number"
                         value={settings.slideshow.transition.duration}
                         onChange={(e) => updateSettings({
-                            ...settings,
-                            slideshow: {
-                                ...settings.slideshow,
-                                transition: {
-                                    ...settings.slideshow.transition,
-                                    duration: Number(e.target.value)
-                                }
-                            }
+                            slideshow: { transition: { duration: Number(e.target.value) } }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         min="100"
@@ -270,7 +219,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.clock.enabled}
-                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, enabled: e.target.checked } })}
+                        onChange={(e) => updateSettings({ clock: { enabled: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Clock</span>
@@ -280,7 +229,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.clock.use24HourFormat}
-                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, use24HourFormat: e.target.checked } })}
+                        onChange={(e) => updateSettings({ clock: { use24HourFormat: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>24-Hour Format</span>
@@ -291,7 +240,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="text"
                         value={settings.clock.dateFormat}
-                        onChange={(e) => updateSettings({ ...settings, clock: { ...settings.clock, dateFormat: e.target.value } })}
+                        onChange={(e) => updateSettings({ clock: { dateFormat: e.target.value } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM DD, YYYY"
                     />
@@ -305,7 +254,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.weather.enabled}
-                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, enabled: e.target.checked } })}
+                        onChange={(e) => updateSettings({ weather: { enabled: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Weather</span>
@@ -316,7 +265,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         value={settings.weather.location.lat}
-                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lat: Number(e.target.value) } } })}
+                        onChange={(e) => updateSettings({ weather: { location: { lat: Number(e.target.value) } } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
                         placeholder="0.0000"
@@ -328,7 +277,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         value={settings.weather.location.lng}
-                        onChange={(e) => updateSettings({ ...settings, weather: { ...settings.weather, location: { ...settings.weather.location, lng: Number(e.target.value) } } })}
+                        onChange={(e) => updateSettings({ weather: { location: { lng: Number(e.target.value) } } })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
                         placeholder="0.0000"
@@ -342,7 +291,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.debug.showDebugStats}
-                        onChange={(e) => updateSettings({ ...settings, debug: { ...settings.debug, showDebugStats: e.target.checked } })}
+                        onChange={(e) => updateSettings({ debug: { showDebugStats: e.target.checked } })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Debug Stats</span>

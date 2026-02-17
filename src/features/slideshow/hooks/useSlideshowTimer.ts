@@ -30,13 +30,9 @@ export function useSlideshowTimer({
     // Toggle play/pause by updating settings
     const togglePlayPause = useCallback(() => {
         updateSettings({
-            ...settings,
-            slideshow: {
-                ...settings.slideshow,
-                autoplay: !settings.slideshow.autoplay,
-            },
+            slideshow: { autoplay: !settings.slideshow.autoplay },
         });
-    }, [settings, updateSettings]);
+    }, [settings.slideshow.autoplay, updateSettings]);
 
     // Timer effect: handles progress tracking and auto-advance
     useEffect(() => {
