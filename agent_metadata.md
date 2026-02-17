@@ -149,7 +149,7 @@ export const useServices = () => useContext(ServiceContext);
 
 ## Settings Architecture
 
-Settings are persisted in localStorage and loaded via TanStack Query. Defaults are configured at **build time** via `VITE_*` environment variables.
+Settings are persisted in localStorage and loaded via TanStack Query. Defaults are configured at **runtime** via environment variables read by the server, allowing for Docker deployment with runtime configuration.
 
 ### Adding a New Setting
 
@@ -165,26 +165,30 @@ export interface AppSettings {
 }
 ```
 
-2. **Add default value** in `features/settings/constants.ts`:
+2. **Add default value in server config** at `server/config/defaultSettings.ts`:
 
 ```typescript
-export const DEFAULT_APP_SETTINGS: AppSettings = {
-    // ... existing defaults ...
-    myFeature: {
-        enabled: parseBool(import.meta.env.VITE_DEFAULT_MY_FEATURE_ENABLED, true),
-        threshold: parseNumber(import.meta.env.VITE_DEFAULT_MY_FEATURE_THRESHOLD, 50),
-    },
-};
+export function buildDefaultSettings(): AppSettings {
+    return {
+        // ... existing defaults ...
+        myFeature: {
+            enabled: parseBool(process.env.DEFAULT_MY_FEATURE_ENABLED, true),
+            threshold: parseNumber(process.env.DEFAULT_MY_FEATURE_THRESHOLD, 50),
+        },
+    };
+}
 ```
 
-3. **Add env var types** in `src/env.d.ts`:
+3. **Add fallback value** in `features/settings/constants.ts` (used when server is unavailable):
 
 ```typescript
-interface ImportMetaEnv {
-    // ... existing vars ...
-    readonly VITE_DEFAULT_MY_FEATURE_ENABLED?: string;
-    readonly VITE_DEFAULT_MY_FEATURE_THRESHOLD?: string;
-}
+export const FALLBACK_APP_SETTINGS: AppSettings = {
+    // ... existing fallbacks ...
+    myFeature: {
+        enabled: true,
+        threshold: 50,
+    },
+};
 ```
 
 ### Using Settings
@@ -225,30 +229,42 @@ updateSettings({
 });
 ```
 
-**Environment variables** (`.env`):
+**Environment variables** (`.env.example`):
 
 ```bash
-VITE_DEFAULT_MY_FEATURE_ENABLED=true
-VITE_DEFAULT_MY_FEATURE_THRESHOLD=50
+DEFAULT_MY_FEATURE_ENABLED=true
+DEFAULT_MY_FEATURE_THRESHOLD=50
 ```
 
-**Docker build args** (`docker build --build-arg`):
+**Docker deployment** (runtime configuration via environment variables):
 
-```dockerfile
-ARG VITE_DEFAULT_MY_FEATURE_ENABLED=true
-ARG VITE_DEFAULT_MY_FEATURE_THRESHOLD=50
-ENV VITE_DEFAULT_MY_FEATURE_ENABLED=$VITE_DEFAULT_MY_FEATURE_ENABLED
-ENV VITE_DEFAULT_MY_FEATURE_THRESHOLD=$VITE_DEFAULT_MY_FEATURE_THRESHOLD
+```bash
+docker run -e DEFAULT_MY_FEATURE_ENABLED=true \
+           -e DEFAULT_MY_FEATURE_THRESHOLD=50 \
+           immich-slides
+```
+
+**Docker Compose**:
+
+```yaml
+services:
+  immich-slides:
+    image: immich-slides
+    environment:
+      - DEFAULT_MY_FEATURE_ENABLED=true
+      - DEFAULT_MY_FEATURE_THRESHOLD=50
 ```
 
 ### Settings Pattern Rules
 
 - ✅ Access via `useSettingsData()` hook
-- ✅ Define defaults in `constants.ts` using `VITE_*` env vars
-- ✅ All env vars must start with `VITE_` prefix (Vite requirement)
-- ✅ Defaults are baked into build (no runtime config fetch)
+- ✅ Define defaults in `server/config/defaultSettings.ts` using `process.env.DEFAULT_*` vars
+- ✅ Provide fallbacks in `features/settings/constants.ts` (for server failures)
+- ✅ Settings are fetched from server at runtime (allows Docker env var configuration)
+- ✅ Environment variables follow `DEFAULT_*` naming convention
 - ❌ Never hardcode defaults in components
-- ❌ Never access localStorage directly
+- ❌ Never access localStorage or environment variables directly
+- ❌ Don't use `VITE_*` prefix for settings (those are build-time only)
 
 ---
 
