@@ -14,7 +14,21 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     const { settings, updateSettings } = useSettingsData();
 
     return (
-        <div className="h-full w-full bg-surface/95 backdrop-blur-sm p-8 text-text-primary overflow-y-auto">
+        <div
+            className="h-full w-full bg-surface backdrop-blur-sm p-8 text-text-primary overflow-y-auto touch-pan-y"
+            onTouchStart={(e) => {
+                // Prevent touch events from propagating to elements behind the panel
+                e.stopPropagation();
+            }}
+            onClick={(e) => {
+                // Prevent click events from propagating to elements behind the panel
+                e.stopPropagation();
+            }}
+            style={{
+                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+                overscrollBehavior: 'contain' // Prevent scroll chaining
+            }}
+        >
             {/* Header with title and close button */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Settings</h2>

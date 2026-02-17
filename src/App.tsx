@@ -33,11 +33,25 @@ function AppContent() {
         <Settings size={24} strokeWidth={2} />
       </button>
 
+      {/* Backdrop - catches touches outside settings panel */}
+      {isSettingsPanelVisible && (
+        <div
+          className="absolute inset-0 bg-black/50 transition-opacity duration-500 ease-in-out"
+          onClick={closeSettings}
+          onTouchStart={(e) => {
+            // Prevent touches on backdrop from reaching slideshow
+            e.preventDefault();
+            closeSettings();
+          }}
+        />
+      )}
+
       {/* Settings Panel - always rendered, positioned absolutely */}
       <div
-        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out"
+        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-10"
         style={{
-          transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)'
+          transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
+          pointerEvents: isSettingsPanelVisible ? 'auto' : 'none'
         }}
       >
         <SettingsPanel onClose={closeSettings} />
