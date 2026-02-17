@@ -16,6 +16,11 @@ export function ItemDropdown<T extends PickerItem>({
             <div
                 className="fixed inset-0 z-10"
                 onClick={onClose}
+                onTouchStart={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose();
+                }}
             />
 
             {/* Dropdown content */}
@@ -32,8 +37,8 @@ export function ItemDropdown<T extends PickerItem>({
                                 key={item.id}
                                 onClick={() => onSelect(item.id)}
                                 className={`w-full flex items-center gap-2 p-2 hover:bg-surface-hover text-left ${isSelected && selectionMode === 'single'
-                                        ? 'bg-primary-500/10 text-primary-500'
-                                        : 'text-text-primary'
+                                    ? 'bg-primary-500/10 text-primary-500'
+                                    : 'text-text-primary'
                                     }`}
                             >
                                 {renderImage && (
