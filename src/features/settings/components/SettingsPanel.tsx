@@ -132,24 +132,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </label>
             </CollapsibleSection>
 
-            {/* Display Options - Commonly changed */}
-            <CollapsibleSection title="Display Options">
-
-                <label className="block">
-                    <span className="block mb-1">Font Size</span>
-                    <select
-                        value={settings.ui.fontSize}
-                        onChange={(e) => updateSettings({ ui: { fontSize: e.target.value as any } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    >
-                        <option value="sm">Small</option>
-                        <option value="base">Base</option>
-                        <option value="lg">Large</option>
-                        <option value="xl">Extra Large</option>
-                    </select>
-                </label>
-            </CollapsibleSection>
-
             {/* Photo Display - Less commonly changed */}
             <CollapsibleSection title="Photo Display">
                 <label className="flex items-center cursor-pointer">

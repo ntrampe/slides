@@ -42,9 +42,6 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
             lng: -0.1278,
         },
     },
-    ui: {
-        fontSize: 'base',
-    },
     theme: {
         mode: 'dark',
     },

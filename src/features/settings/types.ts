@@ -43,11 +43,6 @@ export interface AppSettings {
         };
     };
 
-    // UI feature (shared/global UI settings)
-    ui: {
-        fontSize: 'sm' | 'base' | 'lg' | 'xl';
-    };
-
     // Theme feature
     theme: {
         mode: ThemeMode;

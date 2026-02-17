@@ -74,9 +74,6 @@ export function buildDefaultSettings(): AppSettings {
                 lng: parseFloat(process.env.DEFAULT_WEATHER_LNG, -0.1278),
             },
         },
-        ui: {
-            fontSize: (process.env.DEFAULT_FONT_SIZE as AppSettings['ui']['fontSize']) || 'base',
-        },
         theme: {
             mode: (process.env.DEFAULT_THEME as AppSettings['theme']['mode']) || 'dark',
         },
