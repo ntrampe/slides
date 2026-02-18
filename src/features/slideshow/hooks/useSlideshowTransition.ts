@@ -6,11 +6,13 @@ interface UseSlideshowTransitionParams {
     currentPhoto: Photo | undefined;
     nextPhoto: Photo | undefined;
     transitionSettings: AppSettings['slideshow']['transition'];
+    layoutClass: string;
 }
 
 interface UseSlideshowTransitionReturn {
     displayedPhoto: Photo | undefined;
     displayedNextPhoto: Photo | undefined;
+    displayedLayoutClass: string;
     isTransitioning: boolean;
     transitionStyles: React.CSSProperties;
 }
@@ -23,10 +25,12 @@ export function useSlideshowTransition({
     currentPhoto,
     nextPhoto,
     transitionSettings,
+    layoutClass,
 }: UseSlideshowTransitionParams): UseSlideshowTransitionReturn {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [displayedPhoto, setDisplayedPhoto] = useState(currentPhoto);
     const [displayedNextPhoto, setDisplayedNextPhoto] = useState(nextPhoto);
+    const [displayedLayoutClass, setDisplayedLayoutClass] = useState(layoutClass);
 
     // Handle photo transitions
     useEffect(() => {
@@ -36,6 +40,7 @@ export function useSlideshowTransition({
             // No transition - immediately update
             setDisplayedPhoto(currentPhoto);
             setDisplayedNextPhoto(nextPhoto);
+            setDisplayedLayoutClass(layoutClass);
             return;
         }
 
@@ -46,6 +51,7 @@ export function useSlideshowTransition({
         const updateTimeout = setTimeout(() => {
             setDisplayedPhoto(currentPhoto);
             setDisplayedNextPhoto(nextPhoto);
+            setDisplayedLayoutClass(layoutClass);
         }, transitionSettings.duration * 0.8);
 
         // Complete transition
@@ -57,7 +63,7 @@ export function useSlideshowTransition({
             clearTimeout(updateTimeout);
             clearTimeout(completeTimeout);
         };
-    }, [currentPhoto?.id, nextPhoto?.id, transitionSettings.type, transitionSettings.duration]);
+    }, [currentPhoto?.id, nextPhoto?.id, layoutClass, transitionSettings.type, transitionSettings.duration]);
 
     // Calculate transition styles based on settings
     const getTransitionStyles = (): React.CSSProperties => {
@@ -96,6 +102,7 @@ export function useSlideshowTransition({
     return {
         displayedPhoto,
         displayedNextPhoto,
+        displayedLayoutClass,
         isTransitioning,
         transitionStyles: getTransitionStyles(),
     };

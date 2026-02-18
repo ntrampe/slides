@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import { useControls } from '../../../shared/hooks';
 import { useSlideshowData } from './useSlideshowData';
@@ -6,6 +6,7 @@ import { useSlideshowTimer } from './useSlideshowTimer';
 import { useSlideshowKeyboard } from './useSlideshowKeyboard';
 import { useSlideshowTransition } from './useSlideshowTransition';
 import type { UseSlideshowReturn } from './types';
+import type { Photo } from '../../photos';
 
 export function useSlideshow(): UseSlideshowReturn {
     const { settings } = useSettingsData();
@@ -25,11 +26,33 @@ export function useSlideshow(): UseSlideshowReturn {
     // Get next photo for split view
     const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
 
+    // Layout calculation with auto-portrait logic
+    const shouldUseSplitLayout = useMemo(() => {
+        if (settings.slideshow.layout === 'single') {
+            return false;
+        }
+
+        if (settings.slideshow.layout === 'split') {
+            // Auto-enable split for portrait pairs
+            return areBothPortrait(data.currentLoaded?.photo, nextLoaded?.photo);
+        }
+
+        return false;
+    }, [
+        settings.slideshow.layout,
+        data.currentLoaded?.photo,
+        nextLoaded?.photo
+    ]);
+
+    // Layout calculation based on settings
+    const layoutClass = shouldUseSplitLayout ? 'grid-cols-2 gap-2' : 'grid-cols-1';
+
     // Transition layer: handles photo transitions with configurable effects
     const transition = useSlideshowTransition({
         currentPhoto: data.currentLoaded?.photo,
         nextPhoto: nextLoaded?.photo,
         transitionSettings: settings.slideshow.transition,
+        layoutClass
     });
 
     // Timer layer: autoplay, progress tracking (paused during transitions)
@@ -59,9 +82,6 @@ export function useSlideshow(): UseSlideshowReturn {
         onReset: timer.reset,
     });
 
-    // Layout calculation based on settings
-    const layoutClass = settings.slideshow.layout === 'split' ? 'grid-cols-2 gap-2' : 'grid-cols-1';
-
     return {
         state: {
             currentPhoto: data.currentLoaded?.photo,
@@ -77,7 +97,7 @@ export function useSlideshow(): UseSlideshowReturn {
             areControlsVisible,
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
-            layoutClass,
+            layoutClass: transition.displayedLayoutClass,
             objectFit: settings.photos.display.fit,
         },
         actions: {
@@ -98,4 +118,15 @@ export function useSlideshow(): UseSlideshowReturn {
             }
             : undefined,
     };
+}
+
+function isPortrait(photo: Photo | undefined): boolean {
+    if (!photo?.width || !photo?.height) {
+        return false; // Default to landscape if dimensions unknown
+    }
+    return photo.height > photo.width;
+}
+
+function areBothPortrait(photo1: Photo | undefined, photo2: Photo | undefined): boolean {
+    return isPortrait(photo1) && isPortrait(photo2);
 }
