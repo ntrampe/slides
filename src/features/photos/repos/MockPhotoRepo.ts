@@ -87,6 +87,7 @@ function generateMockPhotos(count: number): Photo[] {
         photos.push({
             id: String(i),
             url: `https://picsum.photos/${dimensions.width}/${dimensions.height}?${i}`,
+            inAppUrl: `https://picsum.photos/${dimensions.width}/${dimensions.height}?${i}`,
             width: dimensions.width,
             height: dimensions.height,
             type: 'IMAGE',

@@ -25,6 +25,7 @@ export interface Photo {
     // Core identifiers
     id: string;
     url: string;
+    inAppUrl?: string;  // URL to open photo in the source app
 
     // Essential for layout/display
     width?: number;
