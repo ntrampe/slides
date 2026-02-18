@@ -72,12 +72,12 @@ export function usePhotoPool(
         : undefined;
 
     const next = useCallback(() => {
-        setIndex((i) => Math.min(i + 1, orderedPhotos.length - 1));
+        setIndex((i) => (i + 1) % orderedPhotos.length);
     }, [orderedPhotos.length]);
 
     const previous = useCallback(() => {
-        setIndex((i) => Math.max(i - 1, 0));
-    }, []);
+        setIndex((i) => (i - 1 + orderedPhotos.length) % orderedPhotos.length);
+    }, [orderedPhotos.length]);
 
     const jumpTo = useCallback((i: number) => {
         setIndex(Math.max(0, Math.min(i, orderedPhotos.length - 1)));
