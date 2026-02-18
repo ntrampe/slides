@@ -6,7 +6,7 @@ import { HudPanel, hudTextSizes } from '../../../shared/components';
 
 interface PhotoMetadataOverlayProps {
     createdAt?: Photo['createdAt'];
-    location?: Photo['location'];
+    location?: string;
 }
 
 export const PhotoMetadataOverlay = ({ createdAt, location }: PhotoMetadataOverlayProps) => {

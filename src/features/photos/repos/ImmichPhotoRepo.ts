@@ -1,4 +1,4 @@
-import type { PhotoRepo, PaginationParams, PaginatedPhotos } from "../types";
+import type { PhotoRepo, PaginationParams, PaginatedPhotos, Photo, PhotoLocation, PhotoCameraInfo, PhotoExifSettings } from "../types";
 
 export class ImmichPhotoRepo implements PhotoRepo {
     private proxyUrl = "/api/immich";
@@ -38,22 +38,51 @@ export class ImmichPhotoRepo implements PhotoRepo {
         }
 
         const json = await res.json();
-
         const assets = json.assets?.items ?? [];
 
-        const photos = assets.map((asset: any) => ({
-            id: asset.id,
-            url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
-            createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
-            location: [
-                asset.exifInfo?.city,
-                asset.exifInfo?.state,
-                asset.exifInfo?.country
-            ]
-                .filter(Boolean)
-                .join(", "),
-            description: asset.exifInfo?.description,
-        }));
+        const photos: Photo[] = assets.map((asset: any) => {
+            // Location data
+            const locationData: PhotoLocation | undefined = asset.exifInfo ? {
+                city: asset.exifInfo.city,
+                state: asset.exifInfo.state,
+                country: asset.exifInfo.country,
+                latitude: asset.exifInfo.latitude,
+                longitude: asset.exifInfo.longitude,
+            } : undefined;
+
+            // Camera info
+            const cameraInfo: PhotoCameraInfo | undefined = asset.exifInfo ? {
+                make: asset.exifInfo.make,
+                model: asset.exifInfo.model,
+                lensModel: asset.exifInfo.lensModel,
+            } : undefined;
+
+            // EXIF settings
+            const exifSettings: PhotoExifSettings | undefined = asset.exifInfo ? {
+                fNumber: asset.exifInfo.fNumber,
+                exposureTime: asset.exifInfo.exposureTime,
+                iso: asset.exifInfo.iso,
+                focalLength: asset.exifInfo.focalLength,
+            } : undefined;
+
+            return {
+                id: asset.id,
+                url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
+                width: asset.width || asset.exifInfo?.exifImageWidth,
+                height: asset.height || asset.exifInfo?.exifImageHeight,
+                type: asset.type as 'IMAGE' | 'VIDEO',
+                createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
+                description: asset.exifInfo?.description,
+                rating: asset.exifInfo?.rating,
+                isFavorite: asset.isFavorite ?? false,
+                tags: asset.tags?.map((tag: any) => tag.name) || [],
+                location: locationData,
+                camera: cameraInfo,
+                exifSettings: exifSettings,
+                orientation: asset.exifInfo?.orientation,
+                duration: asset.duration,
+            };
+        });
 
         return {
             photos,
