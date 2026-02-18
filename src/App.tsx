@@ -2,10 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ServiceContext, services } from './shared/context/ServiceContext';
 import { ControlsProvider } from './shared/context/ControlsContext';
 import { Slideshow } from './features/slideshow';
-
-import { useControls } from './shared/hooks';
 import { SettingsPanel, useSettingsPanel } from './features/settings';
-import { Settings } from 'lucide-react';
 import { useTheme } from './features/theme';
 
 const queryClient = new QueryClient();
@@ -15,23 +12,13 @@ function AppContent() {
   useTheme();
 
   const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();
-  const { areControlsVisible } = useControls();
 
   return (
     <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
-      {/* Slideshow Container - shrinks when settings are visible */}
+      {/* Slideshow Container */}
       <div className="h-full transition-all duration-500 ease-in-out">
-        <Slideshow />
+        <Slideshow onToggleSettings={toggleSettings} />
       </div>
-
-      {/* Settings Button */}
-      <button
-        onClick={toggleSettings}
-        className={`absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-3 ${areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        aria-label="Settings"
-      >
-        <Settings size={24} strokeWidth={2} />
-      </button>
 
       {/* Backdrop - catches touches outside settings panel */}
       {isSettingsPanelVisible && (
@@ -48,7 +35,7 @@ function AppContent() {
 
       {/* Settings Panel - always rendered, positioned absolutely */}
       <div
-        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-10"
+        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-20"
         style={{
           transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
           pointerEvents: isSettingsPanelVisible ? 'auto' : 'none'
