@@ -70,9 +70,10 @@ export const ControlsProvider = ({ children, autoHideDelay = 3000 }: ControlsPro
         return;
       }
 
-      // Toggle controls when tapping on the photo/background
+      // If controls are visible, reset the auto-hide timer
+      // If controls are hidden, show them
       if (areControlsVisible) {
-        hideControls();
+        showControls(); // This resets the timer
       } else {
         showControls();
       }
@@ -82,7 +83,7 @@ export const ControlsProvider = ({ children, autoHideDelay = 3000 }: ControlsPro
     return () => {
       window.removeEventListener('touchstart', handleTouch);
     };
-  }, [areControlsVisible, showControls, hideControls]);
+  }, [areControlsVisible, showControls]);
 
   return (
     <ControlsContext.Provider value={{ areControlsVisible, showControls, hideControls }}>
