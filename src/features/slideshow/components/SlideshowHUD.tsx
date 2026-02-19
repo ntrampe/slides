@@ -11,7 +11,7 @@ interface SlideshowHUDProps {
     progress: number;
     isPlaying: boolean;
     areControlsVisible: boolean;
-    
+
     // Actions
     onPrevious: () => void;
     onNext: () => void;
@@ -66,7 +66,7 @@ export const SlideshowHUD = ({
                             <WeatherDisplay {...weather} />
                         </div>
                     )}
-                    
+
                     <HudButton
                         onClick={onToggleSettings}
                         label="Settings"
@@ -78,8 +78,8 @@ export const SlideshowHUD = ({
                 </div>
             </div>
 
-            {/* Bottom Center: Slideshow Controls */}
-            <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 transition-all duration-300 ${controlsOpacity}`}>
+            {/* Center: Slideshow Controls */}
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${controlsOpacity}`}>
                 <div className="flex items-center gap-4 pointer-events-auto">
                     <HudButton
                         onClick={onPrevious}
@@ -88,7 +88,7 @@ export const SlideshowHUD = ({
                     >
                         <ChevronLeft strokeWidth={2} />
                     </HudButton>
-                    
+
                     <HudButton
                         onClick={onTogglePlayPause}
                         label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
@@ -97,7 +97,7 @@ export const SlideshowHUD = ({
                     >
                         {isPlaying ? <Pause strokeWidth={2} /> : <Play strokeWidth={2} />}
                     </HudButton>
-                    
+
                     <HudButton
                         onClick={onNext}
                         label="Next photo"
