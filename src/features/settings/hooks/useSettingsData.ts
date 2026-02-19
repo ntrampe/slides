@@ -14,6 +14,8 @@ export interface UseSettingsDataReturn {
      * Only saves user overrides, keeps defaults un-persisted.
      */
     updateSettings: (partialSettings: DeepPartial<AppSettings>) => void;
+    /** Clear all settings from localStorage, reverting to defaults */
+    clearSettings: () => void;
 }
 
 /**
@@ -68,8 +70,18 @@ export function useSettingsData(): UseSettingsDataReturn {
         [settingsQuery.data, mutation]
     );
 
+    const clearMutation = useMutation({
+        mutationFn: () => settingsService.clearSettings(),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+    });
+
+    const clearSettings = useCallback(() => {
+        clearMutation.mutate();
+    }, [clearMutation]);
+
     return {
         settings,
         updateSettings,
+        clearSettings
     };
 }

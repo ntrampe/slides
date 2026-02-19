@@ -63,4 +63,6 @@ export interface SettingsRepo {
     loadSettings: () => Promise<AppSettings | null>;
     /** Save settings to localStorage */
     saveSettings: (settings: AppSettings) => Promise<void>;
+    /** Clear all settings from localStorage */
+    clearSettings: () => Promise<void>;
 }

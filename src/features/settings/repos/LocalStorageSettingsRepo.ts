@@ -15,4 +15,8 @@ export class LocalSettingsRepo implements SettingsRepo {
     async saveSettings(settings: AppSettings): Promise<void> {
         localStorage.setItem(this.KEY, JSON.stringify(settings));
     }
+
+    async clearSettings(): Promise<void> {
+        localStorage.removeItem(this.KEY);
+    }
 }

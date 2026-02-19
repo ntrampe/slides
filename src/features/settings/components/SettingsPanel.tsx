@@ -11,7 +11,13 @@ export interface SettingsPanelProps {
 }
 
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
-    const { settings, updateSettings } = useSettingsData();
+    const { settings, updateSettings, clearSettings } = useSettingsData();
+
+    const handleReset = () => {
+        if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+            clearSettings();
+        }
+    };
 
     return (
         <div
@@ -293,6 +299,19 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span>Show Debug Stats</span>
                 </label>
             </CollapsibleSection>
+
+            {/* Reset Section */}
+            <div className="mt-8 pt-6">
+                <button
+                    onClick={handleReset}
+                    className="w-full bg-error hover:bg-error/80 text-white font-medium py-2 px-4 rounded transition-colors"
+                >
+                    Reset All Settings
+                </button>
+                <p className="text-sm text-text-secondary mt-2 text-center">
+                    This will clear all your settings and restore defaults
+                </p>
+            </div>
         </div>
     );
 };
