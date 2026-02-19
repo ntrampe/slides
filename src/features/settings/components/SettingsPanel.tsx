@@ -21,13 +21,13 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
     return (
         <div
-            className="h-full w-full bg-surface backdrop-blur-sm p-8 text-text-primary overflow-y-auto touch-pan-y"
-            onTouchStart={(e) => {
-                // Prevent touch events from propagating to elements behind the panel
+            className="h-full w-full bg-surface backdrop-blur-sm pl-8 pr-12 py-8 text-text-primary overflow-y-auto touch-pan-y"
+            onClick={(e) => {
+                // Prevent clicks inside panel from propagating to backdrop
                 e.stopPropagation();
             }}
-            onClick={(e) => {
-                // Prevent click events from propagating to elements behind the panel
+            onTouchStart={(e) => {
+                // Prevent touches inside panel from propagating to backdrop
                 e.stopPropagation();
             }}
             style={{

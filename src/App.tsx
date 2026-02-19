@@ -23,13 +23,8 @@ function AppContent() {
       {/* Backdrop - catches touches outside settings panel */}
       {isSettingsPanelVisible && (
         <div
-          className="absolute inset-0 bg-black/50 transition-opacity duration-500 ease-in-out"
+          className="absolute inset-0 bg-black/50 transition-opacity duration-500 ease-in-out z-10"
           onClick={closeSettings}
-          onTouchStart={(e) => {
-            // Prevent touches on backdrop from reaching slideshow
-            e.preventDefault();
-            closeSettings();
-          }}
         />
       )}
 

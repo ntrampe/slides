@@ -25,7 +25,10 @@ export function SelectedItems<T extends PickerItem>({
                         {renderLabel ? renderLabel(item) : item.label}
                     </span>
                     <button
-                        onClick={() => onRemove(item.id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove(item.id);
+                        }}
                         className="hover:bg-surface-hover rounded p-1 flex-shrink-0 text-text-tertiary hover:text-text-primary"
                         aria-label={`Clear ${item.label}`}
                     >
@@ -53,7 +56,10 @@ export function SelectedItems<T extends PickerItem>({
                         {renderLabel ? renderLabel(item) : item.label}
                     </span>
                     <button
-                        onClick={() => onRemove(item.id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove(item.id);
+                        }}
                         className="hover:bg-surface rounded p-0.5 flex-shrink-0"
                         aria-label={`Remove ${item.label}`}
                     >
