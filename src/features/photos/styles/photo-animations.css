@@ -1,0 +1,113 @@
+/* Base animated photo class */
+.photo-animated {
+    transform-origin: center;
+    will-change: transform;
+}
+
+/* Zoom In Animations */
+@keyframes photo-zoom-in-0 {
+    from { transform: scale(1); }
+    to { transform: scale(var(--animation-intensity, 1.2)); }
+}
+
+@keyframes photo-zoom-in-1 {
+    from { transform: scale(1) translate(0, 0); }
+    to { transform: scale(var(--animation-intensity, 1.2)) translate(-2%, -2%); }
+}
+
+@keyframes photo-zoom-in-2 {
+    from { transform: scale(1) translate(0, 0); }
+    to { transform: scale(var(--animation-intensity, 1.2)) translate(2%, -2%); }
+}
+
+@keyframes photo-zoom-in-3 {
+    from { transform: scale(1) translate(0, 0); }
+    to { transform: scale(var(--animation-intensity, 1.2)) translate(-2%, 2%); }
+}
+
+/* Zoom Out Animations */
+@keyframes photo-zoom-out-0 {
+    from { transform: scale(var(--animation-intensity, 1.2)); }
+    to { transform: scale(1); }
+}
+
+@keyframes photo-zoom-out-1 {
+    from { transform: scale(var(--animation-intensity, 1.2)) translate(-2%, -2%); }
+    to { transform: scale(1) translate(0, 0); }
+}
+
+@keyframes photo-zoom-out-2 {
+    from { transform: scale(var(--animation-intensity, 1.2)) translate(2%, -2%); }
+    to { transform: scale(1) translate(0, 0); }
+}
+
+@keyframes photo-zoom-out-3 {
+    from { transform: scale(var(--animation-intensity, 1.2)) translate(-2%, 2%); }
+    to { transform: scale(1) translate(0, 0); }
+}
+
+/* Pan Animations */
+@keyframes photo-pan-0 {
+    from { transform: scale(1.1) translateX(-3%); }
+    to { transform: scale(1.1) translateX(3%); }
+}
+
+@keyframes photo-pan-1 {
+    from { transform: scale(1.1) translateX(3%); }
+    to { transform: scale(1.1) translateX(-3%); }
+}
+
+@keyframes photo-pan-2 {
+    from { transform: scale(1.1) translateY(-3%); }
+    to { transform: scale(1.1) translateY(3%); }
+}
+
+@keyframes photo-pan-3 {
+    from { transform: scale(1.1) translateY(3%); }
+    to { transform: scale(1.1) translateY(-3%); }
+}
+
+/* Ken Burns (Zoom + Pan) Animations */
+@keyframes photo-ken-burns-0 {
+    from { 
+        transform: scale(1) translate(0, 0); 
+        transform-origin: top left;
+    }
+    to { 
+        transform: scale(var(--animation-intensity, 1.2)) translate(2%, 2%); 
+        transform-origin: top left;
+    }
+}
+
+@keyframes photo-ken-burns-1 {
+    from { 
+        transform: scale(1) translate(0, 0); 
+        transform-origin: top right;
+    }
+    to { 
+        transform: scale(var(--animation-intensity, 1.2)) translate(-2%, 2%); 
+        transform-origin: top right;
+    }
+}
+
+@keyframes photo-ken-burns-2 {
+    from { 
+        transform: scale(1) translate(0, 0); 
+        transform-origin: bottom left;
+    }
+    to { 
+        transform: scale(var(--animation-intensity, 1.2)) translate(2%, -2%); 
+        transform-origin: bottom left;
+    }
+}
+
+@keyframes photo-ken-burns-3 {
+    from { 
+        transform: scale(1) translate(0, 0); 
+        transform-origin: bottom right;
+    }
+    to { 
+        transform: scale(var(--animation-intensity, 1.2)) translate(-2%, -2%); 
+        transform-origin: bottom right;
+    }
+}

@@ -4,6 +4,7 @@ import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import type { Photo } from '../types';
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 import { useControls } from '../../../shared/hooks';
+import { usePhotoAnimation } from '../hooks/usePhotoAnimation';
 
 interface PhotoDisplayProps {
     photo: Photo;
@@ -23,13 +24,22 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
     const { areControlsVisible } = useControls();
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Get animation configuration
+    const { animationClass, animationStyles } = usePhotoAnimation({
+        type: settings.photos.display.animation.type,
+        duration: settings.photos.display.animation.duration,
+        intensity: settings.photos.display.animation.intensity,
+        photoId: photo.id,
+    });
+
     return (
         <div className="relative h-full w-full overflow-hidden">
             {/* Photo Image */}
             <img
                 src={photo.url}
                 alt={photo.description || 'Photo'}
-                className={`w-full h-full ${objectFitClasses[objectFit]}`}
+                className={`w-full h-full ${objectFitClasses[objectFit]} ${animationClass}`}
+                style={animationStyles}
             />
 
             {/* Photo Metadata Overlay */}

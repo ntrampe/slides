@@ -27,6 +27,11 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         display: {
             fit: 'cover',
             showMetadata: true,
+            animation: {
+                type: 'ken-burns',
+                duration: 5000, // Should match intervalMs
+                intensity: 1.2, // 20% zoom/pan
+            },
         },
         dateFormat: 'MMM dd, yyyy',
     },

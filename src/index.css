@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tailwindcss-safe-area";
 
+/* Photo animations */
+@import "./features/photos/styles/photo-animations.css";
+
 /* Tailwind v4 Theme Definition */
 @theme {
     /* Color tokens - Tailwind will auto-generate utilities */

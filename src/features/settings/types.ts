@@ -1,6 +1,8 @@
 import type { LayoutMode, ObjectFit, SlideshowFilter } from "../../shared/types/config";
 import type { ThemeMode } from "../theme";
 
+export type PhotoAnimationType = 'none' | 'zoom-in' | 'zoom-out' | 'pan' | 'ken-burns';
+
 export interface AppSettings {
     // Slideshow feature
     slideshow: {
@@ -23,7 +25,12 @@ export interface AppSettings {
         display: {
             fit: ObjectFit;
             showMetadata: boolean;
-        }
+            animation: {
+                type: PhotoAnimationType;
+                duration: number; // in milliseconds, should match or be slightly longer than intervalMs
+                intensity: number; // 1.0 = subtle, 2.0 = dramatic (zoom/pan amount)
+            };
+        };
         dateFormat: string;
     };
 

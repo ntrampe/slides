@@ -5,6 +5,7 @@ import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
+import type { PhotoAnimationType } from '../types';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -118,11 +119,35 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         value={settings.slideshow.intervalMs / 1000}
-                        onChange={(e) => updateSettings({ slideshow: { intervalMs: Number(e.target.value) * 1000 } })}
+                        onChange={(e) => {
+                            const intervalMs = Number(e.target.value) * 1000;
+                            const updates: any = { slideshow: { intervalMs } };
+                            // Auto-sync animation duration if it currently matches the interval
+                            if (settings.photos.display.animation.duration === settings.slideshow.intervalMs) {
+                                updates.photos = { display: { animation: { duration: intervalMs } } };
+                            }
+                            updateSettings(updates);
+                        }}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         min="1"
                         step="1"
                     />
+                </label>
+
+                <label className="flex items-center cursor-pointer mt-2">
+                    <input
+                        type="checkbox"
+                        checked={settings.photos.display.animation.duration === settings.slideshow.intervalMs}
+                        onChange={(e) => {
+                            if (e.target.checked) {
+                                updateSettings({
+                                    photos: { display: { animation: { duration: settings.slideshow.intervalMs } } }
+                                });
+                            }
+                        }}
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span className="text-sm text-text-secondary">Match animation duration to slide interval</span>
                 </label>
 
                 <label className="block">
@@ -166,6 +191,50 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         <option value="fill">Fill (stretch)</option>
                     </select>
                 </label>
+
+                <label className="block">
+                    <span className="block mb-1">Photo Animation</span>
+                    <select
+                        value={settings.photos.display.animation.type}
+                        onChange={(e) => updateSettings({
+                            photos: { display: { animation: { type: e.target.value as PhotoAnimationType } } }
+                        })}
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                    >
+                        <option value="none">None</option>
+                        <option value="zoom-in">Zoom In</option>
+                        <option value="zoom-out">Zoom Out</option>
+                        <option value="pan">Pan (Random Direction)</option>
+                        <option value="ken-burns">Ken Burns (Zoom + Pan)</option>
+                    </select>
+                    <span className="text-sm text-text-secondary mt-1 block">
+                        Subtle motion effect during photo display
+                    </span>
+                </label>
+
+                {settings.photos.display.animation.type !== 'none' && (
+                    <label className="block">
+                        <span className="block mb-1">Animation Intensity</span>
+                        <input
+                            type="range"
+                            value={settings.photos.display.animation.intensity}
+                            onChange={(e) => updateSettings({
+                                photos: { display: { animation: { intensity: Number(e.target.value) } } }
+                            })}
+                            className="w-full"
+                            min="1.0"
+                            max="2.0"
+                            step="0.1"
+                        />
+                        <div className="flex justify-between text-sm text-text-secondary">
+                            <span>Subtle (1.0x)</span>
+                            <span className="font-medium text-text-primary">
+                                {settings.photos.display.animation.intensity.toFixed(1)}x
+                            </span>
+                            <span>Dramatic (2.0x)</span>
+                        </div>
+                    </label>
+                )}
 
                 <label className="block">
                     <span className="block mb-1">Date Format</span>
