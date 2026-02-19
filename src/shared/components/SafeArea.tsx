@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import type { ReactNode, HTMLAttributes } from "react";
 
-type SafeInset =
+export type SafeInset =
     | "top"
     | "bottom"
     | "left"

@@ -8,3 +8,5 @@ export type * from './picker/types';
 export { HudPanel, hudTextSizes } from './HudPanel';
 export type { HudVariant, HudSize } from './HudPanel';
 export { HudButton } from './HudButton';
+export { SafeArea } from './SafeArea';
+export type { SafeInset } from './SafeArea';

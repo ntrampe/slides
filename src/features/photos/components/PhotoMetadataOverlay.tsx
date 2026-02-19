@@ -2,7 +2,8 @@ import { format } from 'date-fns';
 import { Calendar, MapPin, Info, ExternalLink } from 'lucide-react';
 import type { Photo } from '../types';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import { HudPanel, HudButton, hudTextSizes } from '../../../shared/components';
+import { HudPanel, HudButton, hudTextSizes, SafeArea } from '../../../shared/components';
+import { HUD_SPACING_CLASSES } from '../../../shared/constants';
 
 interface PhotoMetadataOverlayProps {
     photo: Photo;
@@ -51,119 +52,126 @@ export const PhotoMetadataOverlay = ({
     if (!hasBasicMetadata && !hasButtons) return null;
 
     return (
-        <HudPanel
-            variant="subtle"
-            className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 transition-all duration-300 ease-in-out max-h-[50vh] overflow-y-auto max-w-fit"
+        <SafeArea
+            inset="all"
+            className="absolute inset-0 pointer-events-none"
         >
-            {/* Basic Metadata - Always Visible */}
-            {hasBasicMetadata && (
-                <div className={hasButtons || isExpanded ? 'mb-3' : ''}>
-                    {photo.createdAt && (
-                        <div className={`flex items-center gap-2 sm:gap-3 ${location ? 'mb-1 sm:mb-2' : ''}`}>
-                            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
-                            <p className={`font-medium ${hudTextSizes.body}`}>
-                                {format(new Date(photo.createdAt), settings.photos.dateFormat)}
-                            </p>
-                        </div>
-                    )}
-                    {location && (
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
-                            <h2 className={`font-medium ${hudTextSizes.body}`}>{location}</h2>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Expanded Details */}
-            {isExpanded && (
-                <div className="space-y-3 mb-3">
-                    <div className={`space-y-3 ${hudTextSizes.caption}`}>
-                        {/* Basic Info */}
-                        <div className="space-y-1">
-                            <h4 className="font-medium opacity-90 text-xs">Photo Details</h4>
-                            <p><span className="opacity-70">ID:</span> {photo.id}</p>
-                            {photo.width && photo.height && (
-                                <p><span className="opacity-70">Dimensions:</span> {photo.width} × {photo.height}px</p>
-                            )}
-                            <p><span className="opacity-70">Type:</span> {photo.type}</p>
-                            <p><span className="opacity-70">Taken:</span> {photo.createdAt.toLocaleString()}</p>
-                        </div>
-
-                        {/* Camera Info */}
-                        {(photo.camera || photo.exifSettings) && (
-                            <div className="space-y-1 pt-2 border-t border-white/10">
-                                <h4 className="font-medium opacity-90 text-xs">Camera</h4>
-                                {formatCamera(photo.camera) && (
-                                    <p><span className="opacity-70">Body:</span> {formatCamera(photo.camera)}</p>
-                                )}
-                                {photo.camera?.lensModel && (
-                                    <p><span className="opacity-70">Lens:</span> {photo.camera.lensModel}</p>
-                                )}
-                                {photo.exifSettings && formatExifSettings(photo.exifSettings).length > 0 && (
-                                    <p><span className="opacity-70">Settings:</span> {formatExifSettings(photo.exifSettings).join(' • ')}</p>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Extended Location Info */}
-                        {photo.location && (photo.location.latitude || photo.location.longitude) && (
-                            <div className="space-y-1 pt-2 border-t border-white/10">
-                                <h4 className="font-medium opacity-90 text-xs">Coordinates</h4>
-                                {photo.location.latitude && photo.location.longitude && (
-                                    <p className="opacity-70">
-                                        {photo.location.latitude.toFixed(4)}, {photo.location.longitude.toFixed(4)}
+            <div className={`absolute bottom-0 left-0 pointer-events-auto ${HUD_SPACING_CLASSES}`}>
+                <HudPanel
+                    variant="subtle"
+                    className="transition-all duration-300 ease-in-out max-h-[50vh] overflow-y-auto max-w-fit"
+                >
+                    {/* Basic Metadata - Always Visible */}
+                    {hasBasicMetadata && (
+                        <div className={hasButtons || isExpanded ? 'mb-3' : ''}>
+                            {photo.createdAt && (
+                                <div className={`flex items-center gap-2 sm:gap-3 ${location ? 'mb-1 sm:mb-2' : ''}`}>
+                                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
+                                    <p className={`font-medium ${hudTextSizes.body}`}>
+                                        {format(new Date(photo.createdAt), settings.photos.dateFormat)}
                                     </p>
+                                </div>
+                            )}
+                            {location && (
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
+                                    <h2 className={`font-medium ${hudTextSizes.body}`}>{location}</h2>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Expanded Details */}
+                    {isExpanded && (
+                        <div className="space-y-3 mb-3">
+                            <div className={`space-y-3 ${hudTextSizes.caption}`}>
+                                {/* Basic Info */}
+                                <div className="space-y-1">
+                                    <h4 className="font-medium opacity-90 text-xs">Photo Details</h4>
+                                    <p><span className="opacity-70">ID:</span> {photo.id}</p>
+                                    {photo.width && photo.height && (
+                                        <p><span className="opacity-70">Dimensions:</span> {photo.width} × {photo.height}px</p>
+                                    )}
+                                    <p><span className="opacity-70">Type:</span> {photo.type}</p>
+                                    <p><span className="opacity-70">Taken:</span> {photo.createdAt.toLocaleString()}</p>
+                                </div>
+
+                                {/* Camera Info */}
+                                {(photo.camera || photo.exifSettings) && (
+                                    <div className="space-y-1 pt-2 border-t border-white/10">
+                                        <h4 className="font-medium opacity-90 text-xs">Camera</h4>
+                                        {formatCamera(photo.camera) && (
+                                            <p><span className="opacity-70">Body:</span> {formatCamera(photo.camera)}</p>
+                                        )}
+                                        {photo.camera?.lensModel && (
+                                            <p><span className="opacity-70">Lens:</span> {photo.camera.lensModel}</p>
+                                        )}
+                                        {photo.exifSettings && formatExifSettings(photo.exifSettings).length > 0 && (
+                                            <p><span className="opacity-70">Settings:</span> {formatExifSettings(photo.exifSettings).join(' • ')}</p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Extended Location Info */}
+                                {photo.location && (photo.location.latitude || photo.location.longitude) && (
+                                    <div className="space-y-1 pt-2 border-t border-white/10">
+                                        <h4 className="font-medium opacity-90 text-xs">Coordinates</h4>
+                                        {photo.location.latitude && photo.location.longitude && (
+                                            <p className="opacity-70">
+                                                {photo.location.latitude.toFixed(4)}, {photo.location.longitude.toFixed(4)}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Content Metadata */}
+                                {(photo.description || photo.rating || photo.isFavorite || (photo.tags && photo.tags.length > 0)) && (
+                                    <div className="space-y-1 pt-2 border-t border-white/10">
+                                        <h4 className="font-medium opacity-90 text-xs">Content</h4>
+                                        {photo.description && (
+                                            <p><span className="opacity-70">Description:</span> {photo.description}</p>
+                                        )}
+                                        {photo.rating && (
+                                            <p><span className="opacity-70">Rating:</span> {'★'.repeat(photo.rating)}{'☆'.repeat(5 - photo.rating)}</p>
+                                        )}
+                                        {photo.isFavorite && (
+                                            <p><span className="opacity-70">Favorite:</span> ❤️</p>
+                                        )}
+                                        {photo.tags && photo.tags.length > 0 && (
+                                            <p><span className="opacity-70">Tags:</span> {photo.tags.join(', ')}</p>
+                                        )}
+                                    </div>
                                 )}
                             </div>
-                        )}
-
-                        {/* Content Metadata */}
-                        {(photo.description || photo.rating || photo.isFavorite || (photo.tags && photo.tags.length > 0)) && (
-                            <div className="space-y-1 pt-2 border-t border-white/10">
-                                <h4 className="font-medium opacity-90 text-xs">Content</h4>
-                                {photo.description && (
-                                    <p><span className="opacity-70">Description:</span> {photo.description}</p>
-                                )}
-                                {photo.rating && (
-                                    <p><span className="opacity-70">Rating:</span> {'★'.repeat(photo.rating)}{'☆'.repeat(5 - photo.rating)}</p>
-                                )}
-                                {photo.isFavorite && (
-                                    <p><span className="opacity-70">Favorite:</span> ❤️</p>
-                                )}
-                                {photo.tags && photo.tags.length > 0 && (
-                                    <p><span className="opacity-70">Tags:</span> {photo.tags.join(', ')}</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Control Buttons */}
-            {hasButtons && (
-                <div className="flex gap-2">
-                    {onToggleExpanded && (
-                        <HudButton
-                            onClick={onToggleExpanded}
-                            label={isExpanded ? "Hide photo information" : "Show photo information"}
-                            size="small"
-                            className={isExpanded ? 'bg-white/20' : ''}
-                        >
-                            <Info strokeWidth={2} />
-                        </HudButton>
+                        </div>
                     )}
-                    {photo.inAppUrl && (
-                        <HudButton
-                            onClick={() => window.open(photo.inAppUrl, '_blank')}
-                            label="Open in app"
-                            size="small"
-                        >
-                            <ExternalLink strokeWidth={2} />
-                        </HudButton>
+
+                    {/* Control Buttons */}
+                    {hasButtons && (
+                        <div className="flex gap-2">
+                            {onToggleExpanded && (
+                                <HudButton
+                                    onClick={onToggleExpanded}
+                                    label={isExpanded ? "Hide photo information" : "Show photo information"}
+                                    size="small"
+                                    className={isExpanded ? 'bg-white/20' : ''}
+                                >
+                                    <Info strokeWidth={2} />
+                                </HudButton>
+                            )}
+                            {photo.inAppUrl && (
+                                <HudButton
+                                    onClick={() => window.open(photo.inAppUrl, '_blank')}
+                                    label="Open in app"
+                                    size="small"
+                                >
+                                    <ExternalLink strokeWidth={2} />
+                                </HudButton>
+                            )}
+                        </div>
                     )}
-                </div>
-            )}
-        </HudPanel>
+                </HudPanel>
+            </div>
+        </SafeArea>
     );
 };
