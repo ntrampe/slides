@@ -2,8 +2,7 @@ import { format } from 'date-fns';
 import { Calendar, MapPin, Info, ExternalLink } from 'lucide-react';
 import type { Photo } from '../types';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import { HudPanel, HudButton, hudTextSizes, SafeArea } from '../../../shared/components';
-import { HUD_SPACING_CLASSES } from '../../../shared/constants';
+import { HudPanel, HudButton, hudTextSizes } from '../../../shared/components';
 
 interface PhotoMetadataOverlayProps {
     photo: Photo;
@@ -52,11 +51,8 @@ export const PhotoMetadataOverlay = ({
     if (!hasBasicMetadata && !hasButtons) return null;
 
     return (
-        <SafeArea
-            inset="all"
-            className="absolute inset-0 pointer-events-none"
-        >
-            <div className={`absolute bottom-0 left-0 pointer-events-auto ${HUD_SPACING_CLASSES}`}>
+        <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-safe-or-4 left-safe-or-4 sm:bottom-safe-or-6 sm:left-safe-or-6 pointer-events-auto">
                 <HudPanel
                     variant="subtle"
                     className="transition-all duration-300 ease-in-out max-h-[50vh] overflow-y-auto max-w-fit"
@@ -172,6 +168,6 @@ export const PhotoMetadataOverlay = ({
                     )}
                 </HudPanel>
             </div>
-        </SafeArea>
+        </div>
     );
 };

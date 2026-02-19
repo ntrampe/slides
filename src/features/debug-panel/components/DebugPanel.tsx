@@ -1,6 +1,5 @@
 import type { SlideshowDebugInfo } from '../types';
-import { HudPanel, hudTextSizes, SafeArea } from '../../../shared/components';
-import { HUD_SPACING_CLASSES } from '../../../shared/constants';
+import { HudPanel, hudTextSizes } from '../../../shared/components';
 
 interface DebugPanelProps {
     debug: SlideshowDebugInfo;
@@ -8,11 +7,8 @@ interface DebugPanelProps {
 
 export const DebugPanel = ({ debug }: DebugPanelProps) => {
     return (
-        <SafeArea
-            inset="all"
-            className="absolute inset-0 pointer-events-none"
-        >
-            <div className={`absolute bottom-0 right-0 pointer-events-auto ${HUD_SPACING_CLASSES}`}>
+        <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-safe-or-4 right-safe-or-4 sm:bottom-safe-or-6 sm:right-safe-or-6 pointer-events-auto">
                 <HudPanel
                     variant="prominent"
                     className="font-mono space-y-2"
@@ -46,6 +42,6 @@ export const DebugPanel = ({ debug }: DebugPanelProps) => {
                     </div>
                 </HudPanel>
             </div>
-        </SafeArea>
+        </div>
     );
 };
