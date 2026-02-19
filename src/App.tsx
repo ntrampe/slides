@@ -14,7 +14,7 @@ function AppContent() {
   const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();
 
   return (
-    <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
+    <main className="safe-areas h-screen w-screen bg-background select-none overflow-hidden relative">
       {/* Slideshow Container */}
       <div className="h-full transition-all duration-500 ease-in-out">
         <Slideshow onToggleSettings={toggleSettings} />
@@ -30,7 +30,7 @@ function AppContent() {
 
       {/* Settings Panel - always rendered, positioned absolutely */}
       <div
-        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-20"
+        className="no-safe-areas absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-20"
         style={{
           transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
           pointerEvents: isSettingsPanelVisible ? 'auto' : 'none'
