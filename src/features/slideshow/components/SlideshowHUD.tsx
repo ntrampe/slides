@@ -67,14 +67,16 @@ export const SlideshowHUD = ({
                         </div>
                     )}
 
-                    <HudButton
-                        onClick={onToggleSettings}
-                        label="Settings"
-                        size="medium"
-                        className={`pointer-events-auto transition-all duration-300 ${controlsOpacity}`}
-                    >
-                        <Settings strokeWidth={2} />
-                    </HudButton>
+                    {areControlsVisible && (
+                        <HudButton
+                            onClick={onToggleSettings}
+                            label="Settings"
+                            size="medium"
+                            className="pointer-events-auto transition-all duration-300"
+                        >
+                            <Settings strokeWidth={2} />
+                        </HudButton>
+                    )}
                 </div>
             </div>
 
