@@ -112,7 +112,7 @@ export const SlideshowHUD = ({
 
             {/* Bottom Edge: Progress Bar - with safe area support */}
             {settings.slideshow.ui.showProgressBar && (
-                <div className="absolute bottom-safe left-0 right-0 h-1 bg-white/10 pointer-events-none">
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 pointer-events-none">
                     <div
                         className="h-full bg-white transition-all duration-100 ease-linear"
                         style={{ width: `${progress}%` }}
