@@ -53,8 +53,7 @@ export const PhotoMetadataOverlay = ({
     return (
         <HudPanel
             variant="subtle"
-            className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 transition-all duration-300 ease-in-out max-h-[50vh] overflow-y-auto ${isExpanded ? 'max-w-xs sm:max-w-md' : 'max-w-fit'
-                }`}
+            className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 transition-all duration-300 ease-in-out max-h-[50vh] overflow-y-auto max-w-fit"
         >
             {/* Basic Metadata - Always Visible */}
             {hasBasicMetadata && (
@@ -77,68 +76,69 @@ export const PhotoMetadataOverlay = ({
             )}
 
             {/* Expanded Details */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                <div className={`space-y-3 ${hudTextSizes.caption} mb-3`}>
-                    {/* Basic Info */}
-                    <div className="space-y-1">
-                        <h4 className="font-medium opacity-90 text-xs">Photo Details</h4>
-                        <p><span className="opacity-70">ID:</span> {photo.id}</p>
-                        {photo.width && photo.height && (
-                            <p><span className="opacity-70">Dimensions:</span> {photo.width} × {photo.height}px</p>
+            {isExpanded && (
+                <div className="space-y-3 mb-3">
+                    <div className={`space-y-3 ${hudTextSizes.caption}`}>
+                        {/* Basic Info */}
+                        <div className="space-y-1">
+                            <h4 className="font-medium opacity-90 text-xs">Photo Details</h4>
+                            <p><span className="opacity-70">ID:</span> {photo.id}</p>
+                            {photo.width && photo.height && (
+                                <p><span className="opacity-70">Dimensions:</span> {photo.width} × {photo.height}px</p>
+                            )}
+                            <p><span className="opacity-70">Type:</span> {photo.type}</p>
+                            <p><span className="opacity-70">Taken:</span> {photo.createdAt.toLocaleString()}</p>
+                        </div>
+
+                        {/* Camera Info */}
+                        {(photo.camera || photo.exifSettings) && (
+                            <div className="space-y-1 pt-2 border-t border-white/10">
+                                <h4 className="font-medium opacity-90 text-xs">Camera</h4>
+                                {formatCamera(photo.camera) && (
+                                    <p><span className="opacity-70">Body:</span> {formatCamera(photo.camera)}</p>
+                                )}
+                                {photo.camera?.lensModel && (
+                                    <p><span className="opacity-70">Lens:</span> {photo.camera.lensModel}</p>
+                                )}
+                                {photo.exifSettings && formatExifSettings(photo.exifSettings).length > 0 && (
+                                    <p><span className="opacity-70">Settings:</span> {formatExifSettings(photo.exifSettings).join(' • ')}</p>
+                                )}
+                            </div>
                         )}
-                        <p><span className="opacity-70">Type:</span> {photo.type}</p>
-                        <p><span className="opacity-70">Taken:</span> {photo.createdAt.toLocaleString()}</p>
+
+                        {/* Extended Location Info */}
+                        {photo.location && (photo.location.latitude || photo.location.longitude) && (
+                            <div className="space-y-1 pt-2 border-t border-white/10">
+                                <h4 className="font-medium opacity-90 text-xs">Coordinates</h4>
+                                {photo.location.latitude && photo.location.longitude && (
+                                    <p className="opacity-70">
+                                        {photo.location.latitude.toFixed(4)}, {photo.location.longitude.toFixed(4)}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Content Metadata */}
+                        {(photo.description || photo.rating || photo.isFavorite || (photo.tags && photo.tags.length > 0)) && (
+                            <div className="space-y-1 pt-2 border-t border-white/10">
+                                <h4 className="font-medium opacity-90 text-xs">Content</h4>
+                                {photo.description && (
+                                    <p><span className="opacity-70">Description:</span> {photo.description}</p>
+                                )}
+                                {photo.rating && (
+                                    <p><span className="opacity-70">Rating:</span> {'★'.repeat(photo.rating)}{'☆'.repeat(5 - photo.rating)}</p>
+                                )}
+                                {photo.isFavorite && (
+                                    <p><span className="opacity-70">Favorite:</span> ❤️</p>
+                                )}
+                                {photo.tags && photo.tags.length > 0 && (
+                                    <p><span className="opacity-70">Tags:</span> {photo.tags.join(', ')}</p>
+                                )}
+                            </div>
+                        )}
                     </div>
-
-                    {/* Camera Info */}
-                    {(photo.camera || photo.exifSettings) && (
-                        <div className="space-y-1 pt-2 border-t border-white/10">
-                            <h4 className="font-medium opacity-90 text-xs">Camera</h4>
-                            {formatCamera(photo.camera) && (
-                                <p><span className="opacity-70">Body:</span> {formatCamera(photo.camera)}</p>
-                            )}
-                            {photo.camera?.lensModel && (
-                                <p><span className="opacity-70">Lens:</span> {photo.camera.lensModel}</p>
-                            )}
-                            {photo.exifSettings && formatExifSettings(photo.exifSettings).length > 0 && (
-                                <p><span className="opacity-70">Settings:</span> {formatExifSettings(photo.exifSettings).join(' • ')}</p>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Extended Location Info */}
-                    {photo.location && (photo.location.latitude || photo.location.longitude) && (
-                        <div className="space-y-1 pt-2 border-t border-white/10">
-                            <h4 className="font-medium opacity-90 text-xs">Coordinates</h4>
-                            {photo.location.latitude && photo.location.longitude && (
-                                <p className="opacity-70">
-                                    {photo.location.latitude.toFixed(4)}, {photo.location.longitude.toFixed(4)}
-                                </p>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Content Metadata */}
-                    {(photo.description || photo.rating || photo.isFavorite || (photo.tags && photo.tags.length > 0)) && (
-                        <div className="space-y-1 pt-2 border-t border-white/10">
-                            <h4 className="font-medium opacity-90 text-xs">Content</h4>
-                            {photo.description && (
-                                <p><span className="opacity-70">Description:</span> {photo.description}</p>
-                            )}
-                            {photo.rating && (
-                                <p><span className="opacity-70">Rating:</span> {'★'.repeat(photo.rating)}{'☆'.repeat(5 - photo.rating)}</p>
-                            )}
-                            {photo.isFavorite && (
-                                <p><span className="opacity-70">Favorite:</span> ❤️</p>
-                            )}
-                            {photo.tags && photo.tags.length > 0 && (
-                                <p><span className="opacity-70">Tags:</span> {photo.tags.join(', ')}</p>
-                            )}
-                        </div>
-                    )}
                 </div>
-            </div>
+            )}
 
             {/* Control Buttons */}
             {hasButtons && (
