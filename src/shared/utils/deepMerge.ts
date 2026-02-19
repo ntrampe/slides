@@ -24,13 +24,16 @@ export function deepMerge<T extends Record<string, any>>(
             const sourceValue = source[key];
             const targetValue = target[key as keyof T];
 
-            if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
+            if (sourceValue === undefined) {
+                // Explicitly set to undefined to clear values
+                (output as any)[key] = undefined;
+            } else if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
                 // Recursively merge nested objects
                 (output as any)[key] = deepMerge(
                     targetValue as Record<string, any>,
                     sourceValue as any
                 );
-            } else if (sourceValue !== undefined) {
+            } else {
                 // Replace primitives, arrays, or undefined target values
                 (output as any)[key] = sourceValue;
             }
