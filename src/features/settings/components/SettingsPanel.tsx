@@ -22,7 +22,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
     return (
         <div
-            className="h-full w-full bg-surface backdrop-blur-sm pl-8 pr-safe-or-12 pt-safe-or-8 pb-safe-or-8 text-text-primary overflow-y-auto touch-pan-y"
+            className="h-full w-full bg-surface backdrop-blur-sm p-safe-or-8 text-text-primary overflow-y-auto touch-pan-y"
             onClick={(e) => {
                 // Prevent clicks inside panel from propagating to backdrop
                 e.stopPropagation();
