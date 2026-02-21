@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useServices } from '../../../shared/context/ServiceContext';
 import type { AppSettings } from '../types';
 import { FALLBACK_APP_SETTINGS } from '../constants';
 import { deepMerge, type DeepPartial } from '../../../shared/utils/deepMerge';
+import { parseUrlSettings } from '../utils/urlSettingsParser';
 
 export interface UseSettingsDataReturn {
     /** Current settings (user overrides merged with defaults) */
@@ -45,17 +46,29 @@ export function useSettingsData(): UseSettingsDataReturn {
         queryFn: () => settingsService.loadSettings(),
     });
 
-    const mutation = useMutation({
-        mutationFn: (newSettings: AppSettings | DeepPartial<AppSettings>) =>
-            settingsService.saveSettings(newSettings as AppSettings),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
-    });
-
-    // Compute final settings: user overrides → server defaults → fallback
     const defaults = configQuery.data ?? FALLBACK_APP_SETTINGS;
-    const settings = settingsQuery.data
-        ? deepMerge(defaults, settingsQuery.data as DeepPartial<AppSettings>)
-        : defaults;
+    const savedOverrides = (settingsQuery.data as DeepPartial<AppSettings>) ?? {};
+
+    // Parse URL overrides every reload
+    const urlOverrides = useMemo(() => {
+        if (typeof window === 'undefined') return {};
+        return parseUrlSettings(window.location.search, defaults);
+    }, [defaults]);
+
+    // Merge in deterministic order: fallback → server → URL → user
+    const settings = useMemo(() => {
+        let merged = deepMerge(defaults, configQuery.data ?? {});
+        merged = deepMerge(merged, urlOverrides);
+        merged = deepMerge(merged, savedOverrides);
+        return merged;
+    }, [defaults, configQuery.data, urlOverrides, savedOverrides]);
+
+    const mutation = useMutation({
+        mutationFn: (newSettings: DeepPartial<AppSettings>) =>
+            settingsService.saveSettings(newSettings as AppSettings),
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: ['settings'] }),
+    });
 
     /**
      * Merges partial settings with SAVED settings (not computed settings).
@@ -63,7 +76,7 @@ export function useSettingsData(): UseSettingsDataReturn {
      */
     const updateSettings = useCallback(
         (partialSettings: DeepPartial<AppSettings>) => {
-            const currentSaved = settingsQuery.data ?? {} as DeepPartial<AppSettings>;
+            const currentSaved = (settingsQuery.data as DeepPartial<AppSettings>) ?? {};
             const merged = deepMerge(currentSaved as AppSettings, partialSettings);
             mutation.mutate(merged);
         },
