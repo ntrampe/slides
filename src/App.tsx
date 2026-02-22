@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ServiceContext, services } from './shared/context/ServiceContext';
-import { ControlsProvider } from './shared/context/ControlsContext';
 import { Slideshow } from './features/slideshow';
 import { SettingsPanel, useSettingsPanel } from './features/settings';
 import { useTheme } from './features/theme';
+import { IdleProvider } from './shared/context';
 
 const queryClient = new QueryClient();
 
@@ -46,9 +46,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ServiceContext.Provider value={services}>
-        <ControlsProvider autoHideDelay={3000}>
+        <IdleProvider>
           <AppContent />
-        </ControlsProvider>
+        </IdleProvider>
       </ServiceContext.Provider>
     </QueryClientProvider>
   );

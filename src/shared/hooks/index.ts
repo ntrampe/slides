@@ -1,2 +1,2 @@
 export { useKeyToggle, useDebugToggle } from './useKeyToggle';
-export { useControls } from '../context/ControlsContext';
+export { useIdle } from '../context/IdleContext';

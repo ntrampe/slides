@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import { useControls } from '../../../shared/hooks';
+import { useIdle } from '../../../shared/hooks';
 import { useSlideshowData } from './useSlideshowData';
 import { useSlideshowTimer } from './useSlideshowTimer';
 import { useSlideshowKeyboard } from './useSlideshowKeyboard';
@@ -10,7 +10,7 @@ import type { Photo } from '../../photos';
 
 export function useSlideshow(): UseSlideshowReturn {
     const { settings } = useSettingsData();
-    const { areControlsVisible } = useControls();
+    const { isIdle } = useIdle();
 
     // Data layer: photos, pooling, navigation
     const data = useSlideshowData({
@@ -94,7 +94,7 @@ export function useSlideshow(): UseSlideshowReturn {
             isError: data.isError,
             isPlaying: timer.isPlaying,
             progress: timer.progress,
-            areControlsVisible,
+            areControlsVisible: !isIdle,
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
             layoutClass: transition.displayedLayoutClass,

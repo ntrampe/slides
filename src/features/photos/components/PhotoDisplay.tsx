@@ -3,7 +3,7 @@ import type { ObjectFit } from '../../../shared/types/config';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import type { Photo } from '../types';
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
-import { useControls } from '../../../shared/hooks';
+import { useIdle } from '../../../shared/hooks';
 import { usePhotoAnimation } from '../hooks/usePhotoAnimation';
 
 interface PhotoDisplayProps {
@@ -21,7 +21,7 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
     };
 
     const { settings } = useSettingsData();
-    const { areControlsVisible } = useControls();
+    const { isIdle } = useIdle();
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Get animation configuration
@@ -48,7 +48,7 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
                     photo={photo}
                     isExpanded={isExpanded}
                     onToggleExpanded={() => setIsExpanded(prev => !prev)}
-                    areControlsVisible={areControlsVisible}
+                    areControlsVisible={!isIdle}
                 />
             )}
 
