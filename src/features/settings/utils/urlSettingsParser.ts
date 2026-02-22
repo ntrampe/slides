@@ -67,7 +67,11 @@ function resolvePath<T extends object>(
 }
 
 function parseValue(raw: string, example: unknown): unknown {
-    if (Array.isArray(example)) return raw.split(',');
+    if (Array.isArray(example)) {
+        if (raw === '') return [];
+
+        return raw.split(',').filter(Boolean);
+    }
 
     if (typeof example === 'boolean') {
         if (raw === 'true') return true;
