@@ -1,8 +1,8 @@
-import { PhotoDisplay } from '../../photos';
 import { SlideshowHUD } from './SlideshowHUD';
 import { useSlideshow } from '../hooks/useSlideshow';
 import { DebugPanel } from '../../debug-panel';
 import { hudTextSizes } from '../../../shared/components';
+import { MediaDisplay } from '../../photos/components/MediaDisplay';
 
 interface SlideshowProps {
     onToggleSettings: () => void;
@@ -42,13 +42,13 @@ export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
                 className={`grid h-full w-full ${state.layoutClass}`}
                 style={state.transitionStyles}
             >
-                <PhotoDisplay
+                <MediaDisplay
                     key={state.displayedPhoto.id}
                     photo={state.displayedPhoto}
                     objectFit={state.objectFit}
                 />
                 {state.layoutClass.includes('grid-cols-2') && state.displayedNextPhoto && (
-                    <PhotoDisplay
+                    <MediaDisplay
                         key={state.displayedNextPhoto.id}
                         photo={state.displayedNextPhoto}
                         objectFit={state.objectFit}

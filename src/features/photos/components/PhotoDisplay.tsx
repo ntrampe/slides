@@ -1,17 +1,19 @@
-import { useState } from 'react';
 import type { ObjectFit } from '../../../shared/types/config';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import type { Photo } from '../types';
-import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
-import { useIdle } from '../../../shared/hooks';
 import { usePhotoAnimation } from '../hooks/usePhotoAnimation';
 
 interface PhotoDisplayProps {
     photo: Photo;
     objectFit?: ObjectFit;
+    className?: string;
 }
 
-export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) => {
+export const PhotoDisplay = ({
+    photo,
+    objectFit = 'cover',
+    className = '',
+}: PhotoDisplayProps) => {
     const objectFitClasses: Record<ObjectFit, string> = {
         contain: 'object-contain',
         cover: 'object-cover',
@@ -21,10 +23,7 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
     };
 
     const { settings } = useSettingsData();
-    const { isIdle } = useIdle();
-    const [isExpanded, setIsExpanded] = useState(false);
 
-    // Get animation configuration
     const { animationClass, animationStyles } = usePhotoAnimation({
         type: settings.photos.display.animation.type,
         duration: settings.photos.display.animation.duration,
@@ -33,28 +32,11 @@ export const PhotoDisplay = ({ photo, objectFit = 'cover' }: PhotoDisplayProps) 
     });
 
     return (
-        <div className="relative h-full w-full overflow-hidden">
-            {/* Photo Image */}
-            <img
-                src={photo.url}
-                alt={photo.description || 'Photo'}
-                className={`w-full h-full ${objectFitClasses[objectFit]} ${animationClass}`}
-                style={animationStyles}
-            />
-
-            {/* Photo Metadata Overlay */}
-            {settings.photos.display.showMetadata && (
-                <PhotoMetadataOverlay
-                    photo={photo}
-                    isExpanded={isExpanded}
-                    onToggleExpanded={() => setIsExpanded(prev => !prev)}
-                    areControlsVisible={!isIdle}
-                />
-            )}
-
-
-
-
-        </div>
+        <img
+            src={photo.url}
+            alt={photo.description || 'Photo'}
+            className={`absolute inset-0 w-full h-full ${objectFitClasses[objectFit]} ${animationClass} ${className}`}
+            style={animationStyles}
+        />
     );
 };
