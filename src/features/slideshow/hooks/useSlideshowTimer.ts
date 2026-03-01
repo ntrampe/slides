@@ -67,7 +67,7 @@ export function useSlideshowTimer({
             clearInterval(timer);
             clearInterval(progressInterval);
         };
-    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded, isTransitioning]);
+    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded, isTransitioning, isVisible]);
 
     return {
         isPlaying,
