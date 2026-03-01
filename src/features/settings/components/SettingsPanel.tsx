@@ -236,6 +236,36 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     </label>
                 )}
 
+                {/* --- Live Photo Settings --- */}
+                <label className="flex items-center cursor-pointer mt-4">
+                    <input
+                        type="checkbox"
+                        checked={settings.photos.display.livePhoto.enabled}
+                        onChange={(e) =>
+                            updateSettings({ photos: { display: { livePhoto: { enabled: e.target.checked, delay: settings.photos.display.livePhoto.delay } } } })
+                        }
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Live Photo</span>
+                </label>
+
+                <label className="block mt-2">
+                    <span className="block mb-1">Live Photo Video Delay (seconds)</span>
+                    <input
+                        type="number"
+                        value={settings.photos.display.livePhoto.delay / 1000} // convert ms → sec
+                        min={0}
+                        step={0.1}
+                        onChange={(e) =>
+                            updateSettings({ photos: { display: { livePhoto: { enabled: settings.photos.display.livePhoto.enabled, delay: Number(e.target.value) * 1000 } } } })
+                        }
+                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                    />
+                    <span className="text-sm text-text-secondary mt-1 block">
+                        Delay before playing live photo video (default 1s)
+                    </span>
+                </label>
+
                 <label className="block">
                     <span className="block mb-1">Date Format</span>
                     <input

@@ -59,6 +59,10 @@ export function buildDefaultSettings(): AppSettings {
             display: {
                 fit: (process.env.DEFAULT_OBJECT_FIT as AppSettings['photos']['display']['fit']) || 'cover',
                 showMetadata: parseBool(process.env.DEFAULT_SHOW_PHOTO_METADATA, true),
+                livePhoto: {
+                    enabled: parseBool(process.env.DEFAULT_SHOW_LIVE_PHOTO, false),
+                    delay: parseNumber(process.env.DEFAULT_LIVE_PHOTO_DELAY, 1000),
+                },
                 animation: {
                     type: (process.env.DEFAULT_PHOTO_ANIMATION_TYPE as AppSettings['photos']['display']['animation']['type']) || 'ken-burns',
                     duration: parseNumber(process.env.DEFAULT_PHOTO_ANIMATION_DURATION, parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000)), // Match interval by default

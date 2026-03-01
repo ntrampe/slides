@@ -27,6 +27,10 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         display: {
             fit: 'cover',
             showMetadata: true,
+            livePhoto: {
+                enabled: false,
+                delay: 1000,
+            },
             animation: {
                 type: 'ken-burns',
                 duration: 5000, // Should match intervalMs

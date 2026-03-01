@@ -25,6 +25,10 @@ export interface AppSettings {
         display: {
             fit: ObjectFit;
             showMetadata: boolean;
+            livePhoto: {
+                enabled: boolean,
+                delay: number,
+            },
             animation: {
                 type: PhotoAnimationType;
                 duration: number; // in milliseconds, should match or be slightly longer than intervalMs
