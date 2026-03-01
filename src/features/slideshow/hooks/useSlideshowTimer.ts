@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import type { UseSlideshowTimerReturn } from './types';
+import { useVisibility } from '../../../shared/context/VisibilityContext';
 
 interface UseSlideshowTimerOptions {
     onAdvance: () => void;
@@ -17,6 +18,7 @@ export function useSlideshowTimer({
 }: UseSlideshowTimerOptions): UseSlideshowTimerReturn {
     const { settings, updateSettings } = useSettingsData();
     const [progress, setProgress] = useState(0);
+    const { isVisible } = useVisibility();
 
     // Get playing state and interval from settings
     const isPlaying = settings.slideshow.autoplay;
@@ -36,8 +38,8 @@ export function useSlideshowTimer({
 
     // Timer effect: handles progress tracking and auto-advance
     useEffect(() => {
-        // Don't run timer if paused, if current photo isn't loaded yet, or during transitions
-        if (!isPlaying || !isCurrentPhotoLoaded || isTransitioning) {
+        // Don't run timer if paused, if current photo isn't loaded yet, or during transitions, or is we aren't visible.
+        if (!isPlaying || !isCurrentPhotoLoaded || isTransitioning || !isVisible) {
             // Only reset progress if not transitioning (preserve progress during transitions)
             if (!isTransitioning) {
                 setProgress(0);
