@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Photo } from '../../photos/types';
 import type { AppSettings } from '../../settings/types';
+import { useVisibility } from '../../../shared/context/VisibilityContext';
 
 interface UseSlideshowTransitionParams {
     currentPhoto: Photo | undefined;
@@ -31,6 +32,7 @@ export function useSlideshowTransition({
     const [displayedPhoto, setDisplayedPhoto] = useState(currentPhoto);
     const [displayedNextPhoto, setDisplayedNextPhoto] = useState(nextPhoto);
     const [displayedLayoutClass, setDisplayedLayoutClass] = useState(layoutClass);
+    const { isVisible } = useVisibility();
 
     // Handle photo transitions
     useEffect(() => {
@@ -49,6 +51,7 @@ export function useSlideshowTransition({
 
         // After fade out is nearly complete, update photos
         const updateTimeout = setTimeout(() => {
+            if (!isVisible) return;
             setDisplayedPhoto(currentPhoto);
             setDisplayedNextPhoto(nextPhoto);
             setDisplayedLayoutClass(layoutClass);
@@ -56,6 +59,7 @@ export function useSlideshowTransition({
 
         // Complete transition
         const completeTimeout = setTimeout(() => {
+            if (!isVisible) return;
             setIsTransitioning(false);
         }, transitionSettings.duration);
 
@@ -63,7 +67,7 @@ export function useSlideshowTransition({
             clearTimeout(updateTimeout);
             clearTimeout(completeTimeout);
         };
-    }, [currentPhoto?.id, nextPhoto?.id, layoutClass, transitionSettings.type, transitionSettings.duration]);
+    }, [currentPhoto?.id, nextPhoto?.id, layoutClass, transitionSettings.type, transitionSettings.duration, isVisible]);
 
     // Calculate transition styles based on settings
     const getTransitionStyles = (): React.CSSProperties => {
