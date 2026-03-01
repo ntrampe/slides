@@ -31,5 +31,6 @@ export function useInfinitePhotos(params: Omit<UsePhotosParams, 'page'> = {}) {
             lastPage.hasMore ? lastPage.page + 1 : undefined,
         initialPageParam: 1,
         refetchInterval: 60 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
