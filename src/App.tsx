@@ -15,7 +15,7 @@ function AppContent() {
   const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();
 
   return (
-    <main className="h-[100dvh] w-[100dvw] bg-background select-none overflow-hidden relative">
+    <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
       {/* Slideshow Container */}
       <div className="h-full transition-all duration-500 ease-in-out">
         <Slideshow onToggleSettings={toggleSettings} />

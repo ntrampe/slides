@@ -14,7 +14,7 @@ export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
     // Handle loading/error states
     if (state.isLoading) {
         return (
-            <div className="h-[100dvh] bg-black flex items-center justify-center text-white">
+            <div className="h-screen bg-black flex items-center justify-center text-white">
                 Loading metadata...
             </div>
         );
@@ -26,7 +26,7 @@ export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
 
     if (!state.currentPhoto || !state.displayedPhoto) {
         return (
-            <div className="h-[100dvh] bg-black flex items-center justify-center text-white">
+            <div className="h-screen bg-black flex items-center justify-center text-white">
                 <div className="text-center">
                     <div className={`mb-2 ${hudTextSizes.heading}`}>Loading photo...</div>
                     <div className={`opacity-60 ${hudTextSizes.caption}`}>{state.currentIndex + 1} / {state.count}</div>
@@ -39,7 +39,7 @@ export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
         <div className="fixed inset-0 bg-black overflow-hidden">
             {/* Photo Display Layer */}
             <div
-                className={`grid h-[100dvh] w-[100dvw] ${state.layoutClass}`}
+                className={`grid h-full w-full ${state.layoutClass}`}
                 style={state.transitionStyles}
             >
                 <PhotoDisplay
