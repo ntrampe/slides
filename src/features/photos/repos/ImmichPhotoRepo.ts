@@ -69,6 +69,9 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 id: asset.id,
                 url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
                 inAppUrl: `https://my.immich.app/photos/${asset.id}`,
+                livePhotoVideoUrl: asset.livePhotoVideoId
+                    ? `${this.proxyUrl}/api/assets/${asset.livePhotoVideoId}/video/playback`
+                    : undefined,
                 width: asset.width || asset.exifInfo?.exifImageWidth,
                 height: asset.height || asset.exifInfo?.exifImageHeight,
                 type: asset.type as 'IMAGE' | 'VIDEO',

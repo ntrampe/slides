@@ -26,6 +26,7 @@ export interface Photo {
     id: string;
     url: string;
     inAppUrl?: string;  // URL to open photo in the source app
+    livePhotoVideoUrl?: string;
 
     // Essential for layout/display
     width?: number;

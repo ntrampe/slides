@@ -88,6 +88,7 @@ function generateMockPhotos(count: number): Photo[] {
             id: String(i),
             url: `https://picsum.photos/${dimensions.width}/${dimensions.height}?${i}`,
             inAppUrl: `https://picsum.photos/${dimensions.width}/${dimensions.height}?${i}`,
+            livePhotoVideoUrl: undefined,
             width: dimensions.width,
             height: dimensions.height,
             type: 'IMAGE',
