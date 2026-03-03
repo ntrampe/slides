@@ -63,6 +63,10 @@ export interface AppSettings {
     debug: {
         showDebugStats: boolean;
     };
+
+    support: {
+        enabled: boolean;
+    };
 }
 
 export interface ConfigRepo {

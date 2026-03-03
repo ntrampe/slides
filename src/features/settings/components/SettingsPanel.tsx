@@ -6,6 +6,7 @@ import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
 import type { PhotoAnimationType } from '../types';
+import { SupportButton } from './SupportButton';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -489,6 +490,28 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     This will clear all your settings and restore defaults
                 </p>
             </div>
+
+            {/* SUPPORT */}
+            {settings.support.enabled && (
+                <div className="mt-6 pt-24 border-t border-border/60">
+                    <div className="text-center">
+                        <p className="text-sm text-text-secondary mb-3">
+                            Enjoying Slides?
+                        </p>
+                        <SupportButton
+                            url="https://github.com/sponsors/ntrampe"
+                            text="Buy me a coffee ☕"
+                            className="w-full justify-center"
+                        />
+                        <button
+                            onClick={() => updateSettings({ support: { enabled: false } })}
+                            className="mt-3 text-xs text-text-secondary hover:text-text-primary transition-colors underline"
+                        >
+                            Hide Forever
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

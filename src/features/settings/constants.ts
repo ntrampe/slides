@@ -57,4 +57,7 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
     debug: {
         showDebugStats: false,
     },
+    support: {
+        enabled: true,
+    },
 };

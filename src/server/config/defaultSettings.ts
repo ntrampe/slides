@@ -89,5 +89,8 @@ export function buildDefaultSettings(): AppSettings {
         debug: {
             showDebugStats: false,
         },
+        support: {
+            enabled: true,
+        },
     };
 }
