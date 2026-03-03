@@ -11,6 +11,10 @@ export interface SettingsPanelProps {
     onClose: () => void;
 }
 
+const Divider = () => (
+    <div className="my-4 border-t border-border/60" />
+);
+
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     const { settings, updateSettings, clearSettings } = useSettingsData();
 
@@ -23,95 +27,88 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     return (
         <div
             className="h-full w-full bg-surface backdrop-blur-sm p-safe-or-8 text-text-primary overflow-y-auto touch-pan-y"
-            onClick={(e) => {
-                // Prevent clicks inside panel from propagating to backdrop
-                e.stopPropagation();
-            }}
-            onTouchStart={(e) => {
-                // Prevent touches inside panel from propagating to backdrop
-                e.stopPropagation();
-            }}
-            style={{
-                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-                overscrollBehavior: 'contain' // Prevent scroll chaining
-            }}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
         >
-            {/* Header with title and close button */}
+            {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Settings</h2>
                 <button
                     onClick={onClose}
                     className="text-text-secondary hover:text-text-primary hover:bg-surface rounded-full p-2 transition-colors"
-                    aria-label="Close settings"
                 >
                     <X size={24} />
                 </button>
             </div>
 
-            {/* Theme - Always visible */}
             <div className="mb-6">
                 <ThemeSelector />
             </div>
 
-            {/* Photo Filters - Most commonly changed, expanded by default */}
-            <CollapsibleSection title="Photo Filters">
+            {/* CONTENT */}
+            <CollapsibleSection title="Content">
                 <AlbumPicker
                     label="Albums"
                     selectedIds={settings.slideshow.filter.albumIds || []}
-                    onChange={(albumIds) => updateSettings({
-                        slideshow: { filter: { albumIds } }
-                    })}
+                    onChange={(albumIds) =>
+                        updateSettings({ slideshow: { filter: { albumIds } } })
+                    }
                 />
-
                 <PeoplePicker
                     label="People"
                     selectedIds={settings.slideshow.filter.personIds || []}
-                    onChange={(personIds) => updateSettings({
-                        slideshow: { filter: { personIds } }
-                    })}
+                    onChange={(personIds) =>
+                        updateSettings({ slideshow: { filter: { personIds } } })
+                    }
                 />
-
                 <LocationPicker
                     label="Location"
                     selection={settings.slideshow.filter.location || {}}
-                    onChange={(location) => updateSettings({
-                        slideshow: { filter: { location } }
-                    })}
+                    onChange={(location) =>
+                        updateSettings({ slideshow: { filter: { location } } })
+                    }
                 />
             </CollapsibleSection>
 
-            {/* Slideshow Behavior - Commonly changed, expanded by default */}
-            <CollapsibleSection title="Slideshow Behavior">
+            {/* PLAYBACK */}
+            <CollapsibleSection title="Playback">
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.slideshow.shuffle}
-                        onChange={(e) => updateSettings({ slideshow: { shuffle: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({ slideshow: { shuffle: e.target.checked } })
+                        }
                         className="mr-2 w-4 h-4"
                     />
-                    <span>Shuffle Photos</span>
-                </label>
-
-                <label className="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={settings.slideshow.ui.showProgressBar}
-                        onChange={(e) => updateSettings({
-                            slideshow: { ui: { showProgressBar: e.target.checked } }
-                        })}
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Progress Bar</span>
+                    <span>Shuffle</span>
                 </label>
 
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.slideshow.autoplay}
-                        onChange={(e) => updateSettings({ slideshow: { autoplay: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({ slideshow: { autoplay: e.target.checked } })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>Autoplay</span>
+                </label>
+
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.slideshow.ui.showProgressBar}
+                        onChange={(e) =>
+                            updateSettings({
+                                slideshow: { ui: { showProgressBar: e.target.checked } }
+                            })
+                        }
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Show Progress Bar</span>
                 </label>
 
                 <label className="block">
@@ -119,210 +116,265 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         value={settings.slideshow.intervalMs / 1000}
-                        onChange={(e) => {
-                            const intervalMs = Number(e.target.value) * 1000;
-                            const updates: any = { slideshow: { intervalMs } };
-                            // Auto-sync animation duration if it currently matches the interval
-                            if (settings.photos.animation.duration === settings.slideshow.intervalMs) {
-                                updates.photos = { animation: { duration: intervalMs } }
-                            };
-                            updateSettings(updates);
-                        }}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         min="1"
                         step="1"
+                        onChange={(e) => {
+                            const intervalMs = Number(e.target.value) * 1000;
+                            updateSettings({ slideshow: { intervalMs } });
+                        }}
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
                 </label>
+            </CollapsibleSection>
 
-                <label className="flex items-center cursor-pointer mt-2">
+            {/* TRANSITIONS */}
+            <CollapsibleSection title="Transitions">
+                <label className="block">
+                    <span className="block mb-1">Type</span>
+                    <select
+                        value={settings.slideshow.transition.type}
+                        onChange={(e) =>
+                            updateSettings({
+                                slideshow: {
+                                    transition: {
+                                        type: e.target.value as 'fade' | 'slide' | 'none'
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
+                    >
+                        <option value="fade">Fade</option>
+                        <option value="slide">Slide</option>
+                        <option value="none">None</option>
+                    </select>
+                </label>
+
+                <label className="block">
+                    <span className="block mb-1">Duration (ms)</span>
                     <input
-                        type="checkbox"
-                        checked={settings.photos.animation.duration === settings.slideshow.intervalMs}
-                        onChange={(e) => {
-                            if (e.target.checked) {
-                                updateSettings({
-                                    photos: { animation: { duration: settings.slideshow.intervalMs } }
-                                });
-                            }
-                        }}
-                        className="mr-2 w-4 h-4"
+                        type="number"
+                        min="100"
+                        step="100"
+                        disabled={settings.slideshow.transition.type === 'none'}
+                        value={settings.slideshow.transition.duration}
+                        onChange={(e) =>
+                            updateSettings({
+                                slideshow: {
+                                    transition: { duration: Number(e.target.value) }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
-                    <span className="text-sm text-text-secondary">Match animation duration to slide interval</span>
+                </label>
+            </CollapsibleSection>
+
+            {/* APPEARANCE */}
+            <CollapsibleSection title="Appearance">
+                <label className="block">
+                    <span className="block mb-1">Photo Fit</span>
+                    <select
+                        value={settings.photos.fit}
+                        onChange={(e) =>
+                            updateSettings({ photos: { fit: e.target.value as any } })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
+                    >
+                        <option value="contain">Contain</option>
+                        <option value="cover">Cover</option>
+                        <option value="fill">Fill</option>
+                    </select>
                 </label>
 
                 <label className="block">
                     <span className="block mb-1">Layout</span>
                     <select
                         value={settings.slideshow.layout}
-                        onChange={(e) => updateSettings({ slideshow: { layout: e.target.value as any } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
+                        onChange={(e) =>
+                            updateSettings({ slideshow: { layout: e.target.value as any } })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     >
-                        <option value="single">Single Image</option>
+                        <option value="single">Single</option>
                         <option value="split">Split View</option>
                     </select>
                 </label>
             </CollapsibleSection>
 
-            {/* Photo Display - Less commonly changed */}
-            <CollapsibleSection title="Photo Display">
+            {/* MOTION */}
+            <CollapsibleSection title="Motion">
+                <label className="block">
+                    <span className="block mb-1">Animation</span>
+                    <select
+                        value={settings.photos.animation.type}
+                        onChange={(e) =>
+                            updateSettings({
+                                photos: {
+                                    animation: {
+                                        type: e.target.value as PhotoAnimationType
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
+                    >
+                        <option value="none">None</option>
+                        <option value="zoom-in">Zoom In</option>
+                        <option value="zoom-out">Zoom Out</option>
+                        <option value="pan">Pan</option>
+                        <option value="ken-burns">Ken Burns</option>
+                    </select>
+                </label>
+
+                {settings.photos.animation.type !== 'none' && (
+                    <>
+                        <label className="block">
+                            <span className="block mb-1">Intensity</span>
+                            <input
+                                type="range"
+                                min="1"
+                                max="2"
+                                step="0.1"
+                                value={settings.photos.animation.intensity}
+                                onChange={(e) =>
+                                    updateSettings({
+                                        photos: {
+                                            animation: {
+                                                intensity: Number(e.target.value)
+                                            }
+                                        }
+                                    })
+                                }
+                                className="w-full"
+                            />
+                        </label>
+
+                        <label className="flex items-center cursor-pointer mt-2">
+                            <input
+                                type="checkbox"
+                                checked={
+                                    settings.photos.animation.duration ===
+                                    settings.slideshow.intervalMs
+                                }
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        updateSettings({
+                                            photos: {
+                                                animation: {
+                                                    duration:
+                                                        settings.slideshow.intervalMs
+                                                }
+                                            }
+                                        });
+                                    }
+                                }}
+                                className="mr-2 w-4 h-4"
+                            />
+                            <span className="text-sm">
+                                Match animation duration to slide interval
+                            </span>
+                        </label>
+                    </>
+                )}
+            </CollapsibleSection>
+
+            {/* LIVE PHOTOS */}
+            <CollapsibleSection title="Live Photos">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={settings.photos.livePhoto.enabled}
+                        onChange={(e) =>
+                            updateSettings({
+                                photos: {
+                                    livePhoto: {
+                                        enabled: e.target.checked,
+                                        delay: settings.photos.livePhoto.delay
+                                    }
+                                }
+                            })
+                        }
+                        className="mr-2 w-4 h-4"
+                    />
+                    <span>Enable</span>
+                </label>
+
+                <label className="block">
+                    <span className="block mb-1">Delay (seconds)</span>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={settings.photos.livePhoto.delay / 1000}
+                        onChange={(e) =>
+                            updateSettings({
+                                photos: {
+                                    livePhoto: {
+                                        enabled: settings.photos.livePhoto.enabled,
+                                        delay: Number(e.target.value) * 1000
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
+                    />
+                </label>
+            </CollapsibleSection>
+
+            {/* OVERLAYS */}
+            <CollapsibleSection title="Overlays">
+                {/* Photo Metadata */}
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.photos.metadata.enabled}
-                        onChange={(e) => updateSettings({
-                            photos: { metadata: { enabled: e.target.checked, dateFormat: settings.photos.metadata.dateFormat } }
-                        })}
+                        onChange={(e) =>
+                            updateSettings({
+                                photos: {
+                                    metadata: {
+                                        enabled: e.target.checked,
+                                        dateFormat:
+                                            settings.photos.metadata.dateFormat
+                                    }
+                                }
+                            })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Photo Metadata</span>
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Photo Fit</span>
-                    <select
-                        value={settings.photos.fit}
-                        onChange={(e) => updateSettings({
-                            photos: { fit: e.target.value as any }
-                        })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    >
-                        <option value="contain">Contain (show full photo)</option>
-                        <option value="cover">Cover (fill screen)</option>
-                        <option value="fill">Fill (stretch)</option>
-                    </select>
-                </label>
-
-                <label className="block">
-                    <span className="block mb-1">Photo Animation</span>
-                    <select
-                        value={settings.photos.animation.type}
-                        onChange={(e) => updateSettings({
-                            photos: { animation: { type: e.target.value as PhotoAnimationType } }
-                        })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    >
-                        <option value="none">None</option>
-                        <option value="zoom-in">Zoom In</option>
-                        <option value="zoom-out">Zoom Out</option>
-                        <option value="pan">Pan (Random Direction)</option>
-                        <option value="ken-burns">Ken Burns (Zoom + Pan)</option>
-                    </select>
-                    <span className="text-sm text-text-secondary mt-1 block">
-                        Subtle motion effect during photo display
-                    </span>
-                </label>
-
-                {
-                    settings.photos.animation.type !== 'none' && (
-                        <label className="block">
-                            <span className="block mb-1">Animation Intensity</span>
-                            <input
-                                type="range"
-                                value={settings.photos.animation.intensity}
-                                onChange={(e) => updateSettings({
-                                    photos: { animation: { intensity: Number(e.target.value) } }
-                                })}
-                                className="w-full"
-                                min="1.0"
-                                max="2.0"
-                                step="0.1"
-                            />
-                            <div className="flex justify-between text-sm text-text-secondary">
-                                <span>Subtle (1.0x)</span>
-                                <span className="font-medium text-text-primary">
-                                    {settings.photos.animation.intensity.toFixed(1)}x
-                                </span>
-                                <span>Dramatic (2.0x)</span>
-                            </div>
-                        </label>
-                    )
-                }
-
-                {/* --- Live Photo Settings --- */}
-                <label className="flex items-center cursor-pointer mt-4">
-                    <input
-                        type="checkbox"
-                        checked={settings.photos.livePhoto.enabled}
-                        onChange={(e) =>
-                            updateSettings({ photos: { livePhoto: { enabled: e.target.checked, delay: settings.photos.livePhoto.delay } } })
-                        }
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Live Photo</span>
-                </label>
-
-                <label className="block mt-2">
-                    <span className="block mb-1">Live Photo Video Delay (seconds)</span>
-                    <input
-                        type="number"
-                        value={settings.photos.livePhoto.delay / 1000} // convert ms → sec
-                        min={0}
-                        step={0.1}
-                        onChange={(e) =>
-                            updateSettings({ photos: { livePhoto: { enabled: settings.photos.livePhoto.enabled, delay: Number(e.target.value) * 1000 } } })
-                        }
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    />
-                    <span className="text-sm text-text-secondary mt-1 block">
-                        Delay before playing live photo video (default 1s)
-                    </span>
-                </label>
-
-                <label className="block">
-                    <span className="block mb-1">Date Format</span>
+                    <span className="block mb-1">Metadata Date Format</span>
                     <input
                         type="text"
                         value={settings.photos.metadata.dateFormat}
-                        onChange={(e) => updateSettings({
-                            photos: { metadata: { enabled: settings.photos.metadata.enabled, dateFormat: e.target.value } }
-                        })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                        placeholder="MMM dd, yyyy"
-                    />
-                    <span className="text-sm text-text-secondary mt-1 block">e.g., MMM dd, yyyy → Jan 01, 2024</span>
-                </label>
-            </CollapsibleSection >
-
-            {/* Transitions - Less commonly changed */}
-            < CollapsibleSection title="Transitions" >
-                <label className="block">
-                    <span className="block mb-1">Transition Type</span>
-                    <select
-                        value={settings.slideshow.transition.type}
-                        onChange={(e) => updateSettings({
-                            slideshow: { transition: { type: e.target.value as 'fade' | 'slide' | 'none' } }
-                        })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                    >
-                        <option value="fade">Fade</option>
-                        <option value="slide">Slide</option>
-                        <option value="none">None (instant)</option>
-                    </select>
-                </label>
-
-                <label className="block">
-                    <span className="block mb-1">Transition Duration (ms)</span>
-                    <input
-                        type="number"
-                        value={settings.slideshow.transition.duration}
-                        onChange={(e) => updateSettings({
-                            slideshow: { transition: { duration: Number(e.target.value) } }
-                        })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                        min="100"
-                        step="100"
-                        disabled={settings.slideshow.transition.type === 'none'}
+                        onChange={(e) =>
+                            updateSettings({
+                                photos: {
+                                    metadata: {
+                                        enabled:
+                                            settings.photos.metadata.enabled,
+                                        dateFormat: e.target.value
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
                 </label>
-            </CollapsibleSection >
 
-            {/* Clock Format - Less commonly changed */}
-            < CollapsibleSection title="Clock" >
+                <Divider />
+
+                {/* Clock */}
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.clock.enabled}
-                        onChange={(e) => updateSettings({ clock: { enabled: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({ clock: { enabled: e.target.checked } })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Clock</span>
@@ -332,32 +384,38 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={settings.clock.use24HourFormat}
-                        onChange={(e) => updateSettings({ clock: { use24HourFormat: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({
+                                clock: { use24HourFormat: e.target.checked }
+                            })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>24-Hour Format</span>
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Date Format</span>
+                    <span className="block mb-1">Clock Date Format</span>
                     <input
                         type="text"
                         value={settings.clock.dateFormat}
-                        onChange={(e) => updateSettings({ clock: { dateFormat: e.target.value } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
-                        placeholder="MMM DD, YYYY"
+                        onChange={(e) =>
+                            updateSettings({ clock: { dateFormat: e.target.value } })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
-                    <span className="text-sm text-text-secondary mt-1 block">e.g., MMM DD, YYYY → JAN 01, 2024</span>
                 </label>
-            </CollapsibleSection >
 
-            {/* Weather - Less commonly changed */}
-            < CollapsibleSection title="Weather" >
+                <Divider />
+
+                {/* Weather */}
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.weather.enabled}
-                        onChange={(e) => updateSettings({ weather: { enabled: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({ weather: { enabled: e.target.checked } })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Weather</span>
@@ -367,11 +425,18 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Latitude</span>
                     <input
                         type="number"
-                        value={settings.weather.location.lat}
-                        onChange={(e) => updateSettings({ weather: { location: { lat: Number(e.target.value) } } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
-                        placeholder="0.0000"
+                        value={settings.weather.location.lat}
+                        onChange={(e) =>
+                            updateSettings({
+                                weather: {
+                                    location: {
+                                        lat: Number(e.target.value)
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
                 </label>
 
@@ -379,30 +444,41 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Longitude</span>
                     <input
                         type="number"
-                        value={settings.weather.location.lng}
-                        onChange={(e) => updateSettings({ weather: { location: { lng: Number(e.target.value) } } })}
-                        className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         step="0.0001"
-                        placeholder="0.0000"
+                        value={settings.weather.location.lng}
+                        onChange={(e) =>
+                            updateSettings({
+                                weather: {
+                                    location: {
+                                        lng: Number(e.target.value)
+                                    }
+                                }
+                            })
+                        }
+                        className="bg-surface border border-border w-full p-2 rounded"
                     />
                 </label>
-            </CollapsibleSection >
+            </CollapsibleSection>
 
-            {/* Debug - Rarely changed */}
-            < CollapsibleSection title="Debug" >
+            {/* ADVANCED */}
+            <CollapsibleSection title="Advanced">
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={settings.debug.showDebugStats}
-                        onChange={(e) => updateSettings({ debug: { showDebugStats: e.target.checked } })}
+                        onChange={(e) =>
+                            updateSettings({
+                                debug: { showDebugStats: e.target.checked }
+                            })
+                        }
                         className="mr-2 w-4 h-4"
                     />
                     <span>Show Debug Stats</span>
                 </label>
-            </CollapsibleSection >
+            </CollapsibleSection>
 
-            {/* Reset Section */}
-            < div className="mt-8 pt-6" >
+            {/* RESET */}
+            <div className="mt-8 pt-6">
                 <button
                     onClick={handleReset}
                     className="w-full bg-error hover:bg-error/80 text-white font-medium py-2 px-4 rounded transition-colors"
@@ -412,7 +488,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <p className="text-sm text-text-secondary mt-2 text-center">
                     This will clear all your settings and restore defaults
                 </p>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
