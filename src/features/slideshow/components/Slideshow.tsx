@@ -3,6 +3,7 @@ import { useSlideshow } from '../hooks/useSlideshow';
 import { DebugPanel } from '../../debug-panel';
 import { hudTextSizes } from '../../../shared/components';
 import { MediaDisplay } from '../../photos/components/MediaDisplay';
+import { SlideshowErrorContent } from './SlideshowErrorContent';
 
 interface SlideshowProps {
     onToggleSettings: () => void;
@@ -28,6 +29,18 @@ export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
                         Open Settings
                     </button>
                 </div>
+            </div>
+        );
+    }
+
+    if (state.isError || state.error) {
+        return (
+            <div className="h-screen bg-black flex items-center justify-center text-white">
+                <SlideshowErrorContent
+                    error={state.error}
+                    onRetry={actions.refetch}
+                    onToggleSettings={onToggleSettings}
+                />
             </div>
         );
     }
