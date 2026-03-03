@@ -56,20 +56,20 @@ export function buildDefaultSettings(): AppSettings {
             }
         },
         photos: {
-            display: {
-                fit: (process.env.DEFAULT_OBJECT_FIT as AppSettings['photos']['display']['fit']) || 'cover',
-                showMetadata: parseBool(process.env.DEFAULT_SHOW_PHOTO_METADATA, true),
-                livePhoto: {
-                    enabled: parseBool(process.env.DEFAULT_SHOW_LIVE_PHOTO, false),
-                    delay: parseNumber(process.env.DEFAULT_LIVE_PHOTO_DELAY, 1000),
-                },
-                animation: {
-                    type: (process.env.DEFAULT_PHOTO_ANIMATION_TYPE as AppSettings['photos']['display']['animation']['type']) || 'ken-burns',
-                    duration: parseNumber(process.env.DEFAULT_PHOTO_ANIMATION_DURATION, parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000)), // Match interval by default
-                    intensity: parseFloat(process.env.DEFAULT_PHOTO_ANIMATION_INTENSITY, 1.2),
-                },
+            fit: (process.env.DEFAULT_OBJECT_FIT as AppSettings['photos']['fit']) || 'cover',
+            livePhoto: {
+                enabled: parseBool(process.env.DEFAULT_SHOW_LIVE_PHOTO, false),
+                delay: parseNumber(process.env.DEFAULT_LIVE_PHOTO_DELAY, 1000),
             },
-            dateFormat: 'MMM dd, yyyy',
+            animation: {
+                type: (process.env.DEFAULT_PHOTO_ANIMATION_TYPE as AppSettings['photos']['animation']['type']) || 'ken-burns',
+                duration: parseNumber(process.env.DEFAULT_PHOTO_ANIMATION_DURATION, parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000)), // Match interval by default
+                intensity: parseFloat(process.env.DEFAULT_PHOTO_ANIMATION_INTENSITY, 1.2),
+            },
+            metadata: {
+                enabled: parseBool(process.env.DEFAULT_SHOW_PHOTO_METADATA, true),
+                dateFormat: 'MMM dd, yyyy',
+            },
         },
         clock: {
             enabled: parseBool(process.env.DEFAULT_SHOW_CLOCK, true),

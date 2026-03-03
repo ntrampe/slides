@@ -20,7 +20,7 @@ export const MediaDisplay = ({
     const { settings } = useSettingsData();
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const showLivePhoto = Boolean(photo.livePhotoVideoUrl) && settings.photos.display.livePhoto.enabled;
+    const showLivePhoto = Boolean(photo.livePhotoVideoUrl) && settings.photos.livePhoto.enabled;
 
     return (
         <div className="relative h-full w-full overflow-hidden">
@@ -32,7 +32,7 @@ export const MediaDisplay = ({
             )}
 
             {/* Metadata Overlay */}
-            {settings.photos.display.showMetadata && (
+            {settings.photos.metadata.enabled && (
                 <PhotoMetadataOverlay
                     photo={photo}
                     isExpanded={isExpanded}

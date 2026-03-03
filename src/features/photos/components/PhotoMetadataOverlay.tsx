@@ -64,7 +64,7 @@ export const PhotoMetadataOverlay = ({
                                 <div className={`flex items-center gap-2 sm:gap-3 ${location ? 'mb-1 sm:mb-2' : ''}`}>
                                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
                                     <p className={`font-medium ${hudTextSizes.body}`}>
-                                        {format(new Date(photo.createdAt), settings.photos.dateFormat)}
+                                        {format(new Date(photo.createdAt), settings.photos.metadata.dateFormat)}
                                     </p>
                                 </div>
                             )}

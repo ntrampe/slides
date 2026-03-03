@@ -24,20 +24,20 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         }
     },
     photos: {
-        display: {
-            fit: 'cover',
-            showMetadata: true,
-            livePhoto: {
-                enabled: false,
-                delay: 1000,
-            },
-            animation: {
-                type: 'ken-burns',
-                duration: 5000, // Should match intervalMs
-                intensity: 1.2, // 20% zoom/pan
-            },
+        fit: 'cover',
+        livePhoto: {
+            enabled: false,
+            delay: 1000,
         },
-        dateFormat: 'MMM dd, yyyy',
+        animation: {
+            type: 'ken-burns',
+            duration: 5000, // Should match intervalMs
+            intensity: 1.2, // 20% zoom/pan
+        },
+        metadata: {
+            enabled: true,
+            dateFormat: 'MMM dd, yyyy',
+        }
     },
     clock: {
         enabled: true,

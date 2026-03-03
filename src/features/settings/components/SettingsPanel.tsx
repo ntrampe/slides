@@ -123,9 +123,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                             const intervalMs = Number(e.target.value) * 1000;
                             const updates: any = { slideshow: { intervalMs } };
                             // Auto-sync animation duration if it currently matches the interval
-                            if (settings.photos.display.animation.duration === settings.slideshow.intervalMs) {
-                                updates.photos = { display: { animation: { duration: intervalMs } } };
-                            }
+                            if (settings.photos.animation.duration === settings.slideshow.intervalMs) {
+                                updates.photos = { animation: { duration: intervalMs } }
+                            };
                             updateSettings(updates);
                         }}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
@@ -137,11 +137,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer mt-2">
                     <input
                         type="checkbox"
-                        checked={settings.photos.display.animation.duration === settings.slideshow.intervalMs}
+                        checked={settings.photos.animation.duration === settings.slideshow.intervalMs}
                         onChange={(e) => {
                             if (e.target.checked) {
                                 updateSettings({
-                                    photos: { display: { animation: { duration: settings.slideshow.intervalMs } } }
+                                    photos: { animation: { duration: settings.slideshow.intervalMs } }
                                 });
                             }
                         }}
@@ -168,9 +168,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.photos.display.showMetadata}
+                        checked={settings.photos.metadata.enabled}
                         onChange={(e) => updateSettings({
-                            photos: { display: { showMetadata: e.target.checked } }
+                            photos: { metadata: { enabled: e.target.checked, dateFormat: settings.photos.metadata.dateFormat } }
                         })}
                         className="mr-2 w-4 h-4"
                     />
@@ -180,9 +180,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Photo Fit</span>
                     <select
-                        value={settings.photos.display.fit}
+                        value={settings.photos.fit}
                         onChange={(e) => updateSettings({
-                            photos: { display: { fit: e.target.value as any } }
+                            photos: { fit: e.target.value as any }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
@@ -195,9 +195,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Photo Animation</span>
                     <select
-                        value={settings.photos.display.animation.type}
+                        value={settings.photos.animation.type}
                         onChange={(e) => updateSettings({
-                            photos: { display: { animation: { type: e.target.value as PhotoAnimationType } } }
+                            photos: { animation: { type: e.target.value as PhotoAnimationType } }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     >
@@ -212,37 +212,39 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     </span>
                 </label>
 
-                {settings.photos.display.animation.type !== 'none' && (
-                    <label className="block">
-                        <span className="block mb-1">Animation Intensity</span>
-                        <input
-                            type="range"
-                            value={settings.photos.display.animation.intensity}
-                            onChange={(e) => updateSettings({
-                                photos: { display: { animation: { intensity: Number(e.target.value) } } }
-                            })}
-                            className="w-full"
-                            min="1.0"
-                            max="2.0"
-                            step="0.1"
-                        />
-                        <div className="flex justify-between text-sm text-text-secondary">
-                            <span>Subtle (1.0x)</span>
-                            <span className="font-medium text-text-primary">
-                                {settings.photos.display.animation.intensity.toFixed(1)}x
-                            </span>
-                            <span>Dramatic (2.0x)</span>
-                        </div>
-                    </label>
-                )}
+                {
+                    settings.photos.animation.type !== 'none' && (
+                        <label className="block">
+                            <span className="block mb-1">Animation Intensity</span>
+                            <input
+                                type="range"
+                                value={settings.photos.animation.intensity}
+                                onChange={(e) => updateSettings({
+                                    photos: { animation: { intensity: Number(e.target.value) } }
+                                })}
+                                className="w-full"
+                                min="1.0"
+                                max="2.0"
+                                step="0.1"
+                            />
+                            <div className="flex justify-between text-sm text-text-secondary">
+                                <span>Subtle (1.0x)</span>
+                                <span className="font-medium text-text-primary">
+                                    {settings.photos.animation.intensity.toFixed(1)}x
+                                </span>
+                                <span>Dramatic (2.0x)</span>
+                            </div>
+                        </label>
+                    )
+                }
 
                 {/* --- Live Photo Settings --- */}
                 <label className="flex items-center cursor-pointer mt-4">
                     <input
                         type="checkbox"
-                        checked={settings.photos.display.livePhoto.enabled}
+                        checked={settings.photos.livePhoto.enabled}
                         onChange={(e) =>
-                            updateSettings({ photos: { display: { livePhoto: { enabled: e.target.checked, delay: settings.photos.display.livePhoto.delay } } } })
+                            updateSettings({ photos: { livePhoto: { enabled: e.target.checked, delay: settings.photos.livePhoto.delay } } })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -253,11 +255,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Live Photo Video Delay (seconds)</span>
                     <input
                         type="number"
-                        value={settings.photos.display.livePhoto.delay / 1000} // convert ms → sec
+                        value={settings.photos.livePhoto.delay / 1000} // convert ms → sec
                         min={0}
                         step={0.1}
                         onChange={(e) =>
-                            updateSettings({ photos: { display: { livePhoto: { enabled: settings.photos.display.livePhoto.enabled, delay: Number(e.target.value) * 1000 } } } })
+                            updateSettings({ photos: { livePhoto: { enabled: settings.photos.livePhoto.enabled, delay: Number(e.target.value) * 1000 } } })
                         }
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                     />
@@ -270,19 +272,19 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Date Format</span>
                     <input
                         type="text"
-                        value={settings.photos.dateFormat}
+                        value={settings.photos.metadata.dateFormat}
                         onChange={(e) => updateSettings({
-                            photos: { dateFormat: e.target.value }
+                            photos: { metadata: { enabled: settings.photos.metadata.enabled, dateFormat: e.target.value } }
                         })}
                         className="bg-surface border border-border text-text-primary w-full p-2 rounded"
                         placeholder="MMM dd, yyyy"
                     />
                     <span className="text-sm text-text-secondary mt-1 block">e.g., MMM dd, yyyy → Jan 01, 2024</span>
                 </label>
-            </CollapsibleSection>
+            </CollapsibleSection >
 
             {/* Transitions - Less commonly changed */}
-            <CollapsibleSection title="Transitions">
+            < CollapsibleSection title="Transitions" >
                 <label className="block">
                     <span className="block mb-1">Transition Type</span>
                     <select
@@ -312,10 +314,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         disabled={settings.slideshow.transition.type === 'none'}
                     />
                 </label>
-            </CollapsibleSection>
+            </CollapsibleSection >
 
             {/* Clock Format - Less commonly changed */}
-            <CollapsibleSection title="Clock">
+            < CollapsibleSection title="Clock" >
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -347,10 +349,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     />
                     <span className="text-sm text-text-secondary mt-1 block">e.g., MMM DD, YYYY → JAN 01, 2024</span>
                 </label>
-            </CollapsibleSection>
+            </CollapsibleSection >
 
             {/* Weather - Less commonly changed */}
-            <CollapsibleSection title="Weather">
+            < CollapsibleSection title="Weather" >
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -384,10 +386,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         placeholder="0.0000"
                     />
                 </label>
-            </CollapsibleSection>
+            </CollapsibleSection >
 
             {/* Debug - Rarely changed */}
-            <CollapsibleSection title="Debug">
+            < CollapsibleSection title="Debug" >
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
@@ -397,10 +399,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     />
                     <span>Show Debug Stats</span>
                 </label>
-            </CollapsibleSection>
+            </CollapsibleSection >
 
             {/* Reset Section */}
-            <div className="mt-8 pt-6">
+            < div className="mt-8 pt-6" >
                 <button
                     onClick={handleReset}
                     className="w-full bg-error hover:bg-error/80 text-white font-medium py-2 px-4 rounded transition-colors"
@@ -410,7 +412,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <p className="text-sm text-text-secondary mt-2 text-center">
                     This will clear all your settings and restore defaults
                 </p>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };

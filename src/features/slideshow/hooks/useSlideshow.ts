@@ -98,7 +98,7 @@ export function useSlideshow(): UseSlideshowReturn {
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
             layoutClass: transition.displayedLayoutClass,
-            objectFit: settings.photos.display.fit,
+            objectFit: settings.photos.fit,
         },
         actions: {
             goToPrevious: handlePrevious,

@@ -22,20 +22,20 @@ export interface AppSettings {
 
     // Photos feature
     photos: {
-        display: {
-            fit: ObjectFit;
-            showMetadata: boolean;
-            livePhoto: {
-                enabled: boolean,
-                delay: number,
-            },
-            animation: {
-                type: PhotoAnimationType;
-                duration: number; // in milliseconds, should match or be slightly longer than intervalMs
-                intensity: number; // 1.0 = subtle, 2.0 = dramatic (zoom/pan amount)
-            };
+        fit: ObjectFit;
+        animation: {
+            type: PhotoAnimationType;
+            duration: number; // in milliseconds, should match or be slightly longer than intervalMs
+            intensity: number; // 1.0 = subtle, 2.0 = dramatic (zoom/pan amount)
         };
-        dateFormat: string;
+        livePhoto: {
+            enabled: boolean,
+            delay: number, // in milliseconds
+        },
+        metadata: {
+            enabled: boolean;
+            dateFormat: string;
+        },
     };
 
     // Clock feature
