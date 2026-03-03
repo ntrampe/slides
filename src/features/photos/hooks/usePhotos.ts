@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useServices } from "../../../shared/context/ServiceContext";
 import type { SlideshowFilter } from '../../../shared/types/config';
+import { AuthError, ClientError, NetworkError } from "../errors";
 
 interface UsePhotosParams extends SlideshowFilter {
     page?: number;
@@ -32,5 +33,15 @@ export function useInfinitePhotos(params: Omit<UsePhotosParams, 'page'> = {}) {
         initialPageParam: 1,
         refetchInterval: 60 * 60 * 1000,
         refetchOnWindowFocus: false,
+        retry: (failureCount: number, error: Error) => {
+            // Don't retry certain errors
+            if (error instanceof NetworkError) return false;
+            if (error instanceof AuthError) return false;
+            if (error instanceof ClientError) return false;
+
+            // Retry server errors (max 2 times)
+            return failureCount < 2;
+        },
+        retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 3000),
     });
 }
