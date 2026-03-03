@@ -23,6 +23,8 @@ export function useSlideshow(): UseSlideshowReturn {
         preloadBackward: 2,
     });
 
+    const isEmpty = !data.isLoading && !data.isError && data.count === 0;
+
     // Get next photo for split view
     const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
 
@@ -59,7 +61,8 @@ export function useSlideshow(): UseSlideshowReturn {
     const timer = useSlideshowTimer({
         onAdvance: data.goToNext,
         currentIndex: data.currentIndex,
-        isCurrentPhotoLoaded: !!data.currentLoaded,
+        isEmpty: isEmpty,
+        isLoading: data.isLoading,
         isTransitioning: transition.isTransitioning,
     });
 
@@ -90,6 +93,7 @@ export function useSlideshow(): UseSlideshowReturn {
             displayedNextPhoto: transition.displayedNextPhoto,
             currentIndex: data.currentIndex,
             count: data.count,
+            isEmpty,
             isLoading: data.isLoading,
             isError: data.isError,
             isPlaying: timer.isPlaying,

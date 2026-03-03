@@ -11,6 +11,27 @@ interface SlideshowProps {
 export const Slideshow = ({ onToggleSettings }: SlideshowProps) => {
     const { state, actions, debug } = useSlideshow();
 
+    if (state.isEmpty) {
+        return (
+            <div className="h-screen bg-black flex items-center justify-center text-white">
+                <div className="text-center max-w-md">
+                    <div className={`mb-3 ${hudTextSizes.heading}`}>
+                        No photos found
+                    </div>
+                    <div className={`opacity-60 mb-6 ${hudTextSizes.caption}`}>
+                        Try adjusting your filters or adding photos to your library.
+                    </div>
+                    <button
+                        onClick={onToggleSettings}
+                        className="px-4 py-2 bg-white text-black rounded"
+                    >
+                        Open Settings
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // Handle loading/error states
     if (state.isLoading) {
         return (

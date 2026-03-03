@@ -33,6 +33,7 @@ export interface UseSlideshowReturn {
         displayedNextPhoto: Photo | undefined;
         currentIndex: number;
         count: number;
+        isEmpty: boolean;
         isLoading: boolean;
         isError: boolean;
         isPlaying: boolean;

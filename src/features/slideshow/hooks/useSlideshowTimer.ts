@@ -6,14 +6,16 @@ import { useVisibility } from '../../../shared/context/VisibilityContext';
 interface UseSlideshowTimerOptions {
     onAdvance: () => void;
     currentIndex: number;
-    isCurrentPhotoLoaded: boolean;
+    isEmpty: boolean;
+    isLoading: boolean;
     isTransitioning?: boolean;
 }
 
 export function useSlideshowTimer({
     onAdvance,
     currentIndex,
-    isCurrentPhotoLoaded,
+    isEmpty,
+    isLoading,
     isTransitioning = false,
 }: UseSlideshowTimerOptions): UseSlideshowTimerReturn {
     const { settings, updateSettings } = useSettingsData();
@@ -38,8 +40,8 @@ export function useSlideshowTimer({
 
     // Timer effect: handles progress tracking and auto-advance
     useEffect(() => {
-        // Don't run timer if paused, if current photo isn't loaded yet, or during transitions, or is we aren't visible.
-        if (!isPlaying || !isCurrentPhotoLoaded || isTransitioning || !isVisible) {
+        // Don't run timer if paused, if current photo isn't loaded yet, we don't have any photos, or during transitions, or is we aren't visible.
+        if (!isPlaying || isLoading || isEmpty || isTransitioning || !isVisible) {
             // Only reset progress if not transitioning (preserve progress during transitions)
             if (!isTransitioning) {
                 setProgress(0);
@@ -67,7 +69,7 @@ export function useSlideshowTimer({
             clearInterval(timer);
             clearInterval(progressInterval);
         };
-    }, [interval, isPlaying, onAdvance, currentIndex, isCurrentPhotoLoaded, isTransitioning, isVisible]);
+    }, [interval, isPlaying, onAdvance, currentIndex, isLoading, isEmpty, isTransitioning, isVisible]);
 
     return {
         isPlaying,
