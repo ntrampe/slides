@@ -25,7 +25,9 @@ export function useSlideshowData({
         photos,
         isLoading,
         isError,
+        error,
         fetchNextPage,
+        refetch,
         hasNextPage,
         isFetchingNextPage,
     } = useInfinitePhotosFlattened({
@@ -51,6 +53,7 @@ export function useSlideshowData({
         preloadBackward,
     });
 
+
     // 3. Auto-load more photos when getting close to the end
     useEffect(() => {
         const photosRemaining = photos.length - currentIndex;
@@ -70,10 +73,12 @@ export function useSlideshowData({
         goToPrevious,
         jumpTo,
         getPhotoAt,
+        refetch: refetch,
 
         // Loading states
         isLoading,
         isError,
+        error: error || undefined,
         isFetchingNextPage,
 
         // Stats for debug

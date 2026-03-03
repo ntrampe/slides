@@ -10,8 +10,10 @@ export interface UseSlideshowDataReturn {
     goToPrevious: () => void;
     jumpTo: (index: number) => void;
     getPhotoAt: (index: number) => LoadedPhoto | undefined;
+    refetch: () => void;
     isLoading: boolean;
     isError: boolean;
+    error?: Error;
     isFetchingNextPage: boolean;
     poolStats: PoolDebugInfo;  // Updated type name
     totalPhotos: number;
@@ -36,6 +38,7 @@ export interface UseSlideshowReturn {
         isEmpty: boolean;
         isLoading: boolean;
         isError: boolean;
+        error: Error | undefined;
         isPlaying: boolean;
         progress: number;
         areControlsVisible: boolean;
@@ -48,6 +51,7 @@ export interface UseSlideshowReturn {
         goToPrevious: () => void;
         goToNext: () => void;
         togglePlayPause: () => void;
+        refetch: () => void;
     };
     debug?: SlideshowDebugInfo;
 }

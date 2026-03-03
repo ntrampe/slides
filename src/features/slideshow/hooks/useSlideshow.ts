@@ -96,6 +96,7 @@ export function useSlideshow(): UseSlideshowReturn {
             isEmpty,
             isLoading: data.isLoading,
             isError: data.isError,
+            error: data.error,
             isPlaying: timer.isPlaying,
             progress: timer.progress,
             areControlsVisible: !isIdle,
@@ -108,6 +109,7 @@ export function useSlideshow(): UseSlideshowReturn {
             goToPrevious: handlePrevious,
             goToNext: handleNext,
             togglePlayPause: timer.togglePlayPause,
+            refetch: data.refetch,
         },
         debug: settings.debug.showDebugStats
             ? {
