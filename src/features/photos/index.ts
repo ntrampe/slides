@@ -1,5 +1,4 @@
 export * from './types.ts';
-export * from './errors.ts';
 export * from './repos/ImmichPhotoRepo.ts';
 export * from './repos/MockPhotoRepo.ts';
 export * from './hooks/usePhotos.ts';

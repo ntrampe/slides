@@ -1,4 +1,4 @@
-import { NetworkError, AuthError, NotFoundError, ClientError, ServerError, isNetworkErrorCode } from "../errors";
+import { NetworkError, AuthError, NotFoundError, ClientError, ServerError, isNetworkErrorCode } from "../../../shared/errors";
 
 interface ProxyErrorResponse {
     error?: {

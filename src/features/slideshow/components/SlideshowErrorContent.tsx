@@ -1,5 +1,5 @@
 import { hudTextSizes } from '../../../shared/components';
-import { AuthError, NetworkError, NotFoundError, ServerError } from '../../photos';
+import { AuthError, NetworkError, NotFoundError, ServerError } from "../../../shared/errors";
 
 interface SlideshowErrorContentProps {
     error?: Error | null;

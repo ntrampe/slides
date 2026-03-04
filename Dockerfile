@@ -41,6 +41,10 @@ COPY --from=server-deps /app/node_modules ./node_modules
 
 # Copy server source
 COPY src/server ./src/server
+
+# Copy shared code (used by both server and client)
+COPY src/shared ./src/shared
+
 COPY tsconfig.server.json ./
 
 # Copy built frontend from builder stage

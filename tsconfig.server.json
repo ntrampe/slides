@@ -11,9 +11,14 @@
     "strict": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/server/**/*"],
+  "include": [
+    "src/server/**/*",
+    "src/shared/**/*"
+  ],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

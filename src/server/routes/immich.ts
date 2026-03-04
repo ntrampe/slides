@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express';
 import { createProxyMiddleware, type Options } from 'http-proxy-middleware';
 import type { ServerConfig } from '../config';
-import { isNetworkErrorCode } from '../../features/photos/errors';
+import { isNetworkErrorCode } from '../../shared/errors/photos';
 
 /**
  * Creates an Express router that proxies requests to Immich API

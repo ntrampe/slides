@@ -1,4 +1,4 @@
-import { NETWORK_ERROR_CODES, NetworkError, PhotoError, ServerError } from "../errors";
+import { NETWORK_ERROR_CODES, NetworkError, PhotoError, ServerError } from "../../../shared/errors";
 import type { PhotoRepo, PaginationParams, PaginatedPhotos, Photo, PhotoLocation, PhotoCameraInfo, PhotoExifSettings } from "../types";
 import { parseErrorResponse } from "../utils/errorParser";
 
