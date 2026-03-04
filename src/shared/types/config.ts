@@ -13,4 +13,7 @@ export interface SlideshowFilter {
         state?: string;
         city?: string;
     };
+    // Date range filter (ISO date strings)
+    startDate?: string;  // Inclusive start date (YYYY-MM-DD)
+    endDate?: string;    // Inclusive end date (YYYY-MM-DD)
 }

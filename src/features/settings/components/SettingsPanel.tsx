@@ -7,6 +7,7 @@ import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
 import type { PhotoAnimationType } from '../types';
 import { SupportButton } from './SupportButton';
+import { DateFilter } from './DateFilter';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -68,6 +69,13 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     selection={settings.slideshow.filter.location || {}}
                     onChange={(location) =>
                         updateSettings({ slideshow: { filter: { location } } })
+                    }
+                />
+                <DateFilter
+                    startDate={settings.slideshow.filter.startDate}
+                    endDate={settings.slideshow.filter.endDate}
+                    onChange={(startDate, endDate) =>
+                        updateSettings({ slideshow: { filter: { startDate, endDate } } })
                     }
                 />
             </CollapsibleSection>

@@ -46,6 +46,8 @@ export function buildDefaultSettings(): AppSettings {
                     state: parseString(process.env.DEFAULT_LOCATION_STATE),
                     city: parseString(process.env.DEFAULT_LOCATION_CITY),
                 },
+                startDate: parseString(process.env.DEFAULT_START_DATE),  // ISO format: YYYY-MM-DD
+                endDate: parseString(process.env.DEFAULT_END_DATE),      // ISO format: YYYY-MM-DD
             },
             transition: {
                 type: (process.env.DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',

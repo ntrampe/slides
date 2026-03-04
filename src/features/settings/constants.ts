@@ -14,6 +14,8 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
             albumIds: [],
             personIds: [],
             location: {},
+            startDate: undefined,  // No date filter by default
+            endDate: undefined,
         },
         transition: {
             type: 'fade',

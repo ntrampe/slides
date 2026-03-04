@@ -12,6 +12,8 @@ export class ImmichPhotoRepo implements PhotoRepo {
             albumIds,
             personIds,
             location,
+            startDate,
+            endDate,
         } = params;
 
         const searchBody: any = {
@@ -28,6 +30,10 @@ export class ImmichPhotoRepo implements PhotoRepo {
         if (location?.country) searchBody.country = location.country;
         if (location?.state) searchBody.state = location.state;
         if (location?.city) searchBody.city = location.city;
+
+        // Add date filters if provided
+        if (startDate) searchBody.takenAfter = startDate;  // ISO format
+        if (endDate) searchBody.takenBefore = endDate;      // ISO format
 
         try {
             const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {

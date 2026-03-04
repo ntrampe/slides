@@ -15,6 +15,8 @@ export function useSlideshowData({
     albumIds,
     personIds,
     location,
+    startDate,
+    endDate,
     pageSize = 1000,
     shuffle = false,
     preloadForward = 5,
@@ -34,6 +36,8 @@ export function useSlideshowData({
         albumIds,
         personIds,
         location,
+        startDate,
+        endDate,
         pageSize,
     });
 
