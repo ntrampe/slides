@@ -1,6 +1,6 @@
 # Codebase Architecture & Patterns
 
-**Project:** Immich Slides - Photo slideshow (React 19 + TypeScript + Vite)  
+**Project:** Slides - Photo slideshow (React 19 + TypeScript + Vite)  
 **Stack:** TanStack Query, Tailwind CSS 4, Lucide Icons
 
 ---
@@ -241,15 +241,15 @@ DEFAULT_MY_FEATURE_THRESHOLD=50
 ```bash
 docker run -e DEFAULT_MY_FEATURE_ENABLED=true \
            -e DEFAULT_MY_FEATURE_THRESHOLD=50 \
-           immich-slides
+           slides
 ```
 
 **Docker Compose**:
 
 ```yaml
 services:
-  immich-slides:
-    image: immich-slides
+  slides:
+    image: slides
     environment:
       - DEFAULT_MY_FEATURE_ENABLED=true
       - DEFAULT_MY_FEATURE_THRESHOLD=50

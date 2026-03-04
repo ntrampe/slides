@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  immich-slideshow:
+  slides-app:
     image: ghcr.io/ntrampe/slides:latest
-    container_name: immich-slides
+    container_name: slides
     env_file:
       - .env
     ports:

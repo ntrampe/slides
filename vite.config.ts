@@ -9,9 +9,9 @@ export default defineConfig({
     injectRegister: 'auto',
     includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
     manifest: {
-      name: 'Immich Slides',
+      name: 'Slides',
       short_name: 'Slides',
-      description: 'Immich-powered slideshow display',
+      description: 'Powerful slideshow display',
       theme_color: '#000000',
       background_color: '#000000',
       display: 'standalone',

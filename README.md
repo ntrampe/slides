@@ -1,4 +1,4 @@
-# 🖼️ Immich Slideshow
+# 🖼️ Slideshow
 
 A beautiful, customizable slideshow application for your [Immich](https://immich.app) photo library. Perfect for digital photo frames, kiosks, and displays.
 
@@ -183,7 +183,7 @@ See [best_practices.md](best_practices.md) for detailed patterns.
 - TypeScript (tsx runtime)
 
 **Integration:**
-- Immich SDK
+- Immich API
 - OpenWeatherMap API (optional)
 
 ## 🤝 Contributing
