@@ -2,6 +2,9 @@
 
 A beautiful, customizable slideshow application for your [Immich](https://immich.app) photo library. Perfect for digital photo frames, kiosks, and displays.
 
+> [!IMPORTANT]
+> **This project is not affiliated with [Immich](https://github.com/immich-app/immich)**
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-19-61dafb.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6.svg)
