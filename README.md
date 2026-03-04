@@ -56,61 +56,6 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 
 That's it! The slideshow is now running. All other settings can be customized in the UI, via URL parameters, or environment variables.
 
-### 💻 Local Development
-
-For development or manual setup:
-
-#### Prerequisites
-
-- Node.js 20+ and npm
-- Running Immich instance
-- Immich API key
-
-#### Setup
-
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Configure environment**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` with your Immich details:
-   ```env
-   IMMICH_URL=http://localhost:2283
-   IMMICH_API_KEY=your-api-key-here
-   ```
-
-3. **Start development servers**
-   
-   Terminal 1 - Backend:
-   ```bash
-   npm run dev:server
-   ```
-   
-   Terminal 2 - Frontend:
-   ```bash
-   npm run dev:ui
-   ```
-
-4. **Open browser**
-   ```
-   http://localhost:5173
-   ```
-
-#### Production Build
-
-```bash
-# Build frontend
-npm run build
-
-# Start production server (serves built frontend + API)
-node --loader tsx src/server/index.ts
-```
-
 ## ⚙️ Configuration
 
 Slides offers **three ways** to configure settings, giving you maximum flexibility for different use cases:
@@ -226,6 +171,61 @@ See [best_practices.md](best_practices.md) for detailed patterns.
 - Node.js + Express
 - http-proxy-middleware (Immich, Weather proxy)
 - TypeScript (tsx runtime)
+
+### 💻 Local Development
+
+For development or manual setup:
+
+#### Prerequisites
+
+- Node.js 20+ and npm
+- Running Immich instance
+- Immich API key
+
+#### Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Configure environment**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your Immich details:
+   ```env
+   IMMICH_URL=http://localhost:2283
+   IMMICH_API_KEY=your-api-key-here
+   ```
+
+3. **Start development servers**
+   
+   Terminal 1 - Backend:
+   ```bash
+   npm run dev:server
+   ```
+   
+   Terminal 2 - Frontend:
+   ```bash
+   npm run dev:ui
+   ```
+
+4. **Open browser**
+   ```
+   http://localhost:5173
+   ```
+
+#### Production Build
+
+```bash
+# Build frontend
+npm run build
+
+# Start production server (serves built frontend + API)
+node --loader tsx src/server/index.ts
+```
 
 ## 🤝 Contributing
 
