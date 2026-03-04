@@ -71,11 +71,11 @@ function generateMockPhotos(count: number): Photo[] {
     startDate.setFullYear(endDate.getFullYear() - 3); // 3 years ago
 
     const aspectRatios = [
-        { width: 1920, height: 1080 }, // 16:9
-        { width: 1080, height: 1920 }, // 9:16 (portrait)
-        { width: 1600, height: 1600 }, // 1:1 (square)
-        { width: 1920, height: 1280 }, // 3:2
-        { width: 1280, height: 1920 }, // 2:3 (portrait)
+        { width: 3840, height: 2160 }, // 16:9 (4K)
+        { width: 2160, height: 3840 }, // 9:16 (4K portrait)
+        { width: 3000, height: 3000 }, // 1:1 (square)
+        { width: 3840, height: 2560 }, // 3:2 (high res)
+        { width: 2560, height: 3840 }, // 2:3 (portrait high res)
     ];
 
     for (let i = 1; i <= count; i++) {
