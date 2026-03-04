@@ -1,7 +1,7 @@
 # Codebase Architecture & Patterns
 
-**Project:** Slides - Photo slideshow (React 19 + TypeScript + Vite)  
-**Stack:** TanStack Query, Tailwind CSS 4, Lucide Icons
+**Project:** Slides - Photo slideshow (React + TypeScript + Vite)  
+**Stack:** TanStack Query, Tailwind CSS, Lucide Icons
 
 ---
 
@@ -88,7 +88,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
 
 ---
 
-## Theming (Tailwind CSS 4)
+## Theming (Tailwind CSS)
 
 ### Semantic Variables (Always Use)
 

@@ -5,23 +5,22 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 > [!IMPORTANT]
 > **This project is not affiliated with [Immich](https://github.com/immich-app/immich)**
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![React](https://img.shields.io/badge/React-19-61dafb.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6.svg)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ed.svg)
-
 ## ✨ Features
 
 - 🎨 **Modern UI** - Clean, responsive interface with light/dark themes
 - 🔀 **Smart Shuffle** - Random photo ordering with customizable intervals
 - 📱 **Flexible Layouts** - Single image or split-screen view
-- 🏷️ **Advanced Filtering** - Filter by albums, people, and locations
+- 🏷️ **Advanced Filtering** - Filter by albums, people, locations, and date ranges
+- 🎬 **Photo Animations** - Ken Burns, zoom, pan, and more cinematic effects
+- 🎞️ **Live Photos** - Support for live photos with configurable delay
 - ⏱️ **Customizable Timing** - Set your preferred slideshow interval
+- 🎭 **Smooth Transitions** - Fade, slide, or instant transitions between photos
 - 🕐 **Optional Overlays** - Clock, weather, and photo metadata
 - ⌨️ **Keyboard Control** - Full keyboard navigation support
 - 💾 **Persistent Settings** - Your preferences saved in browser
-- 🎭 **Smooth Transitions** - Fade, slide, or instant transitions
+- 🔗 **URL Configuration** - Configure via URL query parameters
 - 🐳 **Docker Ready** - Easy deployment with Docker/Docker Compose
+- 🔒 **Secure** - API keys handled server-side, never exposed to browser
 
 ## 🚀 Quick Start
 
@@ -55,7 +54,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
    http://localhost:3000
    ```
 
-That's it! The slideshow is now running. All other settings can be customized in the UI.
+That's it! The slideshow is now running. All other settings can be customized in the UI, via URL parameters, or environment variables.
 
 ### 💻 Local Development
 
@@ -108,47 +107,83 @@ For development or manual setup:
 # Build frontend
 npm run build
 
-# Start production server (serves built frontend)
+# Start production server (serves built frontend + API)
 node --loader tsx src/server/index.ts
 ```
 
 ## ⚙️ Configuration
 
-### Required Settings
+Slides offers **three ways** to configure settings, giving you maximum flexibility for different use cases:
 
-| Variable | Description |
-|----------|-------------|
-| `IMMICH_URL` | Your Immich server URL (e.g., `http://localhost:2283`) |
-| `IMMICH_API_KEY` | Your Immich API key (get from User Settings → API Keys) |
+### 1. 🎨 UI Configuration (Recommended for most users)
 
-### Optional Settings
-
-All other settings have sensible defaults and can be:
-- **Changed in the UI** - Settings panel is accessible via the ⚙️ icon or press `S`
-- **Pre-configured via environment variables** - See [.env.example](.env.example) for full list
-
-Available options include:
+The intuitive settings panel (press `S` or click ⚙️) lets you configure everything visually:
 - Layout and display preferences
 - Slideshow timing and transitions
-- Photo filters (albums, people, locations)
-- Weather integration (requires OpenWeatherMap API key)
-- UI customization (theme, overlays, font size)
+- Photo filters (albums, people, locations, date ranges)
+- Photo animations and live photo settings
+- Weather integration
+- UI customization (theme, overlays, progress bar)
 
-**All settings persist in browser localStorage** - your preferences are saved automatically.
+**All UI settings persist in browser localStorage** and take highest precedence.
 
-## ⌨️ Keyboard Shortcuts
+### 2. 🔗 URL Parameters (Perfect for kiosks & presets)
 
-| Key | Action |
-|-----|--------|
-| **Space** | Play/Pause slideshow |
-| **→** or **L** | Next photo |
-| **←** or **H** | Previous photo |
-| **S** | Toggle settings panel |
-| **D** | Toggle debug mode |
+Configure settings dynamically via URL query parameters using dot-notation:
+
+```
+http://localhost:3000/?slideshow.layout=split&photos.animation.type=ken-burns&theme.mode=dark
+```
+
+Refer to `src/features/settings/types.ts` for the settings structure.
+
+**Examples:**
+
+```bash
+# Kiosk mode with specific album
+?slideshow.filter.albumIds=abc123,def456&slideshow.autoplay=true
+
+# Vacation photos with date range
+?slideshow.filter.startDate=2024-01-01&slideshow.filter.endDate=2024-12-31
+
+# Cinematic display with animations
+?photos.animation.type=ken-burns&photos.animation.intensity=1.5&slideshow.transition.type=fade
+
+# Location-specific slideshow
+?slideshow.filter.location.country=USA&slideshow.filter.location.state=California
+```
+
+URL settings override environment defaults but are overridden by user settings in localStorage.
+
+### 3. 🔧 Environment Variables (Docker & defaults)
+
+Set default configuration via environment variables (prefix: `DEFAULT_*`):
+
+#### Required Settings
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `IMMICH_URL` | Your Immich server URL | `http://localhost:2283` |
+| `IMMICH_API_KEY` | Your Immich API key | Get from User Settings → API Keys |
+
+#### Optional Settings
+
+See `.env.example` for a complete list.
+
+### Configuration Precedence
+
+Settings are resolved in this order (highest to lowest precedence):
+
+1. **User Settings** (localStorage) - Highest priority
+2. **URL Parameters** - Session-specific overrides
+3. **Environment Variables** (`DEFAULT_*`) - Default configuration
+4. **Hardcoded Fallbacks** - Guaranteed baseline
+
+This means you can set organization defaults via Docker env vars, allow per-kiosk customization via URLs, and still save personal preferences in the UI.
 
 ## 🏗️ Architecture
 
-This project uses a **feature-first architecture**:
+This project uses a **feature-first architecture** with a secure Backend for Frontend (BFF) pattern:
 
 ```
 src/
@@ -169,25 +204,28 @@ Each feature is self-contained with:
 - `services/` - External services
 - `types.ts` - Type definitions
 
+### Why BFF?
+
+1. **Security**: API keys (`IMMICH_API_KEY`, `OWM_KEY`) never exposed to browser
+2. **Runtime Config**: Docker env vars read at server startup
+3. **Proxy Pattern**: Transparent request forwarding with injected credentials
+4. **Error Handling**: Centralized error transformation
+
 See [best_practices.md](best_practices.md) for detailed patterns.
 
 ## 🛠️ Tech Stack
 
 **Frontend:**
-- React 19 + TypeScript
+- React + TypeScript
 - Vite (build tool)
 - TanStack Query (data fetching)
-- Tailwind CSS 4 (styling)
+- Tailwind CSS (styling)
 - Lucide Icons
 
 **Backend:**
 - Node.js + Express
-- http-proxy-middleware (Immich proxy)
+- http-proxy-middleware (Immich, Weather proxy)
 - TypeScript (tsx runtime)
-
-**Integration:**
-- Immich API
-- OpenWeatherMap API (optional)
 
 ## 🤝 Contributing
 
