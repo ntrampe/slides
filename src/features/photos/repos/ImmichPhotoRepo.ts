@@ -104,13 +104,6 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 hasMore: assets.length === pageSize,
             };
 
-            return {
-                photos,
-                page,
-                pageSize,
-                hasMore: assets.length === pageSize,
-            };
-
         } catch (error) {
             // Re-throw if already a PhotoError
             if (error instanceof PhotoError) {
