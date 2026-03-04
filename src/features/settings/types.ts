@@ -1,4 +1,4 @@
-import type { LayoutMode, ObjectFit, SlideshowFilter } from "../../shared/types/config";
+import type { LayoutMode, ObjectFit, PhotoFilterParams } from "../../shared/types/config";
 import type { ThemeMode } from "../theme";
 
 export type PhotoAnimationType = 'none' | 'zoom-in' | 'zoom-out' | 'pan' | 'ken-burns';
@@ -10,7 +10,7 @@ export interface AppSettings {
         intervalMs: number;
         shuffle: boolean;
         autoplay: boolean;
-        filter: SlideshowFilter;
+        filter: PhotoFilterParams;
         transition: {
             type: 'fade' | 'slide' | 'none';
             duration: number; // in milliseconds

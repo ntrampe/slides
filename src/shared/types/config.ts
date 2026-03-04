@@ -2,10 +2,10 @@ export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 export type LayoutMode = 'single' | 'split';
 
 /**
- * Filter options for selecting photos in slideshows.
+ * Filter options for querying photos.
  * Centralized type for reuse across the application.
  */
-export interface SlideshowFilter {
+export interface PhotoFilterParams {
     albumIds?: string[];
     personIds?: string[];
     location?: {

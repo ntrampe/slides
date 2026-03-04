@@ -1,4 +1,4 @@
-import type { SlideshowFilter } from '../../shared/types/config';
+import type { PhotoFilterParams } from '../../shared/types/config';
 
 export interface PhotoLocation {
     city?: string;
@@ -54,7 +54,7 @@ export interface Photo {
     duration?: string;      // For videos
 }
 
-export interface PaginationParams extends SlideshowFilter {
+export interface PaginationParams extends PhotoFilterParams {
     page?: number;
     pageSize?: number;
 }

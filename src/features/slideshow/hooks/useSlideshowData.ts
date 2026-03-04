@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useInfinitePhotosFlattened } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
-import type { SlideshowFilter } from '../../../shared/types/config';
+import type { PhotoFilterParams } from '../../../shared/types/config';
 import type { UseSlideshowDataReturn } from './types';
 
-interface UseSlideshowDataOptions extends SlideshowFilter {
+interface UseSlideshowDataOptions extends PhotoFilterParams {
     pageSize?: number;
     shuffle?: boolean;
     preloadForward?: number;
