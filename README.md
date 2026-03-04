@@ -1,4 +1,4 @@
-# 🖼️ Slideshow
+# 🖼️ Slides
 
 A beautiful, customizable slideshow application for your [Immich](https://immich.app) photo library. Perfect for digital photo frames, kiosks, and displays.
 
