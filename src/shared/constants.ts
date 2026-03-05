@@ -1,4 +1,4 @@
-import type { AppSettings } from './types';
+import type { AppSettings } from "../features/settings";
 
 /**
  * Hardcoded fallback settings used ONLY when server is unreachable.

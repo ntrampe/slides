@@ -1,4 +1,4 @@
-import { FALLBACK_APP_SETTINGS } from '../constants';
+import { FALLBACK_APP_SETTINGS } from '../../../shared/constants';
 import type { AppSettings } from '../types';
 
 export interface ConfigRepo {

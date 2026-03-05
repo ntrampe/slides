@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { useServices } from '../../../shared/context/ServiceContext';
 import type { AppSettings } from '../types';
-import { FALLBACK_APP_SETTINGS } from '../constants';
+import { FALLBACK_APP_SETTINGS } from '../../../shared/constants';
 import { deepMerge, type DeepPartial } from '../../../shared/utils/deepMerge';
 import { parseUrlSettings } from '../utils/urlSettingsParser';
 
