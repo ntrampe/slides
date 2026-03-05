@@ -35,7 +35,7 @@ export function buildDefaultSettings(): AppSettings {
     return {
         slideshow: {
             layout: (process.env.DEFAULT_LAYOUT as AppSettings['slideshow']['layout']) || 'single',
-            intervalMs: parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000),
+            intervalMs: parseNumber(process.env.DEFAULT_INTERVAL_MS, 10000),
             shuffle: parseBool(process.env.DEFAULT_SHUFFLE, true),
             autoplay: parseBool(process.env.DEFAULT_AUTOPLAY, true),
             filter: {
@@ -51,7 +51,7 @@ export function buildDefaultSettings(): AppSettings {
             },
             transition: {
                 type: (process.env.DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || 'fade',
-                duration: parseNumber(process.env.DEFAULT_TRANSITION_DURATION, 500),
+                duration: parseNumber(process.env.DEFAULT_TRANSITION_DURATION, 1000),
             },
             ui: {
                 showProgressBar: parseBool(process.env.DEFAULT_SHOW_PROGRESS_BAR, true),
@@ -64,8 +64,8 @@ export function buildDefaultSettings(): AppSettings {
                 delay: parseNumber(process.env.DEFAULT_LIVE_PHOTO_DELAY, 1000),
             },
             animation: {
-                type: (process.env.DEFAULT_PHOTO_ANIMATION_TYPE as AppSettings['photos']['animation']['type']) || 'ken-burns',
-                duration: parseNumber(process.env.DEFAULT_PHOTO_ANIMATION_DURATION, parseNumber(process.env.DEFAULT_INTERVAL_MS, 5000)), // Match interval by default
+                type: (process.env.DEFAULT_PHOTO_ANIMATION_TYPE as AppSettings['photos']['animation']['type']) || 'zoom-in',
+                duration: parseNumber(process.env.DEFAULT_PHOTO_ANIMATION_DURATION, parseNumber(process.env.DEFAULT_INTERVAL_MS, 10000)), // Match interval by default
                 intensity: parseFloat(process.env.DEFAULT_PHOTO_ANIMATION_INTENSITY, 1.2),
             },
             metadata: {

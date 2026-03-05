@@ -7,7 +7,7 @@ import type { AppSettings } from './types';
 export const FALLBACK_APP_SETTINGS: AppSettings = {
     slideshow: {
         layout: 'single',
-        intervalMs: 5000,
+        intervalMs: 10000,
         shuffle: true,
         autoplay: true,
         filter: {
@@ -32,8 +32,8 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
             delay: 1000,
         },
         animation: {
-            type: 'ken-burns',
-            duration: 5000, // Should match intervalMs
+            type: 'zoom-in',
+            duration: 10000, // Should match intervalMs
             intensity: 1.2, // 20% zoom/pan
         },
         metadata: {
