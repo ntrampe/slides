@@ -2,6 +2,8 @@
 
 A beautiful, customizable slideshow application for your [Immich](https://immich.app) photo library. Perfect for digital photo frames, kiosks, and displays.
 
+[![Try Demo](https://img.shields.io/badge/Try_Demo_Now-1e293b?style=for-the-badge&logo=rocket&logoColor=white&labelColor=1e293b)](https://ntrampe-slides.netlify.app/)
+
 > [!IMPORTANT]
 > **This project is not affiliated with [Immich](https://github.com/immich-app/immich)**
 
