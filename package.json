@@ -7,6 +7,7 @@
     "dev:ui": "vite",
     "dev:server": "tsx watch src/server/index.ts",
     "build": "tsc -b && vite build",
+    "build:demo": "tsc -b && VITE_USE_MOCK=true vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
