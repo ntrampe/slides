@@ -5,7 +5,7 @@ import type { AppSettings, SettingsRepo } from "../types";
  * Does not handle defaults - that's done by useSettingsData hook.
  */
 export class LocalSettingsRepo implements SettingsRepo {
-    private KEY = 'immich_slides_settings';
+    private KEY = 'slides:settings';
 
     async loadSettings(): Promise<AppSettings | null> {
         const data = localStorage.getItem(this.KEY);
