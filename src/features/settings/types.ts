@@ -1,7 +1,5 @@
-import type { LayoutMode, ObjectFit, PhotoFilterParams } from "../../shared/types/config";
-import type { ThemeMode } from "../theme";
-
-export type PhotoAnimationType = 'none' | 'zoom-in' | 'zoom-out' | 'pan' | 'ken-burns';
+import type { LayoutMode, ObjectFit, PhotoAnimationType, PhotoFilterParams } from "../../features/photos";
+import type { ThemeMode } from "../../features/theme";
 
 export interface AppSettings {
     // Slideshow feature

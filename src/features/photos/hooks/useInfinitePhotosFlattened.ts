@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useInfinitePhotos } from './usePhotos';
-import type { Photo } from '../types';
-import type { PhotoFilterParams } from '../../../shared/types/config';
+import type { Photo, PhotoFilterParams } from '../types';
 
 interface UseInfinitePhotosFlattenedParams extends PhotoFilterParams {
     pageSize?: number;

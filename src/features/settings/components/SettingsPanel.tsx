@@ -5,9 +5,9 @@ import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
-import type { PhotoAnimationType } from '../types';
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
+import type { PhotoAnimationType } from '../../photos';
 
 export interface SettingsPanelProps {
     onClose: () => void;

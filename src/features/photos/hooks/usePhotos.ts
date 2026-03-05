@@ -1,7 +1,7 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useServices } from "../../../shared/context/ServiceContext";
-import type { PhotoFilterParams } from '../../../shared/types/config';
 import { AuthError, ClientError, NetworkError } from "../../../shared/errors";
+import type { PhotoFilterParams } from "../types";
 
 interface UsePhotosParams extends PhotoFilterParams {
     page?: number;

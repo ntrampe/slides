@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { useInfinitePhotosFlattened } from '../../photos';
+import { useInfinitePhotosFlattened, type PhotoFilterParams } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
-import type { PhotoFilterParams } from '../../../shared/types/config';
 import type { UseSlideshowDataReturn } from './types';
 
 interface UseSlideshowDataOptions extends PhotoFilterParams {

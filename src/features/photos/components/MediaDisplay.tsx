@@ -1,8 +1,7 @@
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 import { useIdle } from '../../../shared/hooks';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import type { Photo } from '../types';
-import type { ObjectFit } from '../../../shared/types/config';
+import type { ObjectFit, Photo } from '../types';
 import { useState } from 'react';
 import { LivePhotoDisplay } from './LivePhotoDisplay';
 import { PhotoDisplay } from './PhotoDisplay';

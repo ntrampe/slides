@@ -1,5 +1,4 @@
-import type { ObjectFit } from '../../../shared/types/config';
-import type { Photo } from '../types';
+import type { ObjectFit, Photo } from '../types';
 import { PhotoDisplay } from './PhotoDisplay';
 import { useLivePhoto } from '../hooks/useLivePhoto';
 

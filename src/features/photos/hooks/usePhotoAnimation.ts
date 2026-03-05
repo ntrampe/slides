@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { PhotoAnimationType } from '../../settings/types';
+import type { PhotoAnimationType } from '../types';
 
 export interface UsePhotoAnimationParams {
     type: PhotoAnimationType;

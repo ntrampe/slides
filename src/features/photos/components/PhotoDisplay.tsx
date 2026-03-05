@@ -1,6 +1,5 @@
-import type { ObjectFit } from '../../../shared/types/config';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import type { Photo } from '../types';
+import type { ObjectFit, Photo } from '../types';
 import { usePhotoAnimation } from '../hooks/usePhotoAnimation';
 
 interface PhotoDisplayProps {
