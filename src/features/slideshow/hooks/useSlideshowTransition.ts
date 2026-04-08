@@ -47,20 +47,15 @@ export function useSlideshowTransition({
         // Start transition
         setIsTransitioning(true);
 
-        // After fade out is nearly complete, update photos
-        const updateTimeout = setTimeout(() => {
+        // After fade out is complete, update photos
+        const completeTimeout = setTimeout(() => {
             setDisplayedPhoto(currentPhoto);
             setDisplayedNextPhoto(nextPhoto);
             setDisplayedLayoutClass(layoutClass);
-        }, transitionSettings.duration * 0.8);
-
-        // Complete transition
-        const completeTimeout = setTimeout(() => {
             setIsTransitioning(false);
         }, transitionSettings.duration);
 
         return () => {
-            clearTimeout(updateTimeout);
             clearTimeout(completeTimeout);
         };
     }, [currentPhoto?.id, nextPhoto?.id, layoutClass, transitionSettings.type, transitionSettings.duration]);
