@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useInfinitePhotosFlattened, type PhotoFilterParams } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
 import type { UseSlideshowDataReturn } from './types';
@@ -21,10 +21,21 @@ export function useSlideshowData({
     preloadForward = 5,
     preloadBackward = 2,
 }: UseSlideshowDataOptions): UseSlideshowDataReturn {
-    // 1. Fetch photos with infinite pagination and shuffling
+    // 1. Create resetKey for photo pool / shuffling - resets when filter params change
+    const resetKey = useMemo(
+        () => JSON.stringify({
+            albumIds,
+            personIds,
+            location,
+            startDate,
+            endDate,
+        }),
+        [albumIds, personIds, location, startDate, endDate]
+    );
+
+    // 2. Fetch photos with infinite pagination and shuffling
     const {
         photos,
-        queryKey,
         isLoading,
         isError,
         error,
@@ -40,9 +51,10 @@ export function useSlideshowData({
         endDate,
         pageSize,
         shuffle,
+        resetKey,
     });
 
-    // 2. Use photo pool for preloading
+    // 3. Use photo pool for preloading
     const {
         current: currentLoaded,
         index: currentIndex,
@@ -53,13 +65,12 @@ export function useSlideshowData({
         getPhotoAt,
         poolStats,
     } = usePhotoPool(photos, {
-        resetKey: queryKey, // Reset when query changes
+        resetKey,
         preloadForward,
         preloadBackward,
     });
 
-
-    // 3. Auto-load more photos when getting close to the end
+    // 4. Auto-load more photos when getting close to the end
     useEffect(() => {
         const photosRemaining = photos.length - currentIndex;
         if (photosRemaining <= 10 && hasNextPage && !isFetchingNextPage) {
