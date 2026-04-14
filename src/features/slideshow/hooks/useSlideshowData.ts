@@ -21,9 +21,10 @@ export function useSlideshowData({
     preloadForward = 5,
     preloadBackward = 2,
 }: UseSlideshowDataOptions): UseSlideshowDataReturn {
-    // 1. Fetch photos with infinite pagination
+    // 1. Fetch photos with infinite pagination and shuffling
     const {
         photos,
+        queryKey,
         isLoading,
         isError,
         error,
@@ -38,6 +39,7 @@ export function useSlideshowData({
         startDate,
         endDate,
         pageSize,
+        shuffle,
     });
 
     // 2. Use photo pool for preloading
@@ -51,7 +53,7 @@ export function useSlideshowData({
         getPhotoAt,
         poolStats,
     } = usePhotoPool(photos, {
-        shuffle,
+        resetKey: queryKey, // Reset when query changes
         preloadForward,
         preloadBackward,
     });

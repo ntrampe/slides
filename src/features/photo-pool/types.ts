@@ -1,7 +1,7 @@
 import type { Photo } from "../photos";
 
 export interface PhotoPoolOptions {
-    shuffle?: boolean;
+    resetKey?: string;
     preloadForward?: number;
     preloadBackward?: number;
 }
