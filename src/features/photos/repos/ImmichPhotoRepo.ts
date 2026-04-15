@@ -1,6 +1,18 @@
 import { NETWORK_ERROR_CODES, NetworkError, PhotoError, ServerError } from "../../../shared/errors";
-import type { PhotoRepo, PaginationParams, PaginatedPhotos, Photo, PhotoLocation, PhotoCameraInfo, PhotoExifSettings } from "../types";
+import type { PhotoRepo, PaginationParams, PaginatedPhotos, Photo, PhotoLocation, PhotoCameraInfo, PhotoExifSettings, FilterOperator } from "../types";
 import { parseErrorResponse } from "../utils/errorParser";
+
+interface QueryConfig {
+    albumIds?: string[];
+    personIds?: string[];
+    location?: {
+        country?: string;
+        state?: string;
+        city?: string;
+    };
+    startDate?: string;
+    endDate?: string;
+}
 
 export class ImmichPhotoRepo implements PhotoRepo {
     private proxyUrl = "/api/immich";
@@ -10,99 +22,58 @@ export class ImmichPhotoRepo implements PhotoRepo {
             page = 1,
             pageSize = 100,
             albumIds,
+            albumOperator = 'AND',
             personIds,
+            personOperator = 'AND',
+            excludeAlbumIds,
+            excludePersonIds,
             location,
             startDate,
             endDate,
+            globalOperator = 'AND',
         } = params;
 
-        const searchBody: any = {
-            page,
-            size: pageSize,
-            type: "IMAGE",
-            withExif: true,
-        };
-
-        if (albumIds && albumIds.length > 0) searchBody.albumIds = albumIds;
-        if (personIds && personIds.length > 0) searchBody.personIds = personIds;
-
-        // Add location filters if provided
-        if (location?.country) searchBody.country = location.country;
-        if (location?.state) searchBody.state = location.state;
-        if (location?.city) searchBody.city = location.city;
-
-        // Add date filters if provided
-        if (startDate) searchBody.takenAfter = startDate;  // ISO format
-        if (endDate) searchBody.takenBefore = endDate;      // ISO format
-
         try {
-            const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(searchBody),
+            // Build queries based on operators
+            const queries = this.buildQueries({
+                albumIds,
+                albumOperator,
+                personIds,
+                personOperator,
+                location,
+                startDate,
+                endDate,
+                globalOperator,
             });
 
-            if (!res.ok) {
-                throw await parseErrorResponse(res);
+            // Execute all queries in parallel (each returns up to 1000 photos)
+            const results = await Promise.all(
+                queries.map(query => this.executeSingleQuery(query))
+            );
+
+            // Combine results based on operators
+            let combinedPhotos = this.combineResults(results, {
+                albumOperator,
+                personOperator,
+                globalOperator,
+            });
+
+            console.log(excludeAlbumIds);
+            console.log(excludePersonIds);
+
+            // Apply exclusions if needed
+            if (excludeAlbumIds || excludePersonIds) {
+                combinedPhotos = await this.applyExclusions(combinedPhotos, {
+                    excludeAlbumIds,
+                    excludePersonIds,
+                    location,
+                    startDate,
+                    endDate,
+                });
             }
 
-            const json = await res.json();
-            const assets = json.assets?.items ?? [];
-
-            const photos: Photo[] = assets.map((asset: any) => {
-                // Location data
-                const locationData: PhotoLocation | undefined = asset.exifInfo ? {
-                    city: asset.exifInfo.city,
-                    state: asset.exifInfo.state,
-                    country: asset.exifInfo.country,
-                    latitude: asset.exifInfo.latitude,
-                    longitude: asset.exifInfo.longitude,
-                } : undefined;
-
-                // Camera info
-                const cameraInfo: PhotoCameraInfo | undefined = asset.exifInfo ? {
-                    make: asset.exifInfo.make,
-                    model: asset.exifInfo.model,
-                    lensModel: asset.exifInfo.lensModel,
-                } : undefined;
-
-                // EXIF settings
-                const exifSettings: PhotoExifSettings | undefined = asset.exifInfo ? {
-                    fNumber: asset.exifInfo.fNumber,
-                    exposureTime: asset.exifInfo.exposureTime,
-                    iso: asset.exifInfo.iso,
-                    focalLength: asset.exifInfo.focalLength,
-                } : undefined;
-
-                return {
-                    id: asset.id,
-                    url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
-                    inAppUrl: `https://my.immich.app/photos/${asset.id}`,
-                    livePhotoVideoUrl: asset.livePhotoVideoId
-                        ? `${this.proxyUrl}/api/assets/${asset.livePhotoVideoId}/video/playback`
-                        : undefined,
-                    width: asset.width || asset.exifInfo?.exifImageWidth,
-                    height: asset.height || asset.exifInfo?.exifImageHeight,
-                    type: asset.type as 'IMAGE' | 'VIDEO',
-                    createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
-                    description: asset.exifInfo?.description,
-                    rating: asset.exifInfo?.rating,
-                    isFavorite: asset.isFavorite ?? false,
-                    tags: asset.tags?.map((tag: any) => tag.name) || [],
-                    location: locationData,
-                    camera: cameraInfo,
-                    exifSettings: exifSettings,
-                    orientation: asset.exifInfo?.orientation,
-                    duration: asset.duration,
-                };
-            });
-
-            return {
-                photos,
-                page,
-                pageSize,
-                hasMore: assets.length === pageSize,
-            };
+            // Apply in-memory pagination
+            return this.paginateResults(combinedPhotos, page, pageSize);
 
         } catch (error) {
             // Re-throw if already a PhotoError
@@ -124,5 +95,321 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 500
             );
         }
+    }
+
+    /**
+     * Build query configurations based on filter operators.
+     * OR: Create separate queries for each item
+     * AND: Create single query with all items
+     */
+    private buildQueries(params: {
+        albumIds?: string[];
+        albumOperator: FilterOperator;
+        personIds?: string[];
+        personOperator: FilterOperator;
+        location?: { country?: string; state?: string; city?: string };
+        startDate?: string;
+        endDate?: string;
+        globalOperator: FilterOperator;
+    }): QueryConfig[] {
+        const {
+            albumIds = [],
+            albumOperator,
+            personIds = [],
+            personOperator,
+            location,
+            startDate,
+            endDate,
+            globalOperator,
+        } = params;
+
+        const albumQueries: QueryConfig[] = [];
+        const personQueries: QueryConfig[] = [];
+        const baseQuery: QueryConfig = { location, startDate, endDate };
+
+        // Build album queries
+        if (albumIds.length > 0) {
+            if (albumOperator === 'OR') {
+                // One query per album
+                albumQueries.push(...albumIds.map(id => ({ ...baseQuery, albumIds: [id] })));
+            } else {
+                // AND: Single query with all albums (Immich handles AND)
+                albumQueries.push({ ...baseQuery, albumIds });
+            }
+        }
+
+        // Build person queries
+        if (personIds.length > 0) {
+            if (personOperator === 'OR') {
+                // One query per person
+                personQueries.push(...personIds.map(id => ({ ...baseQuery, personIds: [id] })));
+            } else {
+                // AND: Single query with all people (Immich handles AND)
+                personQueries.push({ ...baseQuery, personIds });
+            }
+        }
+
+        // Combine album and person queries based on globalOperator
+        let queries: QueryConfig[];
+
+        if (albumQueries.length === 0 && personQueries.length === 0) {
+            // No album/person filters, just base query (location/date only)
+            queries = [baseQuery];
+        } else if (globalOperator === 'OR') {
+            // Union of all queries
+            queries = [...albumQueries, ...personQueries];
+        } else {
+            // AND - combine filters
+            if (albumQueries.length > 0 && personQueries.length > 0) {
+                // Cross-product: each album query × each person query
+                queries = [];
+                for (const aq of albumQueries) {
+                    for (const pq of personQueries) {
+                        queries.push({
+                            ...baseQuery,
+                            albumIds: aq.albumIds,
+                            personIds: pq.personIds,
+                        });
+                    }
+                }
+            } else {
+                // Only one type of filter
+                queries = albumQueries.length > 0 ? albumQueries : personQueries;
+            }
+        }
+
+        return queries;
+    }
+
+    /**
+     * Execute a single query against Immich API.
+     * Returns raw photo array (not paginated).
+     */
+    private async executeSingleQuery(query: QueryConfig): Promise<Photo[]> {
+        const searchBody: any = {
+            page: 1,
+            size: 1000,  // Fetch max to simplify pagination
+            type: "IMAGE",
+            withExif: true,
+        };
+
+        if (query.albumIds && query.albumIds.length > 0) {
+            searchBody.albumIds = query.albumIds;
+        }
+        if (query.personIds && query.personIds.length > 0) {
+            searchBody.personIds = query.personIds;
+        }
+        if (query.location?.country) searchBody.country = query.location.country;
+        if (query.location?.state) searchBody.state = query.location.state;
+        if (query.location?.city) searchBody.city = query.location.city;
+        if (query.startDate) searchBody.takenAfter = query.startDate;
+        if (query.endDate) searchBody.takenBefore = query.endDate;
+
+        const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(searchBody),
+        });
+
+        if (!res.ok) {
+            throw await parseErrorResponse(res);
+        }
+
+        const json = await res.json();
+        const assets = json.assets?.items ?? [];
+
+        return assets.map((asset: any) => this.mapAssetToPhoto(asset));
+    }
+
+    /**
+     * Map Immich asset to Photo domain model.
+     */
+    private mapAssetToPhoto(asset: any): Photo {
+        const locationData: PhotoLocation | undefined = asset.exifInfo ? {
+            city: asset.exifInfo.city,
+            state: asset.exifInfo.state,
+            country: asset.exifInfo.country,
+            latitude: asset.exifInfo.latitude,
+            longitude: asset.exifInfo.longitude,
+        } : undefined;
+
+        const cameraInfo: PhotoCameraInfo | undefined = asset.exifInfo ? {
+            make: asset.exifInfo.make,
+            model: asset.exifInfo.model,
+            lensModel: asset.exifInfo.lensModel,
+        } : undefined;
+
+        const exifSettings: PhotoExifSettings | undefined = asset.exifInfo ? {
+            fNumber: asset.exifInfo.fNumber,
+            exposureTime: asset.exifInfo.exposureTime,
+            iso: asset.exifInfo.iso,
+            focalLength: asset.exifInfo.focalLength,
+        } : undefined;
+
+        return {
+            id: asset.id,
+            url: `${this.proxyUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
+            inAppUrl: `https://my.immich.app/photos/${asset.id}`,
+            livePhotoVideoUrl: asset.livePhotoVideoId
+                ? `${this.proxyUrl}/api/assets/${asset.livePhotoVideoId}/video/playback`
+                : undefined,
+            width: asset.width || asset.exifInfo?.exifImageWidth,
+            height: asset.height || asset.exifInfo?.exifImageHeight,
+            type: asset.type as 'IMAGE' | 'VIDEO',
+            createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt),
+            description: asset.exifInfo?.description,
+            rating: asset.exifInfo?.rating,
+            isFavorite: asset.isFavorite ?? false,
+            tags: asset.tags?.map((tag: any) => tag.name) || [],
+            location: locationData,
+            camera: cameraInfo,
+            exifSettings: exifSettings,
+            orientation: asset.exifInfo?.orientation,
+            duration: asset.duration,
+        };
+    }
+
+    /**
+     * Combine multiple result sets based on operators.
+     * Handles deduplication and proper set operations.
+     */
+    private combineResults(
+        results: Photo[][],
+        operators: {
+            albumOperator: FilterOperator;
+            personOperator: FilterOperator;
+            globalOperator: FilterOperator;
+        }
+    ): Photo[] {
+        if (results.length === 0) return [];
+        if (results.length === 1) return results[0];
+
+        // For OR operations: union (deduplicate by ID)
+        if (operators.globalOperator === 'OR' ||
+            operators.albumOperator === 'OR' ||
+            operators.personOperator === 'OR') {
+            return this.unionPhotos(results);
+        }
+
+        // For AND operations: intersection
+        return this.intersectPhotos(results);
+    }
+
+    /**
+     * Union: combine all photos, deduplicate by ID
+     */
+    private unionPhotos(results: Photo[][]): Photo[] {
+        const photoMap = new Map<string, Photo>();
+
+        for (const photoSet of results) {
+            for (const photo of photoSet) {
+                if (!photoMap.has(photo.id)) {
+                    photoMap.set(photo.id, photo);
+                }
+            }
+        }
+
+        return Array.from(photoMap.values());
+    }
+
+    /**
+     * Intersection: only photos that appear in ALL result sets
+     */
+    private intersectPhotos(results: Photo[][]): Photo[] {
+        if (results.length === 0) return [];
+        if (results.length === 1) return results[0];
+
+        // Start with first set
+        const photoMap = new Map<string, Photo>();
+        for (const photo of results[0]) {
+            photoMap.set(photo.id, photo);
+        }
+
+        // Keep only IDs that appear in all subsequent sets
+        for (let i = 1; i < results.length; i++) {
+            const currentIds = new Set(results[i].map(p => p.id));
+
+            for (const id of photoMap.keys()) {
+                if (!currentIds.has(id)) {
+                    photoMap.delete(id);
+                }
+            }
+        }
+
+        return Array.from(photoMap.values());
+    }
+
+    /**
+     * Apply exclusions by fetching photos to exclude and filtering them out.
+     * Items within each exclude list are OR'd together (union).
+     */
+    private async applyExclusions(
+        photos: Photo[],
+        exclusions: {
+            excludeAlbumIds?: string[];
+            excludePersonIds?: string[];
+            location?: { country?: string; state?: string; city?: string };
+            startDate?: string;
+            endDate?: string;
+        }
+    ): Promise<Photo[]> {
+        const excludeQueries: QueryConfig[] = [];
+        const baseQuery: QueryConfig = {
+            location: exclusions.location,
+            startDate: exclusions.startDate,
+            endDate: exclusions.endDate,
+        };
+
+        // Build queries for items to exclude (each item is a separate query, OR'd together)
+        if (exclusions.excludeAlbumIds && exclusions.excludeAlbumIds.length > 0) {
+            excludeQueries.push(
+                ...exclusions.excludeAlbumIds.map(id => ({
+                    ...baseQuery,
+                    albumIds: [id]
+                }))
+            );
+        }
+        if (exclusions.excludePersonIds && exclusions.excludePersonIds.length > 0) {
+            excludeQueries.push(
+                ...exclusions.excludePersonIds.map(id => ({
+                    ...baseQuery,
+                    personIds: [id]
+                }))
+            );
+        }
+
+        if (excludeQueries.length === 0) return photos;
+
+        // Fetch all photos to exclude (union of all exclude queries)
+        const excludeResults = await Promise.all(
+            excludeQueries.map(q => this.executeSingleQuery(q))
+        );
+
+        const excludeIds = new Set(
+            excludeResults.flat().map(p => p.id)
+        );
+
+        // Filter out excluded photos
+        return photos.filter(p => !excludeIds.has(p.id));
+    }
+
+    /**
+     * Apply in-memory pagination to combined results
+     */
+    private paginateResults(
+        photos: Photo[],
+        page: number,
+        pageSize: number
+    ): PaginatedPhotos {
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedPhotos = photos.slice(startIndex, endIndex);
+
+        return {
+            photos: paginatedPhotos,
+            page,
+            pageSize,
+            hasMore: endIndex < photos.length,
+        };
     }
 }

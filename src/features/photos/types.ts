@@ -1,21 +1,37 @@
 export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 export type LayoutMode = 'single' | 'split';
 
+export type FilterOperator = 'AND' | 'OR';
+
 /**
  * Filter options for querying photos.
  * Centralized type for reuse across the application.
  */
 export interface PhotoFilterParams {
+    // Inclusion filters with operators
     albumIds?: string[];
+    albumOperator?: FilterOperator;  // Default: 'AND'
+
     personIds?: string[];
+    personOperator?: FilterOperator;  // Default: 'AND'
+
+    // Exclusion filters (always OR'd together, then subtracted)
+    excludeAlbumIds?: string[];  // Photos in ANY of these albums will be excluded
+    excludePersonIds?: string[];  // Photos with ANY of these people will be excluded
+
     location?: {
         country?: string;
         state?: string;
         city?: string;
     };
-    // Date range filter (ISO date strings)
+
+    // Date range filter (ISO date strings) - always AND
     startDate?: string;  // Inclusive start date (YYYY-MM-DD)
     endDate?: string;    // Inclusive end date (YYYY-MM-DD)
+
+    // Global operator between different filter categories
+    // e.g., (albums) AND (people) vs (albums) OR (people)
+    globalOperator?: FilterOperator;  // Default: 'AND'
 }
 
 export type PhotoAnimationType = 'none' | 'zoom-in' | 'zoom-out' | 'pan' | 'ken-burns';
