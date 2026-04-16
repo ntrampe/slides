@@ -33,12 +33,19 @@ export class ImmichPhotoRepo implements PhotoRepo {
             globalOperator = 'AND',
         } = params;
 
+        // IDs can appear in both selected and excluded (picker Minus on a chip). Inclusion must not
+        // require an entity we later subtract, or AND results empty out.
+        const excludeAlbumSet = new Set(excludeAlbumIds ?? []);
+        const excludePersonSet = new Set(excludePersonIds ?? []);
+        const effectiveAlbumIds = albumIds?.filter((id) => !excludeAlbumSet.has(id));
+        const effectivePersonIds = personIds?.filter((id) => !excludePersonSet.has(id));
+
         try {
             // Build queries based on operators
             const queries = this.buildQueries({
-                albumIds,
+                albumIds: effectiveAlbumIds,
                 albumOperator,
-                personIds,
+                personIds: effectivePersonIds,
                 personOperator,
                 location,
                 startDate,
@@ -57,9 +64,6 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 personOperator,
                 globalOperator,
             });
-
-            console.log(excludeAlbumIds);
-            console.log(excludePersonIds);
 
             // Apply exclusions if needed
             if (excludeAlbumIds || excludePersonIds) {
