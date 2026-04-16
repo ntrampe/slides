@@ -7,7 +7,11 @@ import type { PickerItem, ItemPickerProps } from './types';
 export function ItemPicker<T extends PickerItem>({
     label,
     selectedIds,
+    excludedIds = [],
+    operator = 'AND',
     onChange,
+    onToggleExclusion,
+    onOperatorChange,
     items,
     isLoading,
     error,
@@ -15,6 +19,7 @@ export function ItemPicker<T extends PickerItem>({
     searchPlaceholder = "Search...",
     emptyMessage = "No items selected. Leave empty to show all.",
     noResultsMessage = "No items found",
+    operatorDescription,
     renderImage,
     renderLabel,
 }: ItemPickerProps<T>) {
@@ -72,11 +77,47 @@ export function ItemPicker<T extends PickerItem>({
 
     return (
         <div className="mb-4">
-            <span className="block mb-2">{label}</span>
+            {/* Header with label and operator toggle */}
+            <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">{label}</span>
+                {selectionMode === 'multiple' && selectedIds.length > 0 && onOperatorChange && (
+                    <div className="flex gap-1 text-xs">
+                        <button
+                            className={`px-2 py-1 rounded transition-colors ${operator === 'AND'
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => onOperatorChange('AND')}
+                            title="Photos must be in ALL selected items"
+                        >
+                            ALL
+                        </button>
+                        <button
+                            className={`px-2 py-1 rounded transition-colors ${operator === 'OR'
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => onOperatorChange('OR')}
+                            title="Photos can be in ANY of the selected items"
+                        >
+                            ANY
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Operator description */}
+            {selectionMode === 'multiple' && selectedIds.length > 0 && operatorDescription && (
+                <p className="text-xs text-text-secondary mb-2">
+                    {operatorDescription(operator)}
+                </p>
+            )}
 
             <SelectedItems
                 items={selectedItems}
+                excludedIds={excludedIds}
                 onRemove={handleRemove}
+                onToggleExclusion={onToggleExclusion}
                 selectionMode={selectionMode}
                 renderImage={renderImage}
                 renderLabel={renderLabel}

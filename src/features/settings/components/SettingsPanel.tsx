@@ -7,7 +7,7 @@ import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
-import type { PhotoAnimationType } from '../../photos';
+import type { PhotoAnimationType, FilterOperator } from '../../photos';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -50,18 +50,70 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
             {/* CONTENT */}
             <CollapsibleSection title="Content">
+                {/* Global filter logic */}
+                <div className="flex items-center justify-between mb-2">
+                    <span className="font-small">Combine filters:</span>
+                    <div className="flex gap-1 text-xs">
+                        <button
+                            className={`px-2 py-1 rounded transition-colors ${settings.slideshow.filter.globalOperator === 'AND'
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => updateSettings({
+                                slideshow: { filter: { globalOperator: 'AND' } }
+                            })}
+                            title="Photos must be in ALL selected items"
+                        >
+                            ALL
+                        </button>
+                        <button
+                            className={`px-2 py-1 rounded transition-colors ${settings.slideshow.filter.globalOperator === 'OR'
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
+                                }`}
+                            onClick={() => updateSettings({
+                                slideshow: { filter: { globalOperator: 'OR' } }
+                            })}
+                            title="Photos can be in ANY of the selected items"
+                        >
+                            ANY
+                        </button>
+                    </div>
+                </div>
+                <p className="text-xs text-text-secondary mt-2">
+                    {(settings.slideshow.filter.globalOperator ?? 'AND') === 'AND'
+                        ? 'Photos must satisfy all filter categories (Albums AND People)'
+                        : 'Photos can satisfy any filter category (Albums OR People)'}
+                </p>
+
                 <AlbumPicker
                     label="Albums"
                     selectedIds={settings.slideshow.filter.albumIds || []}
+                    excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
+                    operator={settings.slideshow.filter.albumOperator || 'OR'}
                     onChange={(albumIds) =>
                         updateSettings({ slideshow: { filter: { albumIds } } })
+                    }
+                    onExcludedChange={(excludeAlbumIds) =>
+                        updateSettings({ slideshow: { filter: { excludeAlbumIds } } })
+                    }
+                    onOperatorChange={(albumOperator) =>
+                        updateSettings({ slideshow: { filter: { albumOperator } } })
                     }
                 />
                 <PeoplePicker
                     label="People"
                     selectedIds={settings.slideshow.filter.personIds || []}
+                    excludedIds={settings.slideshow.filter.excludePersonIds || []}
+                    operator={settings.slideshow.filter.personOperator || 'OR'}
                     onChange={(personIds) =>
                         updateSettings({ slideshow: { filter: { personIds } } })
+                    }
+                    onExcludedChange={(excludePersonIds) =>
+                        updateSettings({ slideshow: { filter: { excludePersonIds } } })
+                    }
+                    onOperatorChange={(personOperator) =>
+                        updateSettings({ slideshow: { filter: { personOperator } } })
                     }
                 />
                 <LocationPicker
