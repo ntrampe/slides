@@ -12,10 +12,15 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         autoplay: true,
         filter: {
             albumIds: [],
+            albumOperator: 'AND',
             personIds: [],
+            personOperator: 'AND',
+            excludeAlbumIds: [],
+            excludePersonIds: [],
             location: {},
             startDate: undefined,  // No date filter by default
             endDate: undefined,
+            globalOperator: 'AND',
         },
         transition: {
             type: 'fade',

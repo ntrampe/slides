@@ -44,7 +44,11 @@ export function buildDefaultSettings(): AppSettings {
             autoplay: parseBool(process.env.DEFAULT_AUTOPLAY, fallback.slideshow.autoplay),
             filter: {
                 albumIds: process.env.DEFAULT_ALBUM_IDS ? parseIdArray(process.env.DEFAULT_ALBUM_IDS) : fallback.slideshow.filter.albumIds,
+                albumOperator: (process.env.DEFAULT_ALBUM_OPERATOR as 'AND' | 'OR') || fallback.slideshow.filter.albumOperator,
                 personIds: process.env.DEFAULT_PERSON_IDS ? parseIdArray(process.env.DEFAULT_PERSON_IDS) : fallback.slideshow.filter.personIds,
+                personOperator: (process.env.DEFAULT_PERSON_OPERATOR as 'AND' | 'OR') || fallback.slideshow.filter.personOperator,
+                excludeAlbumIds: process.env.DEFAULT_EXCLUDE_ALBUM_IDS ? parseIdArray(process.env.DEFAULT_EXCLUDE_ALBUM_IDS) : fallback.slideshow.filter.excludeAlbumIds,
+                excludePersonIds: process.env.DEFAULT_EXCLUDE_PERSON_IDS ? parseIdArray(process.env.DEFAULT_EXCLUDE_PERSON_IDS) : fallback.slideshow.filter.excludePersonIds,
                 location: {
                     country: parseString(process.env.DEFAULT_LOCATION_COUNTRY) || fallback.slideshow.filter.location?.country,
                     state: parseString(process.env.DEFAULT_LOCATION_STATE) || fallback.slideshow.filter.location?.state,
@@ -52,6 +56,7 @@ export function buildDefaultSettings(): AppSettings {
                 },
                 startDate: parseString(process.env.DEFAULT_START_DATE) || fallback.slideshow.filter.startDate,  // ISO format: YYYY-MM-DD
                 endDate: parseString(process.env.DEFAULT_END_DATE) || fallback.slideshow.filter.endDate,      // ISO format: YYYY-MM-DD
+                globalOperator: (process.env.DEFAULT_GLOBAL_OPERATOR as 'AND' | 'OR') || fallback.slideshow.filter.globalOperator,
             },
             transition: {
                 type: (process.env.DEFAULT_TRANSITION_TYPE as AppSettings['slideshow']['transition']['type']) || fallback.slideshow.transition.type,
