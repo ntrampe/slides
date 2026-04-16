@@ -12,10 +12,15 @@ interface UseSlideshowDataOptions extends PhotoFilterParams {
 
 export function useSlideshowData({
     albumIds,
+    excludeAlbumIds,
+    albumOperator,
     personIds,
+    excludePersonIds,
+    personOperator,
     location,
     startDate,
     endDate,
+    globalOperator,
     pageSize = 1000,
     shuffle = false,
     preloadForward = 5,
@@ -25,12 +30,17 @@ export function useSlideshowData({
     const resetKey = useMemo(
         () => JSON.stringify({
             albumIds,
+            excludeAlbumIds,
+            albumOperator,
             personIds,
+            excludePersonIds,
+            personOperator,
             location,
             startDate,
             endDate,
+            globalOperator,
         }),
-        [albumIds, personIds, location, startDate, endDate]
+        [albumIds, excludeAlbumIds, albumOperator, personIds, excludePersonIds, personOperator, location, startDate, endDate, globalOperator]
     );
 
     // 2. Fetch photos with infinite pagination and shuffling
@@ -45,10 +55,15 @@ export function useSlideshowData({
         isFetchingNextPage,
     } = useInfinitePhotosFlattened({
         albumIds,
+        excludeAlbumIds,
+        albumOperator,
         personIds,
+        excludePersonIds,
+        personOperator,
         location,
         startDate,
         endDate,
+        globalOperator,
         pageSize,
         shuffle,
         resetKey,

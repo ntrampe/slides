@@ -15,10 +15,15 @@ export function useSlideshow(): UseSlideshowReturn {
     // Data layer: photos, pooling, navigation
     const data = useSlideshowData({
         ...(settings.slideshow.filter.albumIds?.length && { albumIds: settings.slideshow.filter.albumIds }),
+        ...(settings.slideshow.filter.excludeAlbumIds?.length && { excludeAlbumIds: settings.slideshow.filter.excludeAlbumIds }),
+        ...(settings.slideshow.filter.albumOperator && { albumOperator: settings.slideshow.filter.albumOperator }),
         ...(settings.slideshow.filter.personIds?.length && { personIds: settings.slideshow.filter.personIds }),
+        ...(settings.slideshow.filter.excludePersonIds?.length && { excludePersonIds: settings.slideshow.filter.excludePersonIds }),
+        ...(settings.slideshow.filter.personOperator && { personOperator: settings.slideshow.filter.personOperator }),
         ...(settings.slideshow.filter.location && { location: settings.slideshow.filter.location }),
         ...(settings.slideshow.filter.startDate && { startDate: settings.slideshow.filter.startDate }),
         ...(settings.slideshow.filter.endDate && { endDate: settings.slideshow.filter.endDate }),
+        ...(settings.slideshow.filter.globalOperator && { globalOperator: settings.slideshow.filter.globalOperator }),
         pageSize: 1000,
         shuffle: settings.slideshow.shuffle,
         preloadForward: 5,

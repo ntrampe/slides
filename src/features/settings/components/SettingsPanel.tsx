@@ -7,7 +7,7 @@ import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
-import type { PhotoAnimationType, FilterOperator } from '../../photos';
+import type { PhotoAnimationType } from '../../photos';
 
 export interface SettingsPanelProps {
     onClose: () => void;
