@@ -93,6 +93,10 @@ export interface Photo {
     duration?: string;      // For videos
 }
 
+/**
+ * App-level pagination: `page` / `pageSize` slice the fused result set after
+ * client-side filter combination (see ImmichPhotoRepo), not Immich API search pages.
+ */
 export interface PaginationParams extends PhotoFilterParams {
     page?: number;
     pageSize?: number;

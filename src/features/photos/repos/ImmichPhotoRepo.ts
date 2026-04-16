@@ -12,6 +12,9 @@ import {
 } from "../types";
 import { parseErrorResponse } from "../utils/errorParser";
 
+/** Max assets per Immich metadata search request (API ceiling). */
+const IMMICH_SEARCH_PAGE_SIZE = 1000;
+
 interface QueryConfig {
     albumIds?: string[];
     personIds?: string[];
@@ -63,7 +66,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 globalOperator,
             });
 
-            // Execute all queries in parallel (each returns up to 1000 photos)
+            // Execute all queries in parallel (each may issue multiple Immich pages until drained)
             const results = await Promise.all(
                 queries.map(query => this.executeSingleQuery(query))
             );
@@ -75,8 +78,9 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 globalOperator,
             });
 
-            // Apply exclusions if needed
-            if (excludeAlbumIds || excludePersonIds) {
+            const hasExclusions =
+                (excludeAlbumIds?.length ?? 0) > 0 || (excludePersonIds?.length ?? 0) > 0;
+            if (hasExclusions) {
                 combinedPhotos = await this.applyExclusions(combinedPhotos, {
                     excludeAlbumIds,
                     excludePersonIds,
@@ -196,43 +200,57 @@ export class ImmichPhotoRepo implements PhotoRepo {
     }
 
     /**
-     * Execute a single query against Immich API.
-     * Returns raw photo array (not paginated).
+     * Run one logical Immich metadata search: walk Immich `page` until a page returns fewer
+     * than IMMICH_SEARCH_PAGE_SIZE items. Separate from app-level PaginationParams paging in getPhotos.
      */
     private async executeSingleQuery(query: QueryConfig): Promise<Photo[]> {
-        const searchBody: any = {
-            page: 1,
-            size: 1000,  // Fetch max to simplify pagination
-            type: "IMAGE",
-            withExif: true,
-        };
+        const photos: Photo[] = [];
+        let immichPage = 1;
 
-        if (query.albumIds && query.albumIds.length > 0) {
-            searchBody.albumIds = query.albumIds;
+        for (;;) {
+            const searchBody: Record<string, unknown> = {
+                page: immichPage,
+                size: IMMICH_SEARCH_PAGE_SIZE,
+                type: "IMAGE",
+                withExif: true,
+            };
+
+            if (query.albumIds && query.albumIds.length > 0) {
+                searchBody.albumIds = query.albumIds;
+            }
+            if (query.personIds && query.personIds.length > 0) {
+                searchBody.personIds = query.personIds;
+            }
+            if (query.location?.country) searchBody.country = query.location.country;
+            if (query.location?.state) searchBody.state = query.location.state;
+            if (query.location?.city) searchBody.city = query.location.city;
+            if (query.startDate) searchBody.takenAfter = query.startDate;
+            if (query.endDate) searchBody.takenBefore = query.endDate;
+
+            const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(searchBody),
+            });
+
+            if (!res.ok) {
+                throw await parseErrorResponse(res);
+            }
+
+            const json = await res.json();
+            const assets: unknown[] = json.assets?.items ?? [];
+
+            for (const asset of assets) {
+                photos.push(this.mapAssetToPhoto(asset as any));
+            }
+
+            if (assets.length < IMMICH_SEARCH_PAGE_SIZE) {
+                break;
+            }
+            immichPage += 1;
         }
-        if (query.personIds && query.personIds.length > 0) {
-            searchBody.personIds = query.personIds;
-        }
-        if (query.location?.country) searchBody.country = query.location.country;
-        if (query.location?.state) searchBody.state = query.location.state;
-        if (query.location?.city) searchBody.city = query.location.city;
-        if (query.startDate) searchBody.takenAfter = query.startDate;
-        if (query.endDate) searchBody.takenBefore = query.endDate;
 
-        const res = await fetch(`${this.proxyUrl}/api/search/metadata`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(searchBody),
-        });
-
-        if (!res.ok) {
-            throw await parseErrorResponse(res);
-        }
-
-        const json = await res.json();
-        const assets = json.assets?.items ?? [];
-
-        return assets.map((asset: any) => this.mapAssetToPhoto(asset));
+        return photos;
     }
 
     /**
@@ -285,7 +303,9 @@ export class ImmichPhotoRepo implements PhotoRepo {
 
     /**
      * Combine multiple result sets based on operators.
-     * Handles deduplication and proper set operations.
+     * Invariant (with current buildQueries): multiple batches appear only when at least one of
+     * globalOperator, albumOperator, or personOperator is OR, so union is the correct combiner;
+     * otherwise we have a single batch or an AND-only expansion where intersection applies.
      */
     private combineResults(
         results: Photo[][],
@@ -298,7 +318,6 @@ export class ImmichPhotoRepo implements PhotoRepo {
         if (results.length === 0) return [];
         if (results.length === 1) return results[0];
 
-        // For OR operations: union (deduplicate by ID)
         if (operators.globalOperator === 'OR' ||
             operators.albumOperator === 'OR' ||
             operators.personOperator === 'OR') {
