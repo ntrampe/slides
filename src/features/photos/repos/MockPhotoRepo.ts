@@ -1,4 +1,12 @@
-import type { Photo, PhotoRepo, PaginationParams, PaginatedPhotos, PhotoExifSettings } from '../types';
+import {
+    DEFAULT_FILTER_OPERATOR,
+    type FilterOperator,
+    type PaginatedPhotos,
+    type PaginationParams,
+    type Photo,
+    type PhotoExifSettings,
+    type PhotoRepo,
+} from '../types';
 
 const LOCATIONS = [
     { city: 'Malibu', state: 'California', country: 'USA', latitude: 34.0259, longitude: -118.7798 },
@@ -33,6 +41,86 @@ const DESCRIPTIONS = [
     undefined, // Some photos don't have descriptions
     undefined,
 ];
+
+/** Album ids aligned with MockAlbumRepo. */
+function mockAlbumMembershipForPhotoId(photoId: string): string[] {
+    const n = Number.parseInt(photoId, 10) || 0;
+    const out: string[] = [];
+    for (let a = 1; a <= 5; a++) {
+        if ((n + a * 7) % 11 < 5) {
+            out.push(`mock-album-${a}`);
+        }
+    }
+    if (out.length === 0) {
+        out.push('mock-album-1');
+    }
+    return out;
+}
+
+/** Person ids aligned with MockPeopleRepo. */
+function mockPersonMembershipForPhotoId(photoId: string): string[] {
+    const n = Number.parseInt(photoId, 10) || 0;
+    const out: string[] = [];
+    for (let p = 1; p <= 5; p++) {
+        if ((n + p * 13) % 17 < 6) {
+            out.push(`mock-${p}`);
+        }
+    }
+    if (out.length === 0) {
+        out.push('mock-1');
+    }
+    return out;
+}
+
+interface QueryConfig {
+    albumIds?: string[];
+    personIds?: string[];
+    location?: {
+        country?: string;
+        state?: string;
+        city?: string;
+    };
+    startDate?: string;
+    endDate?: string;
+}
+
+function normField(value: string | undefined): string | undefined {
+    if (value === undefined || value === '') return undefined;
+    return value.trim().toLowerCase();
+}
+
+function matchesLocation(
+    photo: Photo,
+    location: NonNullable<QueryConfig['location']> | undefined
+): boolean {
+    if (!location) return true;
+    const pl = photo.location;
+    if (!pl) return false;
+    if (location.country !== undefined && location.country !== '') {
+        if (normField(pl.country) !== normField(location.country)) return false;
+    }
+    if (location.state !== undefined && location.state !== '') {
+        if (normField(pl.state) !== normField(location.state)) return false;
+    }
+    if (location.city !== undefined && location.city !== '') {
+        if (normField(pl.city) !== normField(location.city)) return false;
+    }
+    return true;
+}
+
+/** Inclusive YYYY-MM-DD using UTC day boundaries. */
+function matchesDateRange(photo: Photo, startDate?: string, endDate?: string): boolean {
+    const t = photo.createdAt.getTime();
+    if (startDate) {
+        const start = new Date(`${startDate}T00:00:00.000Z`).getTime();
+        if (t < start) return false;
+    }
+    if (endDate) {
+        const end = new Date(`${endDate}T23:59:59.999Z`).getTime();
+        if (t > end) return false;
+    }
+    return true;
+}
 
 /**
  * Generate a random date between the start and end dates
@@ -108,22 +196,281 @@ function generateMockPhotos(count: number): Photo[] {
 }
 
 export class MockPhotoRepo implements PhotoRepo {
-    private allPhotos: Photo[] = generateMockPhotos(500);
+    private readonly allPhotos: Photo[];
+    private readonly photoAlbums = new Map<string, ReadonlySet<string>>();
+    private readonly photoPeople = new Map<string, ReadonlySet<string>>();
+
+    constructor() {
+        this.allPhotos = generateMockPhotos(500);
+        for (const p of this.allPhotos) {
+            this.photoAlbums.set(p.id, new Set(mockAlbumMembershipForPhotoId(p.id)));
+            this.photoPeople.set(p.id, new Set(mockPersonMembershipForPhotoId(p.id)));
+        }
+    }
 
     async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
-        const { page = 1, pageSize = 10 } = params;
+        const {
+            page = 1,
+            pageSize = 10,
+            albumIds,
+            albumOperator = DEFAULT_FILTER_OPERATOR,
+            personIds,
+            personOperator = DEFAULT_FILTER_OPERATOR,
+            excludeAlbumIds,
+            excludePersonIds,
+            location,
+            startDate,
+            endDate,
+            globalOperator = DEFAULT_FILTER_OPERATOR,
+        } = params;
+
+        const excludeAlbumSet = new Set(excludeAlbumIds ?? []);
+        const excludePersonSet = new Set(excludePersonIds ?? []);
+        const effectiveAlbumIds = albumIds?.filter((id) => !excludeAlbumSet.has(id));
+        const effectivePersonIds = personIds?.filter((id) => !excludePersonSet.has(id));
+
+        const queries = this.buildQueries({
+            albumIds: effectiveAlbumIds,
+            albumOperator,
+            personIds: effectivePersonIds,
+            personOperator,
+            location,
+            startDate,
+            endDate,
+            globalOperator,
+        });
+
+        const results = queries.map((query) => this.executeSingleQuery(query));
+
+        let combinedPhotos = this.combineResults(results, {
+            albumOperator,
+            personOperator,
+            globalOperator,
+        });
+
+        const hasExclusions =
+            (excludeAlbumIds?.length ?? 0) > 0 || (excludePersonIds?.length ?? 0) > 0;
+        if (hasExclusions) {
+            combinedPhotos = this.applyExclusions(combinedPhotos, {
+                excludeAlbumIds,
+                excludePersonIds,
+                location,
+                startDate,
+                endDate,
+            });
+        }
+
+        return this.paginateResults(combinedPhotos, page, pageSize);
+    }
+
+    private buildQueries(params: {
+        albumIds?: string[];
+        albumOperator: FilterOperator;
+        personIds?: string[];
+        personOperator: FilterOperator;
+        location?: { country?: string; state?: string; city?: string };
+        startDate?: string;
+        endDate?: string;
+        globalOperator: FilterOperator;
+    }): QueryConfig[] {
+        const {
+            albumIds = [],
+            albumOperator,
+            personIds = [],
+            personOperator,
+            location,
+            startDate,
+            endDate,
+            globalOperator,
+        } = params;
+
+        const albumQueries: QueryConfig[] = [];
+        const personQueries: QueryConfig[] = [];
+        const baseQuery: QueryConfig = { location, startDate, endDate };
+
+        if (albumIds.length > 0) {
+            if (albumOperator === 'OR') {
+                albumQueries.push(...albumIds.map((id) => ({ ...baseQuery, albumIds: [id] })));
+            } else {
+                albumQueries.push({ ...baseQuery, albumIds });
+            }
+        }
+
+        if (personIds.length > 0) {
+            if (personOperator === 'OR') {
+                personQueries.push(...personIds.map((id) => ({ ...baseQuery, personIds: [id] })));
+            } else {
+                personQueries.push({ ...baseQuery, personIds });
+            }
+        }
+
+        let queries: QueryConfig[];
+
+        if (albumQueries.length === 0 && personQueries.length === 0) {
+            queries = [baseQuery];
+        } else if (globalOperator === 'OR') {
+            queries = [...albumQueries, ...personQueries];
+        } else {
+            if (albumQueries.length > 0 && personQueries.length > 0) {
+                queries = [];
+                for (const aq of albumQueries) {
+                    for (const pq of personQueries) {
+                        queries.push({
+                            ...baseQuery,
+                            albumIds: aq.albumIds,
+                            personIds: pq.personIds,
+                        });
+                    }
+                }
+            } else {
+                queries = albumQueries.length > 0 ? albumQueries : personQueries;
+            }
+        }
+
+        return queries;
+    }
+
+    private executeSingleQuery(query: QueryConfig): Photo[] {
+        return this.allPhotos.filter((photo) => this.photoMatchesQuery(photo, query));
+    }
+
+    private photoMatchesQuery(photo: Photo, query: QueryConfig): boolean {
+        if (!matchesLocation(photo, query.location)) {
+            return false;
+        }
+        if (!matchesDateRange(photo, query.startDate, query.endDate)) {
+            return false;
+        }
+
+        const albums = this.photoAlbums.get(photo.id);
+        if (query.albumIds && query.albumIds.length > 0) {
+            if (!albums) return false;
+            for (const id of query.albumIds) {
+                if (!albums.has(id)) return false;
+            }
+        }
+
+        const people = this.photoPeople.get(photo.id);
+        if (query.personIds && query.personIds.length > 0) {
+            if (!people) return false;
+            for (const id of query.personIds) {
+                if (!people.has(id)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    private combineResults(
+        results: Photo[][],
+        operators: {
+            albumOperator: FilterOperator;
+            personOperator: FilterOperator;
+            globalOperator: FilterOperator;
+        }
+    ): Photo[] {
+        if (results.length === 0) return [];
+        if (results.length === 1) return results[0];
+
+        if (
+            operators.globalOperator === 'OR' ||
+            operators.albumOperator === 'OR' ||
+            operators.personOperator === 'OR'
+        ) {
+            return this.unionPhotos(results);
+        }
+
+        return this.intersectPhotos(results);
+    }
+
+    private unionPhotos(results: Photo[][]): Photo[] {
+        const photoMap = new Map<string, Photo>();
+
+        for (const photoSet of results) {
+            for (const photo of photoSet) {
+                if (!photoMap.has(photo.id)) {
+                    photoMap.set(photo.id, photo);
+                }
+            }
+        }
+
+        return Array.from(photoMap.values());
+    }
+
+    private intersectPhotos(results: Photo[][]): Photo[] {
+        if (results.length === 0) return [];
+        if (results.length === 1) return results[0];
+
+        const photoMap = new Map<string, Photo>();
+        for (const photo of results[0]) {
+            photoMap.set(photo.id, photo);
+        }
+
+        for (let i = 1; i < results.length; i++) {
+            const currentIds = new Set(results[i].map((p) => p.id));
+
+            for (const id of photoMap.keys()) {
+                if (!currentIds.has(id)) {
+                    photoMap.delete(id);
+                }
+            }
+        }
+
+        return Array.from(photoMap.values());
+    }
+
+    private applyExclusions(
+        photos: Photo[],
+        exclusions: {
+            excludeAlbumIds?: string[];
+            excludePersonIds?: string[];
+            location?: { country?: string; state?: string; city?: string };
+            startDate?: string;
+            endDate?: string;
+        }
+    ): Photo[] {
+        const excludeQueries: QueryConfig[] = [];
+        const baseQuery: QueryConfig = {
+            location: exclusions.location,
+            startDate: exclusions.startDate,
+            endDate: exclusions.endDate,
+        };
+
+        if (exclusions.excludeAlbumIds && exclusions.excludeAlbumIds.length > 0) {
+            excludeQueries.push(
+                ...exclusions.excludeAlbumIds.map((id) => ({
+                    ...baseQuery,
+                    albumIds: [id],
+                }))
+            );
+        }
+        if (exclusions.excludePersonIds && exclusions.excludePersonIds.length > 0) {
+            excludeQueries.push(
+                ...exclusions.excludePersonIds.map((id) => ({
+                    ...baseQuery,
+                    personIds: [id],
+                }))
+            );
+        }
+
+        if (excludeQueries.length === 0) return photos;
+
+        const excludeResults = excludeQueries.map((q) => this.executeSingleQuery(q));
+        const excludeIds = new Set(excludeResults.flat().map((p) => p.id));
+
+        return photos.filter((p) => !excludeIds.has(p.id));
+    }
+
+    private paginateResults(photos: Photo[], page: number, pageSize: number): PaginatedPhotos {
         const startIndex = (page - 1) * pageSize;
         const endIndex = startIndex + pageSize;
-
-        const photos = this.allPhotos.slice(startIndex, endIndex);
-        const total = this.allPhotos.length;
-        const hasMore = endIndex < total;
+        const paginatedPhotos = photos.slice(startIndex, endIndex);
 
         return {
-            photos,
+            photos: paginatedPhotos,
             page,
             pageSize,
-            hasMore,
+            hasMore: endIndex < photos.length,
         };
     }
 }
