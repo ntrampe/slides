@@ -5,6 +5,7 @@ import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
+import { FilterOperatorToggle } from "../../../shared/components/picker/FilterOperatorToggle";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
 import type { PhotoAnimationType } from '../../photos';
@@ -53,32 +54,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 {/* Global filter logic */}
                 <div className="flex items-center justify-between mb-2">
                     <span className="font-small">Combine filters:</span>
-                    <div className="flex gap-1 text-xs">
-                        <button
-                            className={`px-2 py-1 rounded transition-colors ${settings.slideshow.filter.globalOperator === 'AND'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
-                                }`}
-                            onClick={() => updateSettings({
-                                slideshow: { filter: { globalOperator: 'AND' } }
-                            })}
-                            title="Photos must be in ALL selected items"
-                        >
-                            ALL
-                        </button>
-                        <button
-                            className={`px-2 py-1 rounded transition-colors ${settings.slideshow.filter.globalOperator === 'OR'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
-                                }`}
-                            onClick={() => updateSettings({
-                                slideshow: { filter: { globalOperator: 'OR' } }
-                            })}
-                            title="Photos can be in ANY of the selected items"
-                        >
-                            ANY
-                        </button>
-                    </div>
+                    <FilterOperatorToggle
+                        value={settings.slideshow.filter.globalOperator ?? 'AND'}
+                        onChange={(globalOperator) =>
+                            updateSettings({ slideshow: { filter: { globalOperator } } })
+                        }
+                    />
                 </div>
                 <p className="text-xs text-text-secondary mt-2">
                     {(settings.slideshow.filter.globalOperator ?? 'AND') === 'AND'
@@ -91,11 +72,8 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     selectedIds={settings.slideshow.filter.albumIds || []}
                     excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
                     operator={settings.slideshow.filter.albumOperator || 'OR'}
-                    onChange={(albumIds) =>
-                        updateSettings({ slideshow: { filter: { albumIds } } })
-                    }
-                    onExcludedChange={(excludeAlbumIds) =>
-                        updateSettings({ slideshow: { filter: { excludeAlbumIds } } })
+                    onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
+                        updateSettings({ slideshow: { filter: { albumIds, excludeAlbumIds } } })
                     }
                     onOperatorChange={(albumOperator) =>
                         updateSettings({ slideshow: { filter: { albumOperator } } })
@@ -106,11 +84,8 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     selectedIds={settings.slideshow.filter.personIds || []}
                     excludedIds={settings.slideshow.filter.excludePersonIds || []}
                     operator={settings.slideshow.filter.personOperator || 'OR'}
-                    onChange={(personIds) =>
-                        updateSettings({ slideshow: { filter: { personIds } } })
-                    }
-                    onExcludedChange={(excludePersonIds) =>
-                        updateSettings({ slideshow: { filter: { excludePersonIds } } })
+                    onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
+                        updateSettings({ slideshow: { filter: { personIds, excludePersonIds } } })
                     }
                     onOperatorChange={(personOperator) =>
                         updateSettings({ slideshow: { filter: { personOperator } } })

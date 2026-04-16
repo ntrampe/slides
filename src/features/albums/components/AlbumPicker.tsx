@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 import { ItemPicker } from '../../../shared/components/picker/ItemPicker';
+import { pickerSubtitleLabel, renderImmichThumbnail } from '../../../shared/components/picker/pickerRenderers';
 import { useAlbums } from '../hooks/useAlbums';
-import type { PickerItem } from '../../../shared/components/picker/types';
+import type { PickerItem, PickerSelectionState } from '../../../shared/components/picker/types';
 import type { FilterOperator } from '../../photos/types';
 
 interface AlbumPickerProps {
     selectedIds: string[];
     excludedIds?: string[];
     operator?: FilterOperator;
-    onChange: (ids: string[]) => void;
-    onExcludedChange?: (ids: string[]) => void;
+    onBulkChange: (next: PickerSelectionState) => void;
     onOperatorChange?: (operator: FilterOperator) => void;
     label: string;
 }
@@ -18,14 +18,12 @@ export const AlbumPicker = ({
     selectedIds,
     excludedIds = [],
     operator = 'OR',
-    onChange,
-    onExcludedChange,
+    onBulkChange,
     onOperatorChange,
     label
 }: AlbumPickerProps) => {
     const { data: albums, isLoading, error } = useAlbums();
 
-    // Map Album to PickerItem
     const pickerItems = useMemo<PickerItem[]>(() => {
         if (!albums) return [];
         return albums.map(album => ({
@@ -36,26 +34,13 @@ export const AlbumPicker = ({
         }));
     }, [albums]);
 
-    const handleToggleExclusion = (itemId: string) => {
-        if (!onExcludedChange) return;
-
-        if (excludedIds.includes(itemId)) {
-            // Remove from excluded
-            onExcludedChange(excludedIds.filter(id => id !== itemId));
-        } else {
-            // Add to excluded
-            onExcludedChange([...excludedIds, itemId]);
-        }
-    };
-
     return (
         <ItemPicker
             label={label}
             selectedIds={selectedIds}
             excludedIds={excludedIds}
             operator={operator}
-            onChange={onChange}
-            onToggleExclusion={handleToggleExclusion}
+            onBulkChange={onBulkChange}
             onOperatorChange={onOperatorChange}
             items={pickerItems}
             isLoading={isLoading}
@@ -65,28 +50,8 @@ export const AlbumPicker = ({
             operatorDescription={(op) =>
                 `Include photos with ${op === 'AND' ? 'ALL' : 'ANY'} of these albums`
             }
-            renderImage={(item) => (
-                item.imageUrl ? (
-                    <img
-                        src={item.imageUrl}
-                        alt={item.label}
-                        className="w-10 h-10 rounded object-cover"
-                        onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            const sibling = e.currentTarget.nextElementSibling as HTMLElement;
-                            if (sibling) sibling.classList.remove('hidden');
-                        }}
-                    />
-                ) : null
-            )}
-            renderLabel={(item) => (
-                <div>
-                    <div>{item.label}</div>
-                    {item.subtitle && (
-                        <div className="text-xs text-text-tertiary">{item.subtitle}</div>
-                    )}
-                </div>
-            )}
+            renderImage={(item) => renderImmichThumbnail(item, 'album')}
+            renderLabel={pickerSubtitleLabel}
         />
     );
 };

@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { SelectedItems } from './SelectedItems';
+import { ExcludedItems } from './ExcludedItems';
 import { SearchInput } from './SearchInput';
 import { ItemDropdown } from './ItemDropdown';
+import { FilterOperatorToggle } from './FilterOperatorToggle';
 import type { PickerItem, ItemPickerProps } from './types';
 
 export function ItemPicker<T extends PickerItem>({
@@ -10,7 +12,8 @@ export function ItemPicker<T extends PickerItem>({
     excludedIds = [],
     operator = 'AND',
     onChange,
-    onToggleExclusion,
+    onExcludedChange,
+    onBulkChange,
     onOperatorChange,
     items,
     isLoading,
@@ -26,7 +29,27 @@ export function ItemPicker<T extends PickerItem>({
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // Filter items based on search query
+    if (!onBulkChange && !onChange) {
+        throw new Error('ItemPicker requires onChange or onBulkChange');
+    }
+
+    const commitSelection = useCallback(
+        (nextSelected: string[], nextExcluded: string[]) => {
+            if (onBulkChange) {
+                onBulkChange({ selectedIds: nextSelected, excludedIds: nextExcluded });
+            } else {
+                onChange!(nextSelected);
+                const excludedUnchanged =
+                    nextExcluded.length === excludedIds.length &&
+                    nextExcluded.every((id, i) => id === excludedIds[i]);
+                if (!excludedUnchanged) {
+                    onExcludedChange?.(nextExcluded);
+                }
+            }
+        },
+        [onBulkChange, onChange, onExcludedChange, excludedIds]
+    );
+
     const filteredItems = useMemo(() => {
         if (!searchQuery.trim()) return items;
         const query = searchQuery.toLowerCase();
@@ -36,35 +59,46 @@ export function ItemPicker<T extends PickerItem>({
         );
     }, [items, searchQuery]);
 
-    // Get selected items
     const selectedItems = useMemo(() => {
         return items.filter(item => selectedIds.includes(item.id));
     }, [items, selectedIds]);
 
-    // Available items
     const availableItems = useMemo(() => {
         if (selectionMode === 'single') {
-            // In single mode, show all filtered items (user can replace selection)
             return filteredItems;
         }
-        // In multiple mode, hide already selected items
         return filteredItems.filter(item => !selectedIds.includes(item.id));
     }, [filteredItems, selectedIds, selectionMode]);
 
     const handleRemove = (itemId: string) => {
-        onChange(selectedIds.filter(id => id !== itemId));
+        commitSelection(
+            selectedIds.filter(id => id !== itemId),
+            excludedIds.filter(id => id !== itemId)
+        );
+    };
+
+    const handleMoveToExcluded = (itemId: string) => {
+        if (!onBulkChange && !onExcludedChange) return;
+        if (excludedIds.includes(itemId)) return;
+        commitSelection(
+            selectedIds.filter(id => id !== itemId),
+            [...excludedIds, itemId]
+        );
+    };
+
+    const handleRemoveExcluded = (itemId: string) => {
+        commitSelection(selectedIds, excludedIds.filter(id => id !== itemId));
     };
 
     const handleSelect = (itemId: string) => {
-        if (selectionMode === 'single') {
-            // Replace selection
-            onChange([itemId]);
-        } else {
-            // Add to selection
-            onChange([...selectedIds, itemId]);
-        }
+        const nextSelected =
+            selectionMode === 'single' ? [itemId] : [...selectedIds, itemId];
+        const nextExcluded = excludedIds.filter(id => id !== itemId);
+        commitSelection(nextSelected, nextExcluded);
         setSearchQuery('');
     };
+
+    const exclusionEnabled = Boolean(onBulkChange || onExcludedChange);
 
     if (error) {
         return (
@@ -77,36 +111,13 @@ export function ItemPicker<T extends PickerItem>({
 
     return (
         <div className="mb-4">
-            {/* Header with label and operator toggle */}
             <div className="flex items-center justify-between mb-2">
                 <span className="font-medium">{label}</span>
                 {selectionMode === 'multiple' && selectedIds.length > 0 && onOperatorChange && (
-                    <div className="flex gap-1 text-xs">
-                        <button
-                            className={`px-2 py-1 rounded transition-colors ${operator === 'AND'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
-                                }`}
-                            onClick={() => onOperatorChange('AND')}
-                            title="Photos must be in ALL selected items"
-                        >
-                            ALL
-                        </button>
-                        <button
-                            className={`px-2 py-1 rounded transition-colors ${operator === 'OR'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
-                                }`}
-                            onClick={() => onOperatorChange('OR')}
-                            title="Photos can be in ANY of the selected items"
-                        >
-                            ANY
-                        </button>
-                    </div>
+                    <FilterOperatorToggle value={operator} onChange={onOperatorChange} />
                 )}
             </div>
 
-            {/* Operator description */}
             {selectionMode === 'multiple' && selectedIds.length > 0 && operatorDescription && (
                 <p className="text-xs text-text-secondary mb-2">
                     {operatorDescription(operator)}
@@ -115,13 +126,22 @@ export function ItemPicker<T extends PickerItem>({
 
             <SelectedItems
                 items={selectedItems}
-                excludedIds={excludedIds}
                 onRemove={handleRemove}
-                onToggleExclusion={onToggleExclusion}
+                onExclude={exclusionEnabled ? handleMoveToExcluded : undefined}
                 selectionMode={selectionMode}
                 renderImage={renderImage}
                 renderLabel={renderLabel}
             />
+
+            {exclusionEnabled && (
+                <ExcludedItems
+                    excludedIds={excludedIds}
+                    items={items}
+                    onRemoveExcluded={handleRemoveExcluded}
+                    renderImage={renderImage}
+                    renderLabel={renderLabel}
+                />
+            )}
 
             <div className="relative">
                 <SearchInput

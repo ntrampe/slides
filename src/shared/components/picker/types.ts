@@ -10,13 +10,24 @@ export interface PickerItem {
     subtitle?: string;
 }
 
+export interface PickerSelectionState {
+    selectedIds: string[];
+    excludedIds: string[];
+}
+
 export interface ItemPickerProps<T extends PickerItem> {
     label: string;
     selectedIds: string[];
     excludedIds?: string[];
     operator?: FilterOperator;
-    onChange: (ids: string[]) => void;
-    onToggleExclusion?: (id: string) => void;
+    /**
+     * Prefer this when selection and exclusions must persist together (e.g. settings deep-merge).
+     * Avoids two sequential updates that each read the same stale saved snapshot.
+     */
+    onBulkChange?: (next: PickerSelectionState) => void;
+    /** Used when `onBulkChange` is not set (e.g. location pickers). */
+    onChange?: (ids: string[]) => void;
+    onExcludedChange?: (ids: string[]) => void;
     onOperatorChange?: (operator: FilterOperator) => void;
     items: T[];
     isLoading: boolean;
@@ -32,9 +43,8 @@ export interface ItemPickerProps<T extends PickerItem> {
 
 export interface SelectedItemsProps<T extends PickerItem> {
     items: T[];
-    excludedIds?: string[];
     onRemove: (id: string) => void;
-    onToggleExclusion?: (id: string) => void;
+    onExclude?: (id: string) => void;
     selectionMode?: SelectionMode;
     renderImage?: (item: T) => ReactNode;
     renderLabel?: (item: T) => ReactNode;
