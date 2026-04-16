@@ -3,6 +3,9 @@ export type LayoutMode = 'single' | 'split';
 
 export type FilterOperator = 'AND' | 'OR';
 
+/** Default for album, person, and global filter combination operators. */
+export const DEFAULT_FILTER_OPERATOR: FilterOperator = 'AND';
+
 /**
  * Filter options for querying photos.
  * Centralized type for reuse across the application.

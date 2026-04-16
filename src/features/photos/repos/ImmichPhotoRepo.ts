@@ -1,5 +1,15 @@
 import { NETWORK_ERROR_CODES, NetworkError, PhotoError, ServerError } from "../../../shared/errors";
-import type { PhotoRepo, PaginationParams, PaginatedPhotos, Photo, PhotoLocation, PhotoCameraInfo, PhotoExifSettings, FilterOperator } from "../types";
+import {
+    DEFAULT_FILTER_OPERATOR,
+    type FilterOperator,
+    type PaginatedPhotos,
+    type PaginationParams,
+    type Photo,
+    type PhotoCameraInfo,
+    type PhotoExifSettings,
+    type PhotoLocation,
+    type PhotoRepo,
+} from "../types";
 import { parseErrorResponse } from "../utils/errorParser";
 
 interface QueryConfig {
@@ -22,15 +32,15 @@ export class ImmichPhotoRepo implements PhotoRepo {
             page = 1,
             pageSize = 100,
             albumIds,
-            albumOperator = 'AND',
+            albumOperator = DEFAULT_FILTER_OPERATOR,
             personIds,
-            personOperator = 'AND',
+            personOperator = DEFAULT_FILTER_OPERATOR,
             excludeAlbumIds,
             excludePersonIds,
             location,
             startDate,
             endDate,
-            globalOperator = 'AND',
+            globalOperator = DEFAULT_FILTER_OPERATOR,
         } = params;
 
         // IDs can appear in both selected and excluded (picker Minus on a chip). Inclusion must not

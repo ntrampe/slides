@@ -8,7 +8,7 @@ import { CollapsibleSection } from "../../../shared/components";
 import { FilterOperatorToggle } from "../../../shared/components/picker/FilterOperatorToggle";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
-import type { PhotoAnimationType } from '../../photos';
+import { DEFAULT_FILTER_OPERATOR, type PhotoAnimationType } from '../../photos';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -71,7 +71,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     label="Albums"
                     selectedIds={settings.slideshow.filter.albumIds || []}
                     excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
-                    operator={settings.slideshow.filter.albumOperator || 'OR'}
+                    operator={settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR}
                     onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
                         updateSettings({ slideshow: { filter: { albumIds, excludeAlbumIds } } })
                     }
@@ -83,7 +83,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     label="People"
                     selectedIds={settings.slideshow.filter.personIds || []}
                     excludedIds={settings.slideshow.filter.excludePersonIds || []}
-                    operator={settings.slideshow.filter.personOperator || 'OR'}
+                    operator={settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR}
                     onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
                         updateSettings({ slideshow: { filter: { personIds, excludePersonIds } } })
                     }

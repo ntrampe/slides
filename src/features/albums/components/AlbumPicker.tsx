@@ -17,7 +17,7 @@ interface AlbumPickerProps {
 export const AlbumPicker = ({
     selectedIds,
     excludedIds = [],
-    operator = 'OR',
+    operator = 'AND',
     onBulkChange,
     onOperatorChange,
     label

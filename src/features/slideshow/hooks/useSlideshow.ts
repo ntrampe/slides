@@ -6,7 +6,7 @@ import { useSlideshowTimer } from './useSlideshowTimer';
 import { useSlideshowKeyboard } from './useSlideshowKeyboard';
 import { useSlideshowTransition } from './useSlideshowTransition';
 import type { UseSlideshowReturn } from './types';
-import type { Photo } from '../../photos';
+import { DEFAULT_FILTER_OPERATOR, type Photo } from '../../photos';
 
 export function useSlideshow(): UseSlideshowReturn {
     const { settings } = useSettingsData();
@@ -16,14 +16,14 @@ export function useSlideshow(): UseSlideshowReturn {
     const data = useSlideshowData({
         ...(settings.slideshow.filter.albumIds?.length && { albumIds: settings.slideshow.filter.albumIds }),
         ...(settings.slideshow.filter.excludeAlbumIds?.length && { excludeAlbumIds: settings.slideshow.filter.excludeAlbumIds }),
-        ...(settings.slideshow.filter.albumOperator && { albumOperator: settings.slideshow.filter.albumOperator }),
         ...(settings.slideshow.filter.personIds?.length && { personIds: settings.slideshow.filter.personIds }),
         ...(settings.slideshow.filter.excludePersonIds?.length && { excludePersonIds: settings.slideshow.filter.excludePersonIds }),
-        ...(settings.slideshow.filter.personOperator && { personOperator: settings.slideshow.filter.personOperator }),
         ...(settings.slideshow.filter.location && { location: settings.slideshow.filter.location }),
         ...(settings.slideshow.filter.startDate && { startDate: settings.slideshow.filter.startDate }),
         ...(settings.slideshow.filter.endDate && { endDate: settings.slideshow.filter.endDate }),
-        ...(settings.slideshow.filter.globalOperator && { globalOperator: settings.slideshow.filter.globalOperator }),
+        albumOperator: settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR,
+        personOperator: settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR,
+        globalOperator: settings.slideshow.filter.globalOperator ?? DEFAULT_FILTER_OPERATOR,
         pageSize: 1000,
         shuffle: settings.slideshow.shuffle,
         preloadForward: 5,
