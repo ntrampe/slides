@@ -36,14 +36,6 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 error={error}
                 searchPlaceholder="Search countries..."
                 emptyMessage=""
-                renderLabel={(item) => (
-                    <div>
-                        <div>{item.label}</div>
-                        {item.subtitle && (
-                            <div className="text-xs text-text-tertiary">{item.subtitle}</div>
-                        )}
-                    </div>
-                )}
             />
 
             {/* State/Province Picker */}
@@ -57,14 +49,6 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 error={error}
                 searchPlaceholder="Search states/provinces..."
                 emptyMessage=""
-                renderLabel={(item) => (
-                    <div>
-                        <div>{item.label}</div>
-                        {item.subtitle && (
-                            <div className="text-xs text-text-tertiary">{item.subtitle}</div>
-                        )}
-                    </div>
-                )}
             />
 
             {/* City Picker */}
@@ -78,14 +62,6 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 error={error}
                 searchPlaceholder="Search cities..."
                 emptyMessage=""
-                renderLabel={(item) => (
-                    <div>
-                        <div>{item.label}</div>
-                        {item.subtitle && (
-                            <div className="text-xs text-text-tertiary">{item.subtitle}</div>
-                        )}
-                    </div>
-                )}
             />
         </div>
     );

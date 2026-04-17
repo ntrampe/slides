@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ItemPicker } from '../../../shared/components/picker/ItemPicker';
-import { pickerSubtitleLabel, renderImmichThumbnail } from '../../../shared/components/picker/pickerRenderers';
+import { renderImmichThumbnail } from '../../../shared/components/picker/pickerRenderers';
 import { useAlbums } from '../hooks/useAlbums';
 import type { PickerItem, PickerSelectionState } from '../../../shared/components/picker/types';
 import type { FilterOperator } from '../../photos/types';
@@ -29,8 +29,7 @@ export const AlbumPicker = ({
         return albums.map(album => ({
             id: album.id,
             label: album.name,
-            imageUrl: album.thumbnailUrl,
-            subtitle: `${album.assetCount} photo${album.assetCount !== 1 ? 's' : ''}`,
+            imageUrl: album.thumbnailUrl
         }));
     }, [albums]);
 
@@ -47,7 +46,6 @@ export const AlbumPicker = ({
             error={error}
             searchPlaceholder="Search albums..."
             renderImage={(item) => renderImmichThumbnail(item, 'album')}
-            renderLabel={pickerSubtitleLabel}
         />
     );
 };
