@@ -2,11 +2,10 @@ import { NETWORK_ERROR_CODES, NetworkError, PhotoError, ServerError } from "../.
 import {
     DEFAULT_FILTER_OPERATOR,
     type FilterOperator,
-    type PaginatedPhotos,
-    type PaginationParams,
     type Photo,
     type PhotoCameraInfo,
     type PhotoExifSettings,
+    type PhotoFilterParams,
     type PhotoLocation,
     type PhotoRepo,
 } from "../types";
@@ -30,10 +29,8 @@ interface QueryConfig {
 export class ImmichPhotoRepo implements PhotoRepo {
     private proxyUrl = "/api/immich";
 
-    async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
+    async getPhotos(params: PhotoFilterParams = {}): Promise<Photo[]> {
         const {
-            page = 1,
-            pageSize = 100,
             albumIds,
             albumOperator = DEFAULT_FILTER_OPERATOR,
             personIds,
@@ -90,8 +87,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
                 });
             }
 
-            // Apply in-memory pagination
-            return this.paginateResults(combinedPhotos, page, pageSize);
+            return combinedPhotos;
 
         } catch (error) {
             // Re-throw if already a PhotoError
@@ -201,7 +197,7 @@ export class ImmichPhotoRepo implements PhotoRepo {
 
     /**
      * Run one logical Immich metadata search: walk Immich `page` until a page returns fewer
-     * than IMMICH_SEARCH_PAGE_SIZE items. Separate from app-level PaginationParams paging in getPhotos.
+     * than IMMICH_SEARCH_PAGE_SIZE items (Immich API paging, unrelated to app photo list shape).
      */
     private async executeSingleQuery(query: QueryConfig): Promise<Photo[]> {
         const photos: Photo[] = [];
@@ -426,23 +422,4 @@ export class ImmichPhotoRepo implements PhotoRepo {
         return photos.filter(p => !excludeIds.has(p.id));
     }
 
-    /**
-     * Apply in-memory pagination to combined results
-     */
-    private paginateResults(
-        photos: Photo[],
-        page: number,
-        pageSize: number
-    ): PaginatedPhotos {
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedPhotos = photos.slice(startIndex, endIndex);
-
-        return {
-            photos: paginatedPhotos,
-            page,
-            pageSize,
-            hasMore: endIndex < photos.length,
-        };
-    }
 }

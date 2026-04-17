@@ -24,7 +24,6 @@ export function useSlideshow(): UseSlideshowReturn {
         albumOperator: settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR,
         personOperator: settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR,
         globalOperator: settings.slideshow.filter.globalOperator ?? DEFAULT_FILTER_OPERATOR,
-        pageSize: 1000,
         shuffle: settings.slideshow.shuffle,
         preloadForward: 5,
         preloadBackward: 2,

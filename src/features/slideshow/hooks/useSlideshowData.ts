@@ -1,10 +1,9 @@
-import { useEffect, useMemo } from 'react';
-import { useInfinitePhotosFlattened, type PhotoFilterParams } from '../../photos';
+import { useMemo } from 'react';
+import { useOrderedPhotos, type PhotoFilterParams } from '../../photos';
 import { usePhotoPool } from '../../photo-pool';
 import type { UseSlideshowDataReturn } from './types';
 
 interface UseSlideshowDataOptions extends PhotoFilterParams {
-    pageSize?: number;
     shuffle?: boolean;
     preloadForward?: number;
     preloadBackward?: number;
@@ -21,7 +20,6 @@ export function useSlideshowData({
     startDate,
     endDate,
     globalOperator,
-    pageSize = 1000,
     shuffle = false,
     preloadForward = 5,
     preloadBackward = 2,
@@ -43,17 +41,15 @@ export function useSlideshowData({
         [albumIds, excludeAlbumIds, albumOperator, personIds, excludePersonIds, personOperator, location, startDate, endDate, globalOperator]
     );
 
-    // 2. Fetch photos with infinite pagination and shuffling
+    // 2. Fetch all matching photo metadata once; photo pool windows asset requests.
     const {
         photos,
         isLoading,
         isError,
         error,
-        fetchNextPage,
         refetch,
-        hasNextPage,
-        isFetchingNextPage,
-    } = useInfinitePhotosFlattened({
+        isFetching,
+    } = useOrderedPhotos({
         albumIds,
         excludeAlbumIds,
         albumOperator,
@@ -64,7 +60,6 @@ export function useSlideshowData({
         startDate,
         endDate,
         globalOperator,
-        pageSize,
         shuffle,
         resetKey,
     });
@@ -85,14 +80,6 @@ export function useSlideshowData({
         preloadBackward,
     });
 
-    // 4. Auto-load more photos when getting close to the end
-    useEffect(() => {
-        const photosRemaining = photos.length - currentIndex;
-        if (photosRemaining <= 10 && hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    }, [currentIndex, photos.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
     return {
         // Current state
         currentLoaded,
@@ -110,11 +97,11 @@ export function useSlideshowData({
         isLoading,
         isError,
         error: error || undefined,
-        isFetchingNextPage,
+        isFetchingNextPage: isFetching && !isLoading,
 
         // Stats for debug
         poolStats,
         totalPhotos: photos.length,
-        hasNextPage,
+        hasNextPage: false,
     };
 }

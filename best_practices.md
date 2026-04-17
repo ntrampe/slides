@@ -70,7 +70,7 @@ export function useSlideshow(): UseSlideshowReturn {
 
 ```typescript
 export interface PhotoRepo {
-    getPhotos(params: PaginationParams): Promise<PaginatedPhotos>;
+    getPhotos(params: PhotoFilterParams): Promise<Photo[]>;
 }
 
 export class ImmichPhotoRepo implements PhotoRepo {

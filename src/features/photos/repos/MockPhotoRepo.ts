@@ -1,10 +1,9 @@
 import {
     DEFAULT_FILTER_OPERATOR,
     type FilterOperator,
-    type PaginatedPhotos,
-    type PaginationParams,
     type Photo,
     type PhotoExifSettings,
+    type PhotoFilterParams,
     type PhotoRepo,
 } from '../types';
 
@@ -208,10 +207,8 @@ export class MockPhotoRepo implements PhotoRepo {
         }
     }
 
-    async getPhotos(params: PaginationParams = {}): Promise<PaginatedPhotos> {
+    async getPhotos(params: PhotoFilterParams = {}): Promise<Photo[]> {
         const {
-            page = 1,
-            pageSize = 10,
             albumIds,
             albumOperator = DEFAULT_FILTER_OPERATOR,
             personIds,
@@ -260,7 +257,7 @@ export class MockPhotoRepo implements PhotoRepo {
             });
         }
 
-        return this.paginateResults(combinedPhotos, page, pageSize);
+        return combinedPhotos;
     }
 
     private buildQueries(params: {
@@ -459,18 +456,5 @@ export class MockPhotoRepo implements PhotoRepo {
         const excludeIds = new Set(excludeResults.flat().map((p) => p.id));
 
         return photos.filter((p) => !excludeIds.has(p.id));
-    }
-
-    private paginateResults(photos: Photo[], page: number, pageSize: number): PaginatedPhotos {
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedPhotos = photos.slice(startIndex, endIndex);
-
-        return {
-            photos: paginatedPhotos,
-            page,
-            pageSize,
-            hasMore: endIndex < photos.length,
-        };
     }
 }
