@@ -31,25 +31,5 @@ export const SlideshowFilterCombineControl = ({
         );
     }
 
-    if (albumCount > 0 && personCount === 0) {
-        return (
-            <div className="mb-4">
-                <p className="text-xs text-text-tertiary mb-3">
-                    Add at least one person to choose how album and people rules combine.
-                </p>
-            </div>
-        );
-    }
-
-    if (personCount > 0 && albumCount === 0) {
-        return (
-            <div className="mb-4">
-                <p className="text-xs text-text-tertiary mb-3">
-                    Add at least one album to choose how album and people rules combine.
-                </p>
-            </div>
-        );
-    }
-
     return null;
 };
