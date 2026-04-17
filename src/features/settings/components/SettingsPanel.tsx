@@ -5,11 +5,11 @@ import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
 import { CollapsibleSection } from "../../../shared/components";
-import { FilterOperatorToggle } from "../../../shared/components/picker/FilterOperatorToggle";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
+import { SlideshowFilterCombineControl } from './SlideshowFilterCombineControl';
+import { SlideshowFilterSummary } from './SlideshowFilterSummary';
 import { DEFAULT_FILTER_OPERATOR, type PhotoAnimationType } from '../../photos';
-import { describeSlideshowFilter } from '../utils/describeSlideshowFilter';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -23,10 +23,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     const { settings, updateSettings, clearSettings } = useSettingsData();
 
     const filter = settings.slideshow.filter;
-    const albumCount = filter.albumIds?.length ?? 0;
-    const personCount = filter.personIds?.length ?? 0;
-    const showGlobalCombine = albumCount > 0 && personCount > 0;
-    const filterSummaryLines = describeSlideshowFilter(filter);
 
     const handleReset = () => {
         if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
@@ -58,48 +54,13 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
             {/* CONTENT */}
             <CollapsibleSection title="Content">
-                <div className="mb-4">
-                    <h3 className="text-xs font-semibold text-text-primary mb-2">
-                        What&apos;s in the slideshow
-                    </h3>
-                    <div
-                        className="rounded-lg border border-border/80 bg-surface px-3 py-2 text-xs text-text-secondary mb-3"
-                        aria-live="polite"
-                    >
-                        {filterSummaryLines.map((line, i) => (
-                            <p key={i}>{line}</p>
-                        ))}
-                    </div>
-
-                    {showGlobalCombine ? (
-                        <>
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1">
-                                <span className="text-sm text-text-primary">
-                                    Combine album and people rules
-                                </span>
-                                <FilterOperatorToggle
-                                    value={filter.globalOperator ?? DEFAULT_FILTER_OPERATOR}
-                                    onChange={(globalOperator) =>
-                                        updateSettings({ slideshow: { filter: { globalOperator } } })
-                                    }
-                                />
-                            </div>
-                            <p className="text-xs text-text-secondary mb-3">
-                                {(filter.globalOperator ?? DEFAULT_FILTER_OPERATOR) === 'AND'
-                                    ? 'Album rules and people rules must both match the same photo.'
-                                    : 'A photo can match either album rules or people rules (or both).'}
-                            </p>
-                        </>
-                    ) : albumCount > 0 && personCount === 0 ? (
-                        <p className="text-xs text-text-tertiary mb-3">
-                            Add at least one person to choose how album and people rules combine.
-                        </p>
-                    ) : personCount > 0 && albumCount === 0 ? (
-                        <p className="text-xs text-text-tertiary mb-3">
-                            Add at least one album to choose how album and people rules combine.
-                        </p>
-                    ) : null}
-                </div>
+                <SlideshowFilterSummary filter={filter} />
+                <SlideshowFilterCombineControl
+                    filter={filter}
+                    onGlobalOperatorChange={(globalOperator) =>
+                        updateSettings({ slideshow: { filter: { globalOperator } } })
+                    }
+                />
 
                 <AlbumPicker
                     label="Albums"
