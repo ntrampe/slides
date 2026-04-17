@@ -42,6 +42,7 @@ export interface UseSlideshowReturn {
         isPlaying: boolean;
         progress: number;
         areControlsVisible: boolean;
+        showPlaybackControls: boolean;
         isTransitioning: boolean;
         transitionStyles: React.CSSProperties;
         layoutClass: string;

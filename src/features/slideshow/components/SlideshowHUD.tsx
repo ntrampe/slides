@@ -11,6 +11,7 @@ interface SlideshowHUDProps {
     progress: number;
     isPlaying: boolean;
     areControlsVisible: boolean;
+    showPlaybackControls: boolean;
 
     // Actions
     onPrevious: () => void;
@@ -23,6 +24,7 @@ export const SlideshowHUD = ({
     progress,
     isPlaying,
     areControlsVisible,
+    showPlaybackControls,
     onPrevious,
     onNext,
     onTogglePlayPause,
@@ -81,37 +83,39 @@ export const SlideshowHUD = ({
             </div>
 
             {/* Center: Slideshow Controls */}
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${controlsOpacity}`}>
-                <div className="flex items-center gap-4 pointer-events-auto">
-                    <HudButton
-                        onClick={onPrevious}
-                        label="Previous photo"
-                        size="large"
-                    >
-                        <ChevronLeft strokeWidth={2} />
-                    </HudButton>
+            {showPlaybackControls && (
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${controlsOpacity}`}>
+                    <div className="flex items-center gap-4 pointer-events-auto">
+                        <HudButton
+                            onClick={onPrevious}
+                            label="Previous photo"
+                            size="large"
+                        >
+                            <ChevronLeft strokeWidth={2} />
+                        </HudButton>
 
-                    <HudButton
-                        onClick={onTogglePlayPause}
-                        label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
-                        size="large"
-                        className="scale-110" // Make play/pause visually dominant
-                    >
-                        {isPlaying ? <Pause strokeWidth={2} /> : <Play strokeWidth={2} />}
-                    </HudButton>
+                        <HudButton
+                            onClick={onTogglePlayPause}
+                            label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+                            size="large"
+                            className="scale-110" // Make play/pause visually dominant
+                        >
+                            {isPlaying ? <Pause strokeWidth={2} /> : <Play strokeWidth={2} />}
+                        </HudButton>
 
-                    <HudButton
-                        onClick={onNext}
-                        label="Next photo"
-                        size="large"
-                    >
-                        <ChevronRight strokeWidth={2} />
-                    </HudButton>
+                        <HudButton
+                            onClick={onNext}
+                            label="Next photo"
+                            size="large"
+                        >
+                            <ChevronRight strokeWidth={2} />
+                        </HudButton>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Bottom Edge: Progress Bar - with safe area support */}
-            {settings.slideshow.ui.showProgressBar && (
+            {showPlaybackControls && settings.slideshow.ui.showProgressBar && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 pointer-events-none">
                     <div
                         className="h-full bg-white transition-all duration-100 ease-linear"

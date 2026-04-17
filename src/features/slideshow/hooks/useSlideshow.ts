@@ -63,6 +63,19 @@ export function useSlideshow(): UseSlideshowReturn {
         layoutClass
     });
 
+    const pinHudChrome =
+        isEmpty ||
+        data.isError ||
+        data.isLoading ||
+        (data.count > 0 &&
+            (!data.currentLoaded?.photo || !transition.displayedPhoto));
+
+    const showPlaybackControls =
+        !isEmpty &&
+        !data.isError &&
+        !data.isLoading &&
+        Boolean(data.currentLoaded?.photo && transition.displayedPhoto);
+
     // Timer layer: autoplay, progress tracking (paused during transitions)
     const timer = useSlideshowTimer({
         onAdvance: data.goToNext,
@@ -105,7 +118,8 @@ export function useSlideshow(): UseSlideshowReturn {
             error: data.error,
             isPlaying: timer.isPlaying,
             progress: timer.progress,
-            areControlsVisible: !isIdle,
+            areControlsVisible: !isIdle || pinHudChrome,
+            showPlaybackControls,
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
             layoutClass: transition.displayedLayoutClass,
