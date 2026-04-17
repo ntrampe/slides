@@ -36,7 +36,6 @@ export interface ItemPickerProps<T extends PickerItem> {
     searchPlaceholder?: string;
     emptyMessage?: string;
     noResultsMessage?: string;
-    operatorDescription?: (operator: FilterOperator) => string;
     renderImage?: (item: T) => ReactNode;
     renderLabel?: (item: T) => ReactNode;
 }
@@ -44,7 +43,6 @@ export interface ItemPickerProps<T extends PickerItem> {
 export interface SelectedItemsProps<T extends PickerItem> {
     items: T[];
     onRemove: (id: string) => void;
-    onExclude?: (id: string) => void;
     selectionMode?: SelectionMode;
     renderImage?: (item: T) => ReactNode;
     renderLabel?: (item: T) => ReactNode;

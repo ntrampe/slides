@@ -59,11 +59,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             {/* CONTENT */}
             <CollapsibleSection title="Content">
                 <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-text-primary mb-2">
+                    <h3 className="text-xs font-semibold text-text-primary mb-2">
                         What&apos;s in the slideshow
                     </h3>
                     <div
-                        className="rounded-lg border border-border/80 bg-surface px-3 py-2.5 text-xs text-text-secondary space-y-1.5 mb-3"
+                        className="rounded-lg border border-border/80 bg-surface px-3 py-2 text-xs text-text-secondary mb-3"
                         aria-live="polite"
                     >
                         {filterSummaryLines.map((line, i) => (
@@ -139,10 +139,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         updateSettings({ slideshow: { filter: { startDate, endDate } } })
                     }
                 />
-                <p className="text-xs text-text-secondary mt-3">
-                    Location and date always narrow results; they apply together with the album and
-                    people rules above.
-                </p>
             </CollapsibleSection>
 
             {/* PLAYBACK */}

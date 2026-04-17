@@ -24,9 +24,11 @@ export function ExcludedItems<T extends PickerItem>({
     if (excludedIds.length === 0) return null;
 
     return (
-        <div className="mb-3 mt-1">
-            <span className="block text-xs font-medium text-text-secondary mb-1.5">Excluded from slideshow</span>
-            <div className="flex flex-wrap gap-2">
+        <div className="mb-2 mt-0.5">
+            <span className="block text-xs font-medium text-text-secondary mb-1">
+                Excluded from slideshow
+            </span>
+            <div className="flex flex-wrap gap-1.5">
                 {excludedIds.map((id) => {
                     const item = itemById.get(id);
                     if (!item) {

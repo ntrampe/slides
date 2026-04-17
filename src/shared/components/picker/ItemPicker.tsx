@@ -22,7 +22,6 @@ export function ItemPicker<T extends PickerItem>({
     searchPlaceholder = "Search...",
     emptyMessage = "No items selected. Leave empty to show all.",
     noResultsMessage = "No items found",
-    operatorDescription,
     renderImage,
     renderLabel,
 }: ItemPickerProps<T>) {
@@ -77,15 +76,6 @@ export function ItemPicker<T extends PickerItem>({
         );
     };
 
-    const handleMoveToExcluded = (itemId: string) => {
-        if (!onBulkChange && !onExcludedChange) return;
-        if (excludedIds.includes(itemId)) return;
-        commitSelection(
-            selectedIds.filter(id => id !== itemId),
-            [...excludedIds, itemId]
-        );
-    };
-
     const handleRemoveExcluded = (itemId: string) => {
         commitSelection(selectedIds, excludedIds.filter(id => id !== itemId));
     };
@@ -108,11 +98,6 @@ export function ItemPicker<T extends PickerItem>({
     );
 
     const exclusionEnabled = Boolean(onBulkChange || onExcludedChange);
-    const showExclusionHint =
-        exclusionEnabled &&
-        excludedIds.length === 0 &&
-        selectedIds.length > 0 &&
-        selectionMode === 'multiple';
 
     if (error) {
         return (
@@ -124,40 +109,21 @@ export function ItemPicker<T extends PickerItem>({
     }
 
     return (
-        <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
+        <div className="mb-3">
+            <div className="flex items-center justify-between mb-1.5">
                 <span className="font-medium">{label}</span>
-                {selectionMode === 'multiple' && selectedIds.length > 0 && onOperatorChange && (
+                {selectionMode === 'multiple' && selectedIds.length > 1 && onOperatorChange && (
                     <FilterOperatorToggle value={operator} onChange={onOperatorChange} />
                 )}
             </div>
 
-            {selectionMode === 'multiple' && selectedIds.length > 0 && operatorDescription && (
-                <p className="text-xs text-text-secondary mb-2">
-                    {operatorDescription(operator)}
-                </p>
-            )}
-
             <SelectedItems
                 items={selectedItems}
                 onRemove={handleRemove}
-                onExclude={exclusionEnabled ? handleMoveToExcluded : undefined}
                 selectionMode={selectionMode}
                 renderImage={renderImage}
                 renderLabel={renderLabel}
             />
-
-            {showExclusionHint && (
-                <p className="text-xs text-text-tertiary mb-2">
-                    Use{' '}
-                    <span className="font-medium text-text-secondary" aria-hidden>
-                        −
-                    </span>{' '}
-                    on a chip to exclude it from the slideshow, or use{' '}
-                    <span className="font-medium text-text-secondary">Exclude</span> in the search
-                    list. Excluded items stay in your library.
-                </p>
-            )}
 
             {exclusionEnabled && (
                 <ExcludedItems
@@ -201,7 +167,7 @@ export function ItemPicker<T extends PickerItem>({
                 )}
             </div>
 
-            {selectedIds.length === 0 && (
+            {selectionMode === 'single' && selectedIds.length === 0 && emptyMessage && (
                 <p className="text-xs text-text-tertiary mt-1">{emptyMessage}</p>
             )}
         </div>

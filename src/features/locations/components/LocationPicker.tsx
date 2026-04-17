@@ -35,7 +35,7 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 isLoading={isLoading}
                 error={error}
                 searchPlaceholder="Search countries..."
-                emptyMessage="No country selected."
+                emptyMessage=""
                 renderLabel={(item) => (
                     <div>
                         <div>{item.label}</div>
@@ -56,7 +56,7 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 isLoading={isLoading}
                 error={error}
                 searchPlaceholder="Search states/provinces..."
-                emptyMessage="No state/province selected."
+                emptyMessage=""
                 renderLabel={(item) => (
                     <div>
                         <div>{item.label}</div>
@@ -77,7 +77,7 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
                 isLoading={isLoading}
                 error={error}
                 searchPlaceholder="Search cities..."
-                emptyMessage="No city selected."
+                emptyMessage=""
                 renderLabel={(item) => (
                     <div>
                         <div>{item.label}</div>

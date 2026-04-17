@@ -46,9 +46,6 @@ export const PeoplePicker = ({
             error={error}
             searchPlaceholder="Search people..."
             emptyMessage="No people selected. Leave empty to show all photos."
-            operatorDescription={(op) =>
-                `Include photos that match ${op === 'AND' ? 'all' : 'any'} of these people`
-            }
             renderImage={(item) => renderImmichThumbnail(item, 'person')}
             renderLabel={pickerSubtitleLabel}
         />

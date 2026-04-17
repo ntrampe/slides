@@ -4,7 +4,6 @@ import { PickerItemChip } from './PickerItemChip';
 export function SelectedItems<T extends PickerItem>({
     items,
     onRemove,
-    onExclude,
     selectionMode = 'multiple',
     renderImage,
     renderLabel,
@@ -20,7 +19,6 @@ export function SelectedItems<T extends PickerItem>({
                 tone="included"
                 renderImage={renderImage}
                 renderLabel={renderLabel}
-                onExclude={onExclude ? () => onExclude(item.id) : undefined}
                 onRemove={() => onRemove(item.id)}
                 removeAriaLabel={`Clear ${item.label}`}
             />
@@ -28,7 +26,7 @@ export function SelectedItems<T extends PickerItem>({
     }
 
     return (
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-1.5 mb-1.5">
             {items.map((item) => (
                 <PickerItemChip
                     key={item.id}
@@ -37,7 +35,6 @@ export function SelectedItems<T extends PickerItem>({
                     tone="included"
                     renderImage={renderImage}
                     renderLabel={renderLabel}
-                    onExclude={onExclude ? () => onExclude(item.id) : undefined}
                     onRemove={() => onRemove(item.id)}
                     removeAriaLabel={`Remove ${item.label}`}
                 />
