@@ -11,19 +11,34 @@ function formatLocation(loc: PhotoFilterParams['location']): string | null {
     return parts.length > 0 ? parts.join(', ') : null;
 }
 
-function formatDateRange(startDate?: string, endDate?: string): string | null {
+function formatDateConstraint(startDate?: string, endDate?: string): string | null {
     if (!startDate && !endDate) return null;
-    if (startDate && endDate) return `${startDate} through ${endDate}`;
-    if (startDate) return `from ${startDate}`;
-    return `through ${endDate!}`;
+    if (startDate && endDate) return `taken between ${startDate} and ${endDate}`;
+    if (startDate) return `taken on or after ${startDate}`;
+    return `taken on or before ${endDate!}`;
+}
+
+function joinWithAnd(parts: string[]): string {
+    if (parts.length <= 1) return parts[0] ?? '';
+    if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+    return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+}
+
+function selectionTarget(
+    kind: 'album' | 'person',
+    count: number,
+    op: FilterOperator | undefined
+): string {
+    const label = kind === 'album' ? (count === 1 ? 'album' : 'albums') : count === 1 ? 'person' : 'people';
+    if (count === 1) return `the selected ${label}`;
+    if (opWord(op) === 'all') return `all ${count} selected ${label}`;
+    return `any of ${count} selected ${label}`;
 }
 
 /**
- * Human-readable bullets describing the active slideshow filter (albums, people, global combine, exclusions, location, dates).
+ * Human-readable summary describing the active slideshow filter (albums, people, location, dates, exclusions).
  */
 export function describeSlideshowFilter(filter: PhotoFilterParams): string[] {
-    const lines: string[] = [];
-
     const albumIds = filter.albumIds ?? [];
     const personIds = filter.personIds ?? [];
     const excludeAlbumIds = filter.excludeAlbumIds ?? [];
@@ -32,33 +47,42 @@ export function describeSlideshowFilter(filter: PhotoFilterParams): string[] {
 
     const hasAlbumFilter = albumIds.length > 0;
     const hasPersonFilter = personIds.length > 0;
+    const hasAnyPrimaryFilter = hasAlbumFilter || hasPersonFilter;
 
-    if (!hasAlbumFilter && !hasPersonFilter) {
-        lines.push(
-            'No album or people filters — every photo in your library can appear (exclusions, location, and dates still apply).'
-        );
+    let primaryRule: string;
+    if (!hasAnyPrimaryFilter) {
+        primaryRule = 'Photos can come from anywhere in your library';
     } else {
-        if (hasAlbumFilter) {
-            const w = opWord(filter.albumOperator);
-            lines.push(
-                `Albums: match ${w} of ${albumIds.length} selected album${albumIds.length === 1 ? '' : 's'}.`
-            );
-        }
-        if (hasPersonFilter) {
-            const w = opWord(filter.personOperator);
-            lines.push(
-                `People: match ${w} of ${personIds.length} selected ${personIds.length === 1 ? 'person' : 'people'}.`
-            );
-        }
+        const albumTarget = hasAlbumFilter
+            ? selectionTarget('album', albumIds.length, filter.albumOperator)
+            : null;
+        const personTarget = hasPersonFilter
+            ? selectionTarget('person', personIds.length, filter.personOperator)
+            : null;
+
         if (hasAlbumFilter && hasPersonFilter) {
             if (globalOp === 'AND') {
-                lines.push('Album and people rules both apply — a photo must satisfy each active rule set.');
+                primaryRule = `Photos must match ${albumTarget} and ${personTarget}`;
             } else {
-                lines.push(
-                    'Album or people rules — a photo can match either rule set (or both).'
-                );
+                primaryRule = `Photos can match ${albumTarget}, ${personTarget}, or both`;
             }
+        } else if (albumTarget) {
+            primaryRule = `Photos must match ${albumTarget}`;
+        } else {
+            primaryRule = `Photos must match ${personTarget}`;
         }
+    }
+
+    const constraints: string[] = [];
+
+    const loc = formatLocation(filter.location);
+    if (loc) {
+        constraints.push(`from ${loc}`);
+    }
+
+    const dateConstraint = formatDateConstraint(filter.startDate, filter.endDate);
+    if (dateConstraint) {
+        constraints.push(dateConstraint);
     }
 
     const exAlbum = excludeAlbumIds.length;
@@ -71,18 +95,12 @@ export function describeSlideshowFilter(filter: PhotoFilterParams): string[] {
         if (exPerson > 0) {
             parts.push(`${exPerson} ${exPerson === 1 ? 'person' : 'people'}`);
         }
-        lines.push(`Excluding photos tied to ${parts.join(' and ')}.`);
+        constraints.push(`not tied to ${joinWithAnd(parts)}`);
     }
 
-    const loc = formatLocation(filter.location);
-    if (loc) {
-        lines.push(`Location narrows to: ${loc}.`);
+    if (constraints.length === 0) {
+        return [`${primaryRule}.`];
     }
 
-    const dr = formatDateRange(filter.startDate, filter.endDate);
-    if (dr) {
-        lines.push(`Date range narrows to ${dr}.`);
-    }
-
-    return lines;
+    return [`${primaryRule}, ${joinWithAnd(constraints)}.`];
 }
