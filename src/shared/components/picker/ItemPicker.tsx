@@ -98,7 +98,21 @@ export function ItemPicker<T extends PickerItem>({
         setSearchQuery('');
     };
 
+    const handleExcludeFromDropdown = useCallback(
+        (itemId: string) => {
+            if (excludedIds.includes(itemId)) return;
+            commitSelection(selectedIds, [...excludedIds, itemId]);
+            setSearchQuery('');
+        },
+        [commitSelection, selectedIds, excludedIds]
+    );
+
     const exclusionEnabled = Boolean(onBulkChange || onExcludedChange);
+    const showExclusionHint =
+        exclusionEnabled &&
+        excludedIds.length === 0 &&
+        selectedIds.length > 0 &&
+        selectionMode === 'multiple';
 
     if (error) {
         return (
@@ -133,6 +147,18 @@ export function ItemPicker<T extends PickerItem>({
                 renderLabel={renderLabel}
             />
 
+            {showExclusionHint && (
+                <p className="text-xs text-text-tertiary mb-2">
+                    Use{' '}
+                    <span className="font-medium text-text-secondary" aria-hidden>
+                        −
+                    </span>{' '}
+                    on a chip to exclude it from the slideshow, or use{' '}
+                    <span className="font-medium text-text-secondary">Exclude</span> in the search
+                    list. Excluded items stay in your library.
+                </p>
+            )}
+
             {exclusionEnabled && (
                 <ExcludedItems
                     excludedIds={excludedIds}
@@ -159,8 +185,14 @@ export function ItemPicker<T extends PickerItem>({
                     <ItemDropdown
                         items={availableItems}
                         selectedIds={selectedIds}
+                        excludedIds={excludedIds}
                         selectionMode={selectionMode}
                         onSelect={handleSelect}
+                        onExclude={
+                            exclusionEnabled && selectionMode === 'multiple'
+                                ? handleExcludeFromDropdown
+                                : undefined
+                        }
                         onClose={() => setIsDropdownOpen(false)}
                         noResultsMessage={searchQuery ? noResultsMessage : 'All items selected'}
                         renderImage={renderImage}

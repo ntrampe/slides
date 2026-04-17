@@ -61,8 +61,11 @@ export interface SearchInputProps {
 export interface ItemDropdownProps<T extends PickerItem> {
     items: T[];
     selectedIds?: string[];
+    excludedIds?: string[];
     selectionMode?: SelectionMode;
     onSelect: (id: string) => void;
+    /** When set, each row shows an action to exclude without selecting (multi-select pickers). */
+    onExclude?: (id: string) => void;
     onClose: () => void;
     noResultsMessage: string;
     renderImage?: (item: T) => ReactNode;

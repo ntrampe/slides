@@ -9,6 +9,7 @@ import { FilterOperatorToggle } from "../../../shared/components/picker/FilterOp
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
 import { DEFAULT_FILTER_OPERATOR, type PhotoAnimationType } from '../../photos';
+import { describeSlideshowFilter } from '../utils/describeSlideshowFilter';
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -20,6 +21,12 @@ const Divider = () => (
 
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     const { settings, updateSettings, clearSettings } = useSettingsData();
+
+    const filter = settings.slideshow.filter;
+    const albumCount = filter.albumIds?.length ?? 0;
+    const personCount = filter.personIds?.length ?? 0;
+    const showGlobalCombine = albumCount > 0 && personCount > 0;
+    const filterSummaryLines = describeSlideshowFilter(filter);
 
     const handleReset = () => {
         if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
@@ -51,21 +58,48 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
             {/* CONTENT */}
             <CollapsibleSection title="Content">
-                {/* Global filter logic */}
-                <div className="flex items-center justify-between mb-2">
-                    <span className="font-small">Combine filters:</span>
-                    <FilterOperatorToggle
-                        value={settings.slideshow.filter.globalOperator ?? 'AND'}
-                        onChange={(globalOperator) =>
-                            updateSettings({ slideshow: { filter: { globalOperator } } })
-                        }
-                    />
+                <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-text-primary mb-2">
+                        What&apos;s in the slideshow
+                    </h3>
+                    <div
+                        className="rounded-lg border border-border/80 bg-surface px-3 py-2.5 text-xs text-text-secondary space-y-1.5 mb-3"
+                        aria-live="polite"
+                    >
+                        {filterSummaryLines.map((line, i) => (
+                            <p key={i}>{line}</p>
+                        ))}
+                    </div>
+
+                    {showGlobalCombine ? (
+                        <>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1">
+                                <span className="text-sm text-text-primary">
+                                    Combine album and people rules
+                                </span>
+                                <FilterOperatorToggle
+                                    value={filter.globalOperator ?? DEFAULT_FILTER_OPERATOR}
+                                    onChange={(globalOperator) =>
+                                        updateSettings({ slideshow: { filter: { globalOperator } } })
+                                    }
+                                />
+                            </div>
+                            <p className="text-xs text-text-secondary mb-3">
+                                {(filter.globalOperator ?? DEFAULT_FILTER_OPERATOR) === 'AND'
+                                    ? 'Album rules and people rules must both match the same photo.'
+                                    : 'A photo can match either album rules or people rules (or both).'}
+                            </p>
+                        </>
+                    ) : albumCount > 0 && personCount === 0 ? (
+                        <p className="text-xs text-text-tertiary mb-3">
+                            Add at least one person to choose how album and people rules combine.
+                        </p>
+                    ) : personCount > 0 && albumCount === 0 ? (
+                        <p className="text-xs text-text-tertiary mb-3">
+                            Add at least one album to choose how album and people rules combine.
+                        </p>
+                    ) : null}
                 </div>
-                <p className="text-xs text-text-secondary mt-2">
-                    {(settings.slideshow.filter.globalOperator ?? 'AND') === 'AND'
-                        ? 'Photos must satisfy all filter categories (Albums AND People)'
-                        : 'Photos can satisfy any filter category (Albums OR People)'}
-                </p>
 
                 <AlbumPicker
                     label="Albums"
@@ -105,6 +139,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         updateSettings({ slideshow: { filter: { startDate, endDate } } })
                     }
                 />
+                <p className="text-xs text-text-secondary mt-3">
+                    Location and date always narrow results; they apply together with the album and
+                    people rules above.
+                </p>
             </CollapsibleSection>
 
             {/* PLAYBACK */}

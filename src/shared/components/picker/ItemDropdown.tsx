@@ -4,8 +4,10 @@ import type { ItemDropdownProps, PickerItem } from './types';
 export function ItemDropdown<T extends PickerItem>({
     items,
     selectedIds = [],
+    excludedIds = [],
     selectionMode = 'multiple',
     onSelect,
+    onExclude,
     onClose,
     noResultsMessage,
     renderImage,
@@ -54,30 +56,60 @@ export function ItemDropdown<T extends PickerItem>({
                 ) : (
                     items.map(item => {
                         const isSelected = selectedIds.includes(item.id);
+                        const isExcluded = excludedIds.includes(item.id);
                         return (
-                            <button
+                            <div
                                 key={item.id}
-                                onClick={() => {
-                                    onSelect(item.id);
-                                    // Close dropdown after selection in single mode
-                                    if (selectionMode === 'single') {
-                                        onClose();
-                                    }
-                                }}
-                                className={`w-full flex items-center gap-2 p-2 hover:bg-surface-hover text-left ${isSelected && selectionMode === 'single'
-                                    ? 'bg-primary-500/10 text-primary-500'
-                                    : 'text-text-primary'
-                                    }`}
+                                className="flex items-stretch border-b border-border/50 last:border-b-0"
                             >
-                                {renderImage && (
-                                    <div className="flex-shrink-0">
-                                        {renderImage(item)}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        onSelect(item.id);
+                                        if (selectionMode === 'single') {
+                                            onClose();
+                                        }
+                                    }}
+                                    className={`min-w-0 flex-1 flex items-center gap-2 p-2 hover:bg-surface-hover text-left ${
+                                        isSelected && selectionMode === 'single'
+                                            ? 'bg-primary-500/10 text-primary-500'
+                                            : 'text-text-primary'
+                                    }`}
+                                >
+                                    {renderImage && (
+                                        <div className="flex-shrink-0">
+                                            {renderImage(item)}
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        {renderLabel ? renderLabel(item) : item.label}
                                     </div>
+                                </button>
+                                {onExclude && (
+                                    <button
+                                        type="button"
+                                        disabled={isExcluded}
+                                        title={
+                                            isExcluded
+                                                ? 'Already excluded — choose this row to include again'
+                                                : 'Exclude from slideshow without selecting'
+                                        }
+                                        className={`flex-shrink-0 px-2.5 text-xs font-medium border-l border-border/50 transition-colors ${
+                                            isExcluded
+                                                ? 'text-text-tertiary cursor-not-allowed bg-surface'
+                                                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+                                        }`}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            if (isExcluded) return;
+                                            onExclude(item.id);
+                                        }}
+                                    >
+                                        {isExcluded ? 'Out' : 'Exclude'}
+                                    </button>
                                 )}
-                                <div className="flex-1">
-                                    {renderLabel ? renderLabel(item) : item.label}
-                                </div>
-                            </button>
+                            </div>
                         );
                     })
                 )}

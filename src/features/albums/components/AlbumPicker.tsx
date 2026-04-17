@@ -48,7 +48,7 @@ export const AlbumPicker = ({
             searchPlaceholder="Search albums..."
             emptyMessage="No albums selected. Leave empty to show all photos."
             operatorDescription={(op) =>
-                `Include photos with ${op === 'AND' ? 'ALL' : 'ANY'} of these albums`
+                `Include photos that match ${op === 'AND' ? 'all' : 'any'} of these albums`
             }
             renderImage={(item) => renderImmichThumbnail(item, 'album')}
             renderLabel={pickerSubtitleLabel}
