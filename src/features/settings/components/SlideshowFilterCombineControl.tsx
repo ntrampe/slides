@@ -20,18 +20,13 @@ export const SlideshowFilterCombineControl = ({
             <div className="mb-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1">
                     <span className="text-sm text-text-primary">
-                        Combine album and people rules
+                        Combine rules
                     </span>
                     <FilterOperatorToggle
                         value={filter.globalOperator ?? DEFAULT_FILTER_OPERATOR}
                         onChange={onGlobalOperatorChange}
                     />
                 </div>
-                <p className="text-xs text-text-secondary mb-3">
-                    {(filter.globalOperator ?? DEFAULT_FILTER_OPERATOR) === 'AND'
-                        ? 'Album rules and people rules must both match the same photo.'
-                        : 'A photo can match either album rules or people rules (or both).'}
-                </p>
             </div>
         );
     }
