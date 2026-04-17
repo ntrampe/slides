@@ -20,7 +20,7 @@ export const SlideshowFilterCombineControl = ({
             <div className="mb-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1">
                     <span className="text-sm text-text-primary">
-                        Combine rules
+                        Combine albums and people
                     </span>
                     <FilterOperatorToggle
                         value={filter.globalOperator ?? DEFAULT_FILTER_OPERATOR}

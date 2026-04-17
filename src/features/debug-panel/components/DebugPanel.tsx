@@ -30,16 +30,6 @@ export const DebugPanel = ({ debug }: DebugPanelProps) => {
                         <div>Window: {debug.poolStats.windowStart} → {debug.poolStats.windowEnd}</div>
                         <div>Window Size: {debug.poolStats.windowSize}</div>
                     </div>
-
-                    <div className={`font-bold border-b border-white/20 pb-2 mt-3 pt-2 ${hudTextSizes.caption}`}>
-                        Pagination
-                    </div>
-                    <div className={hudTextSizes.caption}>
-                        <div>Metadata Fetched: {debug.totalPhotos}</div>
-                        <div>Remaining: {debug.totalPhotos - debug.currentIndex}</div>
-                        <div>Has More: {debug.hasNextPage ? '✅' : '❌'}</div>
-                        <div>Loading: {debug.isFetchingNextPage ? '⏳' : '✅'}</div>
-                    </div>
                 </HudPanel>
             </div>
         </div>
