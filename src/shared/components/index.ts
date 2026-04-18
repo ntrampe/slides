@@ -1,5 +1,11 @@
 export { StringArrayEditor } from './StringArrayEditor';
 export { CollapsibleSection } from './CollapsibleSection';
+export { SegmentedControl } from './SegmentedControl';
+export type {
+    SegmentedOption,
+    SegmentedSemantics,
+    SegmentedLayout,
+} from './SegmentedControl';
 export { ItemPicker } from './picker/ItemPicker';
 export { SelectedItems } from './picker/SelectedItems';
 export { SearchInput } from './picker/SearchInput';
