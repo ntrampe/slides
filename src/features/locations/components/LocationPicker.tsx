@@ -80,7 +80,6 @@ export const LocationPicker = ({ selection, onChange, label }: LocationPickerPro
             >
                 <ItemPicker
                     key={activeLevel}
-                    label=""
                     selectedIds={pickerProps.selectedIds}
                     onChange={pickerProps.onChange}
                     items={pickerProps.items}
