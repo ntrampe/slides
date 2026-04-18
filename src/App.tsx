@@ -31,7 +31,7 @@ function AppContent() {
 
       {/* Settings Panel - always rendered, positioned absolutely */}
       <div
-        className="absolute top-0 right-0 h-full w-80 transition-transform duration-500 ease-in-out z-20"
+        className="absolute top-0 right-0 h-full w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-transform duration-500 ease-in-out z-20"
         style={{
           transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
           pointerEvents: isSettingsPanelVisible ? 'auto' : 'none'
