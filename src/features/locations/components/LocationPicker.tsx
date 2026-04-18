@@ -1,6 +1,10 @@
+import { useId, useState } from 'react';
 import { ItemPicker } from '../../../shared/components/picker/ItemPicker';
+import { SegmentedControl } from '../../../shared/components/SegmentedControl';
 import { useLocationPicker } from '../hooks/useLocationPicker';
 import type { LocationSelection } from '../types';
+
+type LocationLevel = 'country' | 'state' | 'city';
 
 interface LocationPickerProps {
     selection: LocationSelection;
@@ -8,7 +12,10 @@ interface LocationPickerProps {
     label: string;
 }
 
-export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => {
+export const LocationPicker = ({ selection, onChange, label }: LocationPickerProps) => {
+    const [activeLevel, setActiveLevel] = useState<LocationLevel>('country');
+    const tabsIdPrefix = useId();
+
     const {
         countryItems,
         stateItems,
@@ -23,46 +30,67 @@ export const LocationPicker = ({ selection, onChange }: LocationPickerProps) => 
         handleCityChange,
     } = useLocationPicker({ selection, onChange });
 
+    const pickerProps =
+        activeLevel === 'country'
+            ? {
+                  pickerLabel: 'Country' as const,
+                  selectedIds: selectedCountryIds,
+                  onChange: handleCountryChange,
+                  items: countryItems,
+                  searchPlaceholder: 'Search countries...',
+              }
+            : activeLevel === 'state'
+              ? {
+                    pickerLabel: 'State/Province' as const,
+                    selectedIds: selectedStateIds,
+                    onChange: handleStateChange,
+                    items: stateItems,
+                    searchPlaceholder: 'Search states/provinces...',
+                }
+              : {
+                    pickerLabel: 'City' as const,
+                    selectedIds: selectedCityIds,
+                    onChange: handleCityChange,
+                    items: cityItems,
+                    searchPlaceholder: 'Search cities...',
+                };
+
     return (
         <div className="space-y-4">
-            {/* Country Picker */}
-            <ItemPicker
-                label="Country"
-                selectedIds={selectedCountryIds}
-                onChange={handleCountryChange}
-                items={countryItems}
-                selectionMode="single"
-                isLoading={isLoading}
-                error={error}
-                searchPlaceholder="Search countries..."
-                emptyMessage=""
-            />
+            <div>
+                <span className="block mb-1 font-medium">{label}</span>
+                <SegmentedControl<LocationLevel>
+                    tabsIdPrefix={tabsIdPrefix}
+                    semantics="tabs"
+                    layout="stretch"
+                    ariaLabel={`${label} level`}
+                    value={activeLevel}
+                    onChange={setActiveLevel}
+                    options={[
+                        { value: 'country', label: 'Country' },
+                        { value: 'state', label: 'State' },
+                        { value: 'city', label: 'City' },
+                    ]}
+                />
+            </div>
 
-            {/* State/Province Picker */}
-            <ItemPicker
-                label="State/Province"
-                selectedIds={selectedStateIds}
-                onChange={handleStateChange}
-                items={stateItems}
-                selectionMode="single"
-                isLoading={isLoading}
-                error={error}
-                searchPlaceholder="Search states/provinces..."
-                emptyMessage=""
-            />
-
-            {/* City Picker */}
-            <ItemPicker
-                label="City"
-                selectedIds={selectedCityIds}
-                onChange={handleCityChange}
-                items={cityItems}
-                selectionMode="single"
-                isLoading={isLoading}
-                error={error}
-                searchPlaceholder="Search cities..."
-                emptyMessage=""
-            />
+            <div
+                role="tabpanel"
+                aria-labelledby={`${tabsIdPrefix}-${activeLevel}`}
+            >
+                <ItemPicker
+                    key={activeLevel}
+                    label=""
+                    selectedIds={pickerProps.selectedIds}
+                    onChange={pickerProps.onChange}
+                    items={pickerProps.items}
+                    selectionMode="single"
+                    isLoading={isLoading}
+                    error={error}
+                    searchPlaceholder={pickerProps.searchPlaceholder}
+                    emptyMessage=""
+                />
+            </div>
         </div>
     );
 };

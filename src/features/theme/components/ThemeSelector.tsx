@@ -1,5 +1,7 @@
 import { Sun, Moon } from 'lucide-react';
+import { SegmentedControl } from '../../../shared/components/SegmentedControl';
 import { useTheme } from '../hooks';
+import type { ThemeMode } from '../types';
 
 export const ThemeSelector = () => {
     const { mode, setMode } = useTheme();
@@ -10,29 +12,26 @@ export const ThemeSelector = () => {
                 Theme
             </h3>
 
-            <div className="flex gap-2">
-                <button
-                    onClick={() => setMode('light')}
-                    className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 ${mode === 'light'
-                        ? 'bg-primary-500 text-white border-primary-600 shadow-lg'
-                        : 'bg-surface hover:bg-surface-hover border-border text-text-primary'
-                        }`}
-                >
-                    <Sun size={18} />
-                    <span className="font-medium">Light</span>
-                </button>
-
-                <button
-                    onClick={() => setMode('dark')}
-                    className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 ${mode === 'dark'
-                        ? 'bg-primary-500 text-white border-primary-600 shadow-lg'
-                        : 'bg-surface hover:bg-surface-hover border-border text-text-primary'
-                        }`}
-                >
-                    <Moon size={18} />
-                    <span className="font-medium">Dark</span>
-                </button>
-            </div>
+            <SegmentedControl<ThemeMode>
+                size="md"
+                layout="stretch"
+                className="w-full max-w-md"
+                ariaLabel="Theme"
+                value={mode}
+                onChange={setMode}
+                options={[
+                    {
+                        value: 'light',
+                        label: 'Light',
+                        icon: <Sun size={18} aria-hidden />,
+                    },
+                    {
+                        value: 'dark',
+                        label: 'Dark',
+                        icon: <Moon size={18} aria-hidden />,
+                    },
+                ]}
+            />
         </div>
     );
 };
