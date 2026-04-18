@@ -160,17 +160,24 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Interval (seconds)</span>
+                    <span className="flex justify-between items-baseline mb-1 gap-2">
+                        <span>Interval</span>
+                        <span className="text-sm text-text-secondary tabular-nums shrink-0">
+                            {Math.min(300, Math.max(1, Math.round(settings.slideshow.intervalMs / 1000)))}{' '}
+                            s
+                        </span>
+                    </span>
                     <input
-                        type="number"
-                        value={settings.slideshow.intervalMs / 1000}
-                        min="1"
-                        step="1"
+                        type="range"
+                        min={1}
+                        max={300}
+                        step={1}
+                        value={Math.min(300, Math.max(1, Math.round(settings.slideshow.intervalMs / 1000)))}
                         onChange={(e) => {
                             const intervalMs = Number(e.target.value) * 1000;
                             updateSettings({ slideshow: { intervalMs } });
                         }}
-                        className="bg-surface border border-border w-full p-2 rounded"
+                        className="w-full"
                     />
                 </label>
             </CollapsibleSection>
@@ -199,13 +206,32 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Duration (ms)</span>
+                    <span className="flex justify-between items-baseline mb-1 gap-2">
+                        <span>Duration</span>
+                        <span className="text-sm text-text-secondary tabular-nums shrink-0">
+                            {Math.min(
+                                5000,
+                                Math.max(
+                                    100,
+                                    Math.round(settings.slideshow.transition.duration / 100) * 100
+                                )
+                            )}{' '}
+                            ms
+                        </span>
+                    </span>
                     <input
-                        type="number"
-                        min="100"
-                        step="100"
+                        type="range"
+                        min={100}
+                        max={5000}
+                        step={100}
                         disabled={settings.slideshow.transition.type === 'none'}
-                        value={settings.slideshow.transition.duration}
+                        value={Math.min(
+                            5000,
+                            Math.max(
+                                100,
+                                Math.round(settings.slideshow.transition.duration / 100) * 100
+                            )
+                        )}
                         onChange={(e) =>
                             updateSettings({
                                 slideshow: {
@@ -213,7 +239,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 }
                             })
                         }
-                        className="bg-surface border border-border w-full p-2 rounded"
+                        className="w-full"
                     />
                 </label>
             </CollapsibleSection>
@@ -278,7 +304,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 {settings.photos.animation.type !== 'none' && (
                     <>
                         <label className="block">
-                            <span className="block mb-1">Intensity</span>
+                            <span className="flex justify-between items-baseline mb-1 gap-2">
+                                <span>Intensity</span>
+                                <span className="text-sm text-text-secondary tabular-nums shrink-0">
+                                    {settings.photos.animation.intensity.toFixed(1)}×
+                                </span>
+                            </span>
                             <input
                                 type="range"
                                 min="1"
@@ -349,12 +380,25 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Delay (seconds)</span>
+                    <span className="flex justify-between items-baseline mb-1 gap-2">
+                        <span>Delay</span>
+                        <span className="text-sm text-text-secondary tabular-nums shrink-0">
+                            {Math.min(
+                                10,
+                                Math.max(0, Math.round((settings.photos.livePhoto.delay / 1000) * 10) / 10)
+                            ).toFixed(1)}{' '}
+                            s
+                        </span>
+                    </span>
                     <input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={settings.photos.livePhoto.delay / 1000}
+                        type="range"
+                        min={0}
+                        max={10}
+                        step={0.1}
+                        value={Math.min(
+                            10,
+                            Math.max(0, Math.round((settings.photos.livePhoto.delay / 1000) * 10) / 10)
+                        )}
                         onChange={(e) =>
                             updateSettings({
                                 photos: {
@@ -365,7 +409,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 }
                             })
                         }
-                        className="bg-surface border border-border w-full p-2 rounded"
+                        className="w-full"
                     />
                 </label>
             </CollapsibleSection>
