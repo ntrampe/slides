@@ -105,7 +105,7 @@ export function ItemPicker<T extends PickerItem>({
 
     if (error) {
         return (
-            <div className="mb-4">
+            <div>
                 <span className="block mb-2 text-error">
                     {label ? `${label} (Error loading)` : 'Error loading'}
                 </span>
@@ -115,7 +115,7 @@ export function ItemPicker<T extends PickerItem>({
     }
 
     return (
-        <div className="mb-3">
+        <div>
             {showHeaderRow && (
                 <div
                     className={`flex items-center mb-1.5 ${label ? 'justify-between' : 'justify-end'}`}

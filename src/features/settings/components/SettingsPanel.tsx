@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useSettingsData } from "../hooks/useSettingsData";
 import { PeoplePicker } from "../../people/components/PeoplePicker";
@@ -17,6 +18,12 @@ export interface SettingsPanelProps {
 
 const Divider = () => (
     <div className="my-4 border-t border-border/60" />
+);
+
+const FilterCompartment = ({ children }: { children: ReactNode }) => (
+    <div className="rounded-lg border border-border/80 bg-surface px-4 py-3 space-y-3">
+        {children}
+    </div>
 );
 
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
@@ -54,52 +61,62 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
             {/* CONTENT */}
             <CollapsibleSection title="Content">
-                <SlideshowFilterSummary filter={filter} />
-                <SlideshowFilterCombineControl
-                    filter={filter}
-                    onGlobalOperatorChange={(globalOperator) =>
-                        updateSettings({ slideshow: { filter: { globalOperator } } })
-                    }
-                />
+                <FilterCompartment>
+                    <SlideshowFilterSummary filter={filter} />
+                    <SlideshowFilterCombineControl
+                        filter={filter}
+                        onGlobalOperatorChange={(globalOperator) =>
+                            updateSettings({ slideshow: { filter: { globalOperator } } })
+                        }
+                    />
+                </FilterCompartment>
 
-                <AlbumPicker
-                    label="Albums"
-                    selectedIds={settings.slideshow.filter.albumIds || []}
-                    excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
-                    operator={settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR}
-                    onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
-                        updateSettings({ slideshow: { filter: { albumIds, excludeAlbumIds } } })
-                    }
-                    onOperatorChange={(albumOperator) =>
-                        updateSettings({ slideshow: { filter: { albumOperator } } })
-                    }
-                />
-                <PeoplePicker
-                    label="People"
-                    selectedIds={settings.slideshow.filter.personIds || []}
-                    excludedIds={settings.slideshow.filter.excludePersonIds || []}
-                    operator={settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR}
-                    onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
-                        updateSettings({ slideshow: { filter: { personIds, excludePersonIds } } })
-                    }
-                    onOperatorChange={(personOperator) =>
-                        updateSettings({ slideshow: { filter: { personOperator } } })
-                    }
-                />
-                <LocationPicker
-                    label="Location"
-                    selection={settings.slideshow.filter.location || {}}
-                    onChange={(location) =>
-                        updateSettings({ slideshow: { filter: { location } } })
-                    }
-                />
-                <DateFilter
-                    startDate={settings.slideshow.filter.startDate}
-                    endDate={settings.slideshow.filter.endDate}
-                    onChange={(startDate, endDate) =>
-                        updateSettings({ slideshow: { filter: { startDate, endDate } } })
-                    }
-                />
+                <FilterCompartment>
+                    <AlbumPicker
+                        label="Albums"
+                        selectedIds={settings.slideshow.filter.albumIds || []}
+                        excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
+                        operator={settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR}
+                        onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
+                            updateSettings({ slideshow: { filter: { albumIds, excludeAlbumIds } } })
+                        }
+                        onOperatorChange={(albumOperator) =>
+                            updateSettings({ slideshow: { filter: { albumOperator } } })
+                        }
+                    />
+                </FilterCompartment>
+                <FilterCompartment>
+                    <PeoplePicker
+                        label="People"
+                        selectedIds={settings.slideshow.filter.personIds || []}
+                        excludedIds={settings.slideshow.filter.excludePersonIds || []}
+                        operator={settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR}
+                        onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
+                            updateSettings({ slideshow: { filter: { personIds, excludePersonIds } } })
+                        }
+                        onOperatorChange={(personOperator) =>
+                            updateSettings({ slideshow: { filter: { personOperator } } })
+                        }
+                    />
+                </FilterCompartment>
+                <FilterCompartment>
+                    <LocationPicker
+                        label="Location"
+                        selection={settings.slideshow.filter.location || {}}
+                        onChange={(location) =>
+                            updateSettings({ slideshow: { filter: { location } } })
+                        }
+                    />
+                </FilterCompartment>
+                <FilterCompartment>
+                    <DateFilter
+                        startDate={settings.slideshow.filter.startDate}
+                        endDate={settings.slideshow.filter.endDate}
+                        onChange={(startDate, endDate) =>
+                            updateSettings({ slideshow: { filter: { startDate, endDate } } })
+                        }
+                    />
+                </FilterCompartment>
             </CollapsibleSection>
 
             {/* PLAYBACK */}

@@ -9,12 +9,12 @@ export const SlideshowFilterSummary = ({ filter }: SlideshowFilterSummaryProps) 
     const filterSummaryLines = describeSlideshowFilter(filter);
 
     return (
-        <div className="mb-4">
-            <h3 className="text-xs font-semibold text-text-primary mb-2">
+        <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-text-primary">
                 What&apos;s in the slideshow
             </h3>
             <div
-                className="rounded-lg border border-border/80 bg-surface px-3 py-2 text-xs text-text-secondary mb-3"
+                className="text-xs text-text-secondary space-y-1"
                 aria-live="polite"
             >
                 {filterSummaryLines.map((line, i) => (
