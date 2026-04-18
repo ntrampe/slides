@@ -1,10 +1,23 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSettingsData } from './useSettingsData';
+
+const TRANSIENT_STATUS_MS = 2500;
+
+export const WeatherCurrentLocationStatus = {
+    Idle: 'idle',
+    Loading: 'loading',
+    Success: 'success',
+    Error: 'error'
+} as const;
+
+export type WeatherCurrentLocationStatus =
+    (typeof WeatherCurrentLocationStatus)[keyof typeof WeatherCurrentLocationStatus];
 
 export interface UseWeatherCurrentLocationReturn {
     state: {
-        locating: boolean;
-        error: string | null;
+        status: WeatherCurrentLocationStatus;
+        /** Set when `status` is `Error`; cleared when leaving that state. */
+        errorMessage: string | null;
     };
     actions: {
         requestLocation: () => void;
@@ -17,16 +30,35 @@ export interface UseWeatherCurrentLocationReturn {
  */
 export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
     const { updateSettings } = useSettingsData();
-    const [locating, setLocating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [status, setStatus] = useState<WeatherCurrentLocationStatus>(
+        WeatherCurrentLocationStatus.Idle
+    );
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (
+            status !== WeatherCurrentLocationStatus.Success &&
+            status !== WeatherCurrentLocationStatus.Error
+        ) {
+            return;
+        }
+        const t = window.setTimeout(() => {
+            setStatus(WeatherCurrentLocationStatus.Idle);
+            setErrorMessage(null);
+        }, TRANSIENT_STATUS_MS);
+        return () => window.clearTimeout(t);
+    }, [status]);
 
     const requestLocation = useCallback(() => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            setError('Location is not available in this browser or context.');
+            setErrorMessage(
+                'Location is not available in this browser or context.'
+            );
+            setStatus(WeatherCurrentLocationStatus.Error);
             return;
         }
-        setLocating(true);
-        setError(null);
+        setStatus(WeatherCurrentLocationStatus.Loading);
+        setErrorMessage(null);
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const lat =
@@ -38,7 +70,7 @@ export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
                         location: { lat, lng }
                     }
                 });
-                setLocating(false);
+                setStatus(WeatherCurrentLocationStatus.Success);
             },
             (err) => {
                 const messages: Record<number, string> = {
@@ -46,8 +78,10 @@ export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
                     2: 'Your position could not be determined.',
                     3: 'Location request timed out.'
                 };
-                setError(messages[err.code] ?? 'Could not get your location.');
-                setLocating(false);
+                setErrorMessage(
+                    messages[err.code] ?? 'Could not get your location.'
+                );
+                setStatus(WeatherCurrentLocationStatus.Error);
             },
             {
                 enableHighAccuracy: false,
@@ -58,7 +92,7 @@ export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
     }, [updateSettings]);
 
     return {
-        state: { locating, error },
+        state: { status, errorMessage },
         actions: { requestLocation }
     };
 }
