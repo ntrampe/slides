@@ -16,7 +16,7 @@ export interface PickerSelectionState {
 }
 
 export interface ItemPickerProps<T extends PickerItem> {
-    label: string;
+    label?: string;
     selectedIds: string[];
     excludedIds?: string[];
     operator?: FilterOperator;

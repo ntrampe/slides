@@ -99,10 +99,16 @@ export function ItemPicker<T extends PickerItem>({
 
     const exclusionEnabled = Boolean(onBulkChange || onExcludedChange);
 
+    const showOperatorToggle =
+        selectionMode === 'multiple' && selectedIds.length > 1 && Boolean(onOperatorChange);
+    const showHeaderRow = Boolean(label) || showOperatorToggle;
+
     if (error) {
         return (
             <div className="mb-4">
-                <span className="block mb-2 text-error">{label} (Error loading)</span>
+                <span className="block mb-2 text-error">
+                    {label ? `${label} (Error loading)` : 'Error loading'}
+                </span>
                 <p className="text-sm text-error">Failed to load items</p>
             </div>
         );
@@ -110,12 +116,16 @@ export function ItemPicker<T extends PickerItem>({
 
     return (
         <div className="mb-3">
-            <div className="flex items-center justify-between mb-1.5">
-                <span className="font-medium">{label}</span>
-                {selectionMode === 'multiple' && selectedIds.length > 1 && onOperatorChange && (
-                    <FilterOperatorToggle value={operator} onChange={onOperatorChange} />
-                )}
-            </div>
+            {showHeaderRow && (
+                <div
+                    className={`flex items-center mb-1.5 ${label ? 'justify-between' : 'justify-end'}`}
+                >
+                    {label ? <span className="font-medium">{label}</span> : null}
+                    {showOperatorToggle && onOperatorChange && (
+                        <FilterOperatorToggle value={operator} onChange={onOperatorChange} />
+                    )}
+                </div>
+            )}
 
             <SelectedItems
                 items={selectedItems}
