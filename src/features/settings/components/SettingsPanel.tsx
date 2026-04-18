@@ -10,6 +10,7 @@ import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
 import { SlideshowFilterCombineControl } from './SlideshowFilterCombineControl';
 import { SlideshowFilterSummary } from './SlideshowFilterSummary';
+import { WeatherCurrentLocationButton } from './WeatherCurrentLocationButton';
 import { DEFAULT_FILTER_OPERATOR, type PhotoAnimationType } from '../../photos';
 
 export interface SettingsPanelProps {
@@ -512,6 +513,8 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     />
                     <span>Show Weather</span>
                 </label>
+
+                <WeatherCurrentLocationButton />
 
                 <label className="block">
                     <span className="block mb-1">Latitude</span>
