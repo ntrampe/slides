@@ -12,7 +12,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 - 🎨 **Modern UI** - Clean, responsive interface with light/dark themes
 - 🔀 **Smart Shuffle** - Random photo ordering with customizable intervals
 - 📱 **Flexible Layouts** - Single image or split-screen view
-- 🏷️ **Advanced Filtering** - Filter by albums, people, locations, and date ranges
+- 🏷️ **Advanced Filtering** - Filter by albums, people, locations, and date ranges; **All** vs **Any** match modes per group; exclude specific albums or people; combine album and people criteria with **All** or **Any** when both are set
 - 🎬 **Photo Animations** - Ken Burns, zoom, pan, and more cinematic effects
 - 🎞️ **Live Photos** - Support for live photos with configurable delay
 - ⏱️ **Customizable Timing** - Set your preferred slideshow interval
@@ -67,12 +67,25 @@ Slides offers **three ways** to configure settings, giving you maximum flexibili
 The intuitive settings panel (press `S` or click ⚙️) lets you configure everything visually:
 - Layout and display preferences
 - Slideshow timing and transitions
-- Photo filters (albums, people, locations, date ranges)
+- Photo filters (albums, people, locations, date ranges), including match modes and exclusions (see [Advanced filtering](#advanced-filtering) below)
 - Photo animations and live photo settings
 - Weather integration
 - UI customization (theme, overlays, progress bar)
 
 **All UI settings persist in browser localStorage** and take highest precedence.
+
+#### Advanced filtering
+
+For **albums** and **people**, you can tune how multiple selections combine:
+
+- **All** (AND) — a photo must match every selected album or every selected person in that group.
+- **Any** (OR) — a photo may match any one of the selected albums or any one of the selected people in that group.
+
+You can also **exclude** albums or people: photos in an excluded album, or tagged with an excluded person, are left out of the slideshow (a NOT-style filter on top of your inclusions).
+
+When you filter by **both** albums and people, an extra control lets you **combine** those two parts with **All** or **Any** (for example, photos must satisfy both the album rules and the people rules, or either set of rules).
+
+These options use the same slideshow filter settings as URL and environment configuration (see `src/features/settings/types.ts` and `src/features/photos/types.ts`).
 
 ### 2. 🔗 URL Parameters (Perfect for kiosks & presets)
 
