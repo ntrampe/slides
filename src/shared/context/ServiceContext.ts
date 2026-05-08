@@ -5,6 +5,7 @@ import { MockWeatherService } from "../../features/weather/services/MockWeatherS
 import { OWMWeatherService } from "../../features/weather/services/OWMWeatherService";
 import type { WeatherService } from "../../features/weather/types";
 import { LocalSettingsRepo } from '../../features/settings/repos/LocalStorageSettingsRepo';
+import { ApiSettingsRepo } from '../../features/settings/repos/ApiSettingsRepo';
 import type { PeopleRepo } from '../../features/people/types';
 import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
 import { ImmichPeopleRepo } from '../../features/people/repos/ImmichPeopleRepo';
@@ -46,7 +47,7 @@ const mockServices: AppServices = {
 const liveServices: AppServices = {
     photos: new ImmichPhotoRepo(),
     weather: new OWMWeatherService(),
-    settings: new LocalSettingsRepo(),
+    settings: new ApiSettingsRepo(),
     people: new ImmichPeopleRepo(),
     albums: new ImmichAlbumRepo(),
     locations: new ImmichLocationRepo(),

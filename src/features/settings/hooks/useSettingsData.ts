@@ -19,18 +19,18 @@ export interface UseSettingsDataReturn {
      * Update and persist partial user settings.
      *
      * Important behavior:
-     * - Only USER overrides are stored in localStorage.
+     * - Only USER overrides are persisted via SettingsRepo (/api/settings in live mode).
      * - Defaults (server or fallback) are NEVER persisted.
      * - The partial update is deep-merged with existing saved overrides,
      *   not with the fully computed settings object.
      *
-     * This ensures localStorage remains minimal and only contains
+     * This ensures persisted overrides remain minimal and only contain
      * explicit user customizations.
      */
     updateSettings: (partialSettings: DeepPartial<AppSettings>) => void;
 
     /**
-     * Removes all persisted user overrides from localStorage.
+     * Removes all persisted user overrides from the active SettingsRepo.
      *
      * After clearing:
      * - User overrides are removed.
@@ -63,7 +63,7 @@ export interface UseSettingsDataReturn {
  *    - Intended for temporary/session-based overrides.
  *    - Overrides server + fallback.
  *
- * 4️⃣ User overrides (localStorage)
+ * 4️⃣ User overrides (SettingsRepo, /api/settings in live mode)
  *    - Persisted user customizations.
  *    - Highest precedence.
  *    - Always win over URL + server + fallback.
@@ -90,7 +90,7 @@ export interface UseSettingsDataReturn {
  * PERSISTENCE RULES
  * ------------------------------------------------------------------------
  *
- * - Only user overrides are stored in localStorage.
+ * - Only user overrides are stored in the active SettingsRepo.
  * - The computed settings object is NEVER persisted.
  * - updateSettings() merges against SAVED overrides,
  *   not against computed settings.
@@ -116,13 +116,17 @@ export function useSettingsData(): UseSettingsDataReturn {
     });
 
     /**
-     * Load persisted user overrides from localStorage.
+     * Load persisted user overrides from SettingsRepo.
      *
      * Note: These are partial settings, not full configuration.
+     * Query polling keeps multiple clients synced when one client updates
+     * shared server-backed overrides.
      */
     const settingsQuery = useQuery({
         queryKey: ['settings'],
         queryFn: () => settingsService.loadSettings(),
+        refetchInterval: 3000,
+        refetchIntervalInBackground: true,
     });
 
     /**
@@ -171,7 +175,7 @@ export function useSettingsData(): UseSettingsDataReturn {
      * IMPORTANT:
      * - Merges partial update with CURRENT SAVED overrides.
      * - Does NOT merge with computed settings.
-     * - Prevents defaults from leaking into localStorage.
+     * - Prevents defaults from leaking into persisted overrides.
      */
     const mutation = useMutation({
         mutationFn: (newSettings: DeepPartial<AppSettings>) =>

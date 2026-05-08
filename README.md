@@ -72,7 +72,10 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 - Weather integration
 - UI customization (theme, overlays, progress bar)
 
-**All UI settings persist in browser localStorage** and take highest precedence.
+**All UI settings persist via the backend `/api/settings` endpoint** and take highest precedence.
+For the default tiny implementation, these overrides are stored in memory and reset when the server restarts.
+These user overrides are shared across clients connected to the same server instance.
+Clients poll for updates, so cross-client changes appear within a few seconds.
 
 #### Advanced filtering
 
@@ -113,7 +116,7 @@ Refer to `src/features/settings/types.ts` for the settings structure.
 ?slideshow.filter.location.country=USA&slideshow.filter.location.state=California
 ```
 
-URL settings override environment defaults but are overridden by user settings in localStorage.
+URL settings override environment defaults but are overridden by user settings from `/api/settings`.
 
 ### 3. 🔧 Environment Variables (Docker & defaults)
 
@@ -134,7 +137,7 @@ See `.env.example` for a complete list.
 
 Settings are resolved in this order (highest to lowest precedence):
 
-1. **User Settings** (localStorage) - Highest priority
+1. **User Settings** (`/api/settings`) - Highest priority
 2. **URL Parameters** - Session-specific overrides
 3. **Environment Variables** (`DEFAULT_*`) - Default configuration
 4. **Hardcoded Fallbacks** - Guaranteed baseline

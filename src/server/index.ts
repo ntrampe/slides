@@ -35,5 +35,6 @@ app.listen(config.PORT, () => {
     console.log(`  - /api/immich/* -> ${config.IMMICH_URL}`);
     console.log(`  - /api/weather -> OpenWeatherMap`);
     console.log(`  - /api/config -> Default Settings`);
+    console.log(`  - /api/settings -> User Settings Overrides`);
     console.log(`=================================\n`);
 });
