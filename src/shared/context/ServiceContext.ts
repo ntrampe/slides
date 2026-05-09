@@ -4,8 +4,8 @@ import { ImmichPhotoRepo, MockPhotoRepo, type PhotoRepo } from "../../features/p
 import { MockWeatherService } from "../../features/weather/services/MockWeatherService";
 import { OWMWeatherService } from "../../features/weather/services/OWMWeatherService";
 import type { WeatherService } from "../../features/weather/types";
-import { LocalSettingsRepo } from '../../features/settings/repos/LocalStorageSettingsRepo';
-import { ApiSettingsRepo } from '../../features/settings/repos/ApiSettingsRepo';
+import { LocalStorageSettingsOverridesRepo } from '../../features/settings/repos/LocalStorageSettingsOverridesRepo';
+import { ApiSettingsOverridesRepo } from '../../features/settings/repos/ApiSettingsOverridesRepo';
 import type { PeopleRepo } from '../../features/people/types';
 import { MockPeopleRepo } from '../../features/people/repos/MockPeopleRepo';
 import { ImmichPeopleRepo } from '../../features/people/repos/ImmichPeopleRepo';
@@ -15,9 +15,9 @@ import { ImmichAlbumRepo } from '../../features/albums/repos/ImmichAlbumRepo';
 import type { LocationRepo } from '../../features/locations/types';
 import { MockLocationRepo } from '../../features/locations/repos/MockLocationRepo';
 import { ImmichLocationRepo } from '../../features/locations/repos/ImmichLocationRepo';
-import type { ConfigRepo, SettingsRepo } from '../../features/settings';
-import { ApiConfigRepo } from '../../features/settings/repos/ApiConfigRepo';
-import { MockConfigRepo } from '../../features/settings/repos/MockConfigRepo';
+import type { SettingsDefaultsRepo, SettingsOverridesRepo } from '../../features/settings';
+import { ApiSettingsDefaultsRepo } from '../../features/settings/repos/ApiSettingsDefaultsRepo';
+import { MockSettingsDefaultsRepo } from '../../features/settings/repos/MockSettingsDefaultsRepo';
 
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
@@ -25,33 +25,33 @@ const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 export type AppServices = {
     photos: PhotoRepo;
     weather: WeatherService;
-    settings: SettingsRepo;
+    settingsOverrides: SettingsOverridesRepo;
     people: PeopleRepo;
     albums: AlbumRepo;
     locations: LocationRepo;
-    config: ConfigRepo;
+    settingsDefaults: SettingsDefaultsRepo;
 };
 
 // Mock services
 const mockServices: AppServices = {
     photos: new MockPhotoRepo(),
     weather: new MockWeatherService(),
-    settings: new LocalSettingsRepo(),
+    settingsOverrides: new LocalStorageSettingsOverridesRepo(),
     people: new MockPeopleRepo(),
     albums: new MockAlbumRepo(),
     locations: new MockLocationRepo(),
-    config: new MockConfigRepo()
+    settingsDefaults: new MockSettingsDefaultsRepo()
 };
 
 // Live services
 const liveServices: AppServices = {
     photos: new ImmichPhotoRepo(),
     weather: new OWMWeatherService(),
-    settings: new ApiSettingsRepo(),
+    settingsOverrides: new ApiSettingsOverridesRepo(),
     people: new ImmichPeopleRepo(),
     albums: new ImmichAlbumRepo(),
     locations: new ImmichLocationRepo(),
-    config: new ApiConfigRepo()
+    settingsDefaults: new ApiSettingsDefaultsRepo()
 };
 
 // Select services based on flag

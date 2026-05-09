@@ -2,7 +2,7 @@ import type { AppSettings } from "../features/settings";
 
 /**
  * Hardcoded fallback settings used ONLY when server is unreachable.
- * Normal defaults come from /api/config endpoint.
+ * Normal defaults come from /api/settings/defaults endpoint.
  */
 export const FALLBACK_APP_SETTINGS: AppSettings = {
     slideshow: {

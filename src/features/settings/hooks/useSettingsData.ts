@@ -19,7 +19,7 @@ export interface UseSettingsDataReturn {
      * Update and persist partial user settings.
      *
      * Important behavior:
-     * - Only USER overrides are persisted via SettingsRepo (/api/settings in live mode).
+     * - Only USER overrides are persisted via SettingsOverridesRepo (/api/settings in live mode).
      * - Defaults (server or fallback) are NEVER persisted.
      * - The partial update is deep-merged with existing saved overrides,
      *   not with the fully computed settings object.
@@ -30,7 +30,7 @@ export interface UseSettingsDataReturn {
     updateSettings: (partialSettings: DeepPartial<AppSettings>) => void;
 
     /**
-     * Removes all persisted user overrides from the active SettingsRepo.
+     * Removes all persisted user overrides from the active SettingsOverridesRepo.
      *
      * After clearing:
      * - User overrides are removed.
@@ -54,7 +54,7 @@ export interface UseSettingsDataReturn {
  *    - Guaranteed baseline configuration.
  *    - Used if server config is unavailable.
  *
- * 2️⃣ Server defaults (/api/config)
+ * 2️⃣ Server defaults (/api/settings/defaults)
  *    - Fetched at runtime.
  *    - Overrides hardcoded fallback values.
  *
@@ -63,7 +63,7 @@ export interface UseSettingsDataReturn {
  *    - Intended for temporary/session-based overrides.
  *    - Overrides server + fallback.
  *
- * 4️⃣ User overrides (SettingsRepo, /api/settings in live mode)
+ * 4️⃣ User overrides (SettingsOverridesRepo, /api/settings in live mode)
  *    - Persisted user customizations.
  *    - Highest precedence.
  *    - Always win over URL + server + fallback.
@@ -90,7 +90,7 @@ export interface UseSettingsDataReturn {
  * PERSISTENCE RULES
  * ------------------------------------------------------------------------
  *
- * - Only user overrides are stored in the active SettingsRepo.
+ * - Only user overrides are stored in the active SettingsOverridesRepo.
  * - The computed settings object is NEVER persisted.
  * - updateSettings() merges against SAVED overrides,
  *   not against computed settings.
@@ -99,7 +99,10 @@ export interface UseSettingsDataReturn {
  * into storage and keeps persisted data minimal.
  */
 export function useSettingsData(): UseSettingsDataReturn {
-    const { settings: settingsService, config: configService } = useServices();
+    const {
+        settingsOverrides: settingsOverridesRepo,
+        settingsDefaults: settingsDefaultsRepo,
+    } = useServices();
     const queryClient = useQueryClient();
 
     /**
@@ -109,22 +112,22 @@ export function useSettingsData(): UseSettingsDataReturn {
      * - If unavailable, FALLBACK_APP_SETTINGS is used.
      */
     const configQuery = useQuery({
-        queryKey: ['config'],
-        queryFn: () => configService.fetchDefaultConfig(),
+        queryKey: ['settings-defaults'],
+        queryFn: () => settingsDefaultsRepo.fetchDefaults(),
         staleTime: 5 * 60 * 1000,
         retry: 1,
     });
 
     /**
-     * Load persisted user overrides from SettingsRepo.
+     * Load persisted user overrides from SettingsOverridesRepo.
      *
      * Note: These are partial settings, not full configuration.
      * Query polling keeps multiple clients synced when one client updates
      * shared server-backed overrides.
      */
     const settingsQuery = useQuery({
-        queryKey: ['settings'],
-        queryFn: () => settingsService.loadSettings(),
+        queryKey: ['settings-overrides'],
+        queryFn: () => settingsOverridesRepo.loadOverrides(),
         refetchInterval: 3000,
         refetchIntervalInBackground: true,
     });
@@ -179,9 +182,9 @@ export function useSettingsData(): UseSettingsDataReturn {
      */
     const mutation = useMutation({
         mutationFn: (newSettings: DeepPartial<AppSettings>) =>
-            settingsService.saveSettings(newSettings as AppSettings),
+            settingsOverridesRepo.saveOverrides(newSettings as AppSettings),
         onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: ['settings'] }),
+            queryClient.invalidateQueries({ queryKey: ['settings-overrides'] }),
     });
 
     const updateSettings = useCallback(
@@ -206,9 +209,9 @@ export function useSettingsData(): UseSettingsDataReturn {
      * using URL → server → fallback layers.
      */
     const clearMutation = useMutation({
-        mutationFn: () => settingsService.clearSettings(),
+        mutationFn: () => settingsOverridesRepo.clearOverrides(),
         onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: ['settings'] }),
+            queryClient.invalidateQueries({ queryKey: ['settings-overrides'] }),
     });
 
     const clearSettings = useCallback(() => {

@@ -67,15 +67,12 @@ export interface AppSettings {
     };
 }
 
-export interface ConfigRepo {
-    fetchDefaultConfig(): Promise<AppSettings>;
+export interface SettingsDefaultsRepo {
+    fetchDefaults(): Promise<AppSettings>;
 }
 
-export interface SettingsRepo {
-    /** Load settings from localStorage. Returns null if none saved. */
-    loadSettings: () => Promise<AppSettings | null>;
-    /** Save settings to localStorage */
-    saveSettings: (settings: AppSettings) => Promise<void>;
-    /** Clear all settings from localStorage */
-    clearSettings: () => Promise<void>;
+export interface SettingsOverridesRepo {
+    loadOverrides: () => Promise<AppSettings | null>;
+    saveOverrides: (settings: AppSettings) => Promise<void>;
+    clearOverrides: () => Promise<void>;
 }

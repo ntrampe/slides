@@ -1,21 +1,21 @@
-import type { AppSettings, SettingsRepo } from '../types';
+import type { AppSettings, SettingsOverridesRepo } from '../types';
 
 /**
  * Persists user settings overrides to the backend API.
  */
-export class ApiSettingsRepo implements SettingsRepo {
-    async loadSettings(): Promise<AppSettings | null> {
+export class ApiSettingsOverridesRepo implements SettingsOverridesRepo {
+    async loadOverrides(): Promise<AppSettings | null> {
         const response = await fetch('/api/settings');
 
         if (!response.ok) {
-            throw new Error(`Failed to load settings: ${response.statusText}`);
+            throw new Error(`Failed to load settings overrides: ${response.statusText}`);
         }
 
         const data = (await response.json()) as AppSettings;
         return Object.keys(data).length > 0 ? data : null;
     }
 
-    async saveSettings(settings: AppSettings): Promise<void> {
+    async saveOverrides(settings: AppSettings): Promise<void> {
         const response = await fetch('/api/settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -23,17 +23,17 @@ export class ApiSettingsRepo implements SettingsRepo {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to save settings: ${response.statusText}`);
+            throw new Error(`Failed to save settings overrides: ${response.statusText}`);
         }
     }
 
-    async clearSettings(): Promise<void> {
+    async clearOverrides(): Promise<void> {
         const response = await fetch('/api/settings', {
             method: 'DELETE',
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to clear settings: ${response.statusText}`);
+            throw new Error(`Failed to clear settings overrides: ${response.statusText}`);
         }
     }
 }
