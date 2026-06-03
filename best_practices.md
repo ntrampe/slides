@@ -149,7 +149,7 @@ export const useServices = () => useContext(ServiceContext);
 
 ## Settings Architecture
 
-Settings are persisted in localStorage and loaded via TanStack Query. Defaults are configured at **runtime** via environment variables read by the server, allowing for Docker deployment with runtime configuration.
+User overrides are persisted via `/api/settings` (in-memory on the server in the default implementation; shared across clients; resets on restart) and loaded via TanStack Query. Mock builds (`VITE_USE_MOCK=true`) use localStorage for overrides instead. Defaults come from `/api/settings/defaults`, configured at **runtime** via `DEFAULT_*` environment variables on the server, with `FALLBACK_APP_SETTINGS` when the server is unreachable.
 
 ### Adding a New Setting
 
@@ -179,7 +179,7 @@ export function buildDefaultSettings(): AppSettings {
 }
 ```
 
-3. **Add fallback value** in `features/settings/constants.ts` (used when server is unavailable):
+3. **Add fallback value** in `shared/constants.ts` (`FALLBACK_APP_SETTINGS`, used when server is unavailable):
 
 ```typescript
 export const FALLBACK_APP_SETTINGS: AppSettings = {
@@ -218,14 +218,13 @@ export const MyComponent = () => {
 };
 ```
 
-**Updating settings**:
+**Updating settings** (pass only the override slice; do not spread full computed `settings`):
 
 ```typescript
-const { settings, updateSettings } = useSettingsData();
+const { updateSettings } = useSettingsData();
 
 updateSettings({
-    ...settings,
-    myFeature: { enabled: false, threshold: 75 }
+    myFeature: { enabled: false, threshold: 75 },
 });
 ```
 
@@ -309,8 +308,8 @@ const allPhotos = useMemo(() =>
 ### Settings Mutation
 ```typescript
 const mutation = useMutation({
-    mutationFn: (s: AppSettings) => service.saveSettings(s),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+    mutationFn: (s: AppSettings) => settingsOverridesRepo.saveOverrides(s),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings-overrides'] }),
 });
 ```
 
