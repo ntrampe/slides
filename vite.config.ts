@@ -36,9 +36,12 @@ export default defineConfig({
     workbox: {
       runtimeCaching: [
         {
-          urlPattern: ({ url }) => {
-            return url.pathname.startsWith('/api/')
-          },
+          // User overrides are mutable and polled; never cache them.
+          urlPattern: ({ url }) => url.pathname.startsWith('/api/settings'),
+          handler: 'NetworkOnly',
+        },
+        {
+          urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
           handler: 'NetworkFirst',
           options: {
             cacheName: 'api-cache',
