@@ -19,7 +19,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 - 🎭 **Smooth Transitions** - Fade, slide, or instant transitions between photos
 - 🕐 **Optional Overlays** - Clock, weather, and photo metadata
 - ⌨️ **Keyboard Control** - Full keyboard navigation support
-- 💾 **Persistent Settings** - Your preferences saved in browser
+- 💾 **Persistent Settings** - UI preferences saved on the server (shared across displays on the same instance)
 - 🔗 **URL Configuration** - Configure via URL query parameters
 - 🐳 **Docker Ready** - Easy deployment with Docker/Docker Compose
 - 🔒 **Secure** - API keys handled server-side, never exposed to browser
@@ -73,9 +73,12 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 - UI customization (theme, overlays, progress bar)
 
 **All UI settings persist via the backend `/api/settings` endpoint** and take highest precedence.
-For the default tiny implementation, these overrides are stored in memory and reset when the server restarts.
-These user overrides are shared across clients connected to the same server instance.
-Clients poll for updates, so cross-client changes appear within a few seconds.
+These overrides are shared across clients on the same server instance; clients poll every few seconds so changes show up on other displays quickly.
+
+> [!NOTE]
+> **Durability:** UI overrides are held in server memory today. They are cleared when the Slides **container is restarted or recreated** (for example after an image upgrade or host reboot). That is uncommon in normal use. If overrides are lost, reopen the settings panel (`S`) and reapply them—they are quick to set again. For defaults that survive restarts, use `DEFAULT_*` environment variables or URL parameters (see below). Disk persistence for `/api/settings` may be added later.
+
+The HTTP API is also suitable for home automation (for example Home Assistant `rest_command`) to update kiosk settings remotely.
 
 #### Advanced filtering
 
