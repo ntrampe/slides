@@ -13,7 +13,7 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     volumes:
-      # Maps a "data" folder on your host machine to "/app/data" inside the container
+      # Host ./data must exist before first start (see README). Maps to /app/data in the container.
       - ./data:/app/data
     restart: unless-stopped
     healthcheck:

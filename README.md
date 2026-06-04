@@ -46,12 +46,22 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
    IMMICH_API_KEY=your-api-key-here
    ```
 
-3. **Start the container**
+3. **Create the data directory**
+
+   UI settings overrides are persisted to a `data` folder on the host. Create it next to `docker-compose.yml` before starting the container:
+
+   ```bash
+   mkdir -p data
+   ```
+
+4. **Start the container**
    ```bash
    docker-compose up -d
    ```
 
-4. **Open in browser**
+   Overrides are written to `./data/settings.json` (mounted to `/app/data` inside the container).
+
+5. **Open in browser**
    ```
    http://localhost:3000
    ```
@@ -76,7 +86,7 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 These overrides are shared across clients on the same server instance; clients poll every few seconds so changes show up on other displays quickly.
 
 > [!NOTE]
-> **Durability:** UI overrides are held in server memory today. They are cleared when the Slides **container is restarted or recreated** (for example after an image upgrade or host reboot). That is uncommon in normal use. If overrides are lost, reopen the settings panel (`S`) and reapply them—they are quick to set again. For defaults that survive restarts, use `DEFAULT_*` environment variables or URL parameters (see below). Disk persistence for `/api/v1/settings` may be added later.
+> **Durability:** UI overrides survive server restarts. In Docker, mount a volume to `DATA_DIR` (the included `docker-compose.yml` maps `./data` on the host to `/app/data` in the container). If you delete that volume or run without a mount, overrides are lost when the container is recreated.
 
 The HTTP API is also suitable for home automation (for example Home Assistant `rest_command`) to update kiosk settings remotely.
 
