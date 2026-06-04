@@ -1,0 +1,24 @@
+{
+  "name": "@slides/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=../../.env --import tsx/esm --watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "node --env-file=../../.env --import tsx/esm src/index.ts"
+  },
+  "dependencies": {
+    "@slides/api-contract": "*",
+    "@slides/shared": "*",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5",
+    "tsx": "^4.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.13",
+    "typescript": "~5.9.3"
+  }
+}
