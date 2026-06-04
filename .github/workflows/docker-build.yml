@@ -28,6 +28,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate API contract
+        run: npm run contract:gen
+
+      - name: Typecheck
+        run: npm run build:server && npm run build -w @slides/web
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
