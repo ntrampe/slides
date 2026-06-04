@@ -1,0 +1,51 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Slideshow } from './features/slideshow';
+import { SettingsPanel, useSettingsPanel } from './features/settings';
+import { useTheme } from './features/theme';
+import { IdleProvider } from './context';
+import { VisibilityProvider } from './context/VisibilityContext';
+
+const queryClient = new QueryClient();
+
+function AppContent() {
+  useTheme();
+
+  const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();
+
+  return (
+    <main className="h-screen w-screen bg-background select-none overflow-hidden relative">
+      <div className="h-full transition-all duration-500 ease-in-out">
+        <Slideshow onToggleSettings={toggleSettings} />
+      </div>
+
+      {isSettingsPanelVisible && (
+        <div
+          className="absolute inset-0 bg-black/50 transition-opacity duration-500 ease-in-out z-10"
+          onClick={closeSettings}
+        />
+      )}
+
+      <div
+        className="absolute top-0 right-0 h-full w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl transition-transform duration-500 ease-in-out z-20"
+        style={{
+          transform: isSettingsPanelVisible ? 'translateX(0)' : 'translateX(100%)',
+          pointerEvents: isSettingsPanelVisible ? 'auto' : 'none'
+        }}
+      >
+        <SettingsPanel onClose={closeSettings} />
+      </div>
+    </main>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <VisibilityProvider>
+        <IdleProvider>
+          <AppContent />
+        </IdleProvider>
+      </VisibilityProvider>
+    </QueryClientProvider>
+  );
+}

@@ -1,0 +1,51 @@
+import { useMemo } from 'react';
+import { ItemPicker } from '../../../components/picker/ItemPicker';
+import { renderImmichThumbnail } from '../../../components/picker/pickerRenderers';
+import { useAlbums } from '../hooks/useAlbums';
+import type { PickerItem, PickerSelectionState } from '../../../components/picker/types';
+import type { FilterOperator } from '../../photos/types';
+
+interface AlbumPickerProps {
+    selectedIds: string[];
+    excludedIds?: string[];
+    operator?: FilterOperator;
+    onBulkChange: (next: PickerSelectionState) => void;
+    onOperatorChange?: (operator: FilterOperator) => void;
+    label: string;
+}
+
+export const AlbumPicker = ({
+    selectedIds,
+    excludedIds = [],
+    operator = 'AND',
+    onBulkChange,
+    onOperatorChange,
+    label
+}: AlbumPickerProps) => {
+    const { data: albums, isLoading, error } = useAlbums();
+
+    const pickerItems = useMemo<PickerItem[]>(() => {
+        if (!albums) return [];
+        return albums.map(album => ({
+            id: album.id,
+            label: album.name,
+            imageUrl: album.thumbnailUrl
+        }));
+    }, [albums]);
+
+    return (
+        <ItemPicker
+            label={label}
+            selectedIds={selectedIds}
+            excludedIds={excludedIds}
+            operator={operator}
+            onBulkChange={onBulkChange}
+            onOperatorChange={onOperatorChange}
+            items={pickerItems}
+            isLoading={isLoading}
+            error={error}
+            searchPlaceholder="Search albums..."
+            renderImage={(item) => renderImmichThumbnail(item, 'album')}
+        />
+    );
+};
