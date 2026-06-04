@@ -12,6 +12,9 @@ services:
       - .env
     ports:
       - "${PORT}:${PORT}"
+    volumes:
+      # Maps a "data" folder on your host machine to "/app/data" inside the container
+      - ./data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + (process.env.PORT || 3000), r => process.exit(r.statusCode === 200 ? 0 : 1))"]
