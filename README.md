@@ -179,6 +179,7 @@ packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 
 | Endpoint | Required |
 |----------|----------|
+| `GET /api/v1/meta` | Yes — `{ apiVersion, contractVersion }` for client/server contract checks |
 | `GET /api/v1/slideshow` | Yes — ordered photo list (filtering + shuffle run server-side) |
 | `GET /api/v1/assets/:id/thumbnail` | Yes — proxied image bytes (API key never exposed) |
 | `GET /api/v1/assets/:id/video` | If live photos are enabled |
@@ -187,7 +188,7 @@ packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 | `GET /api/v1/albums`, `/people`, `/locations` | Optional — only if building a filter picker UI |
 | `GET /api/v1/weather` | Optional — only if displaying a weather HUD |
 
-Call `/slideshow` and `/settings/resolved` in parallel at startup. Settings can be refreshed independently of the photo list.
+Call `/meta` first, then `/slideshow` and `/settings/resolved` in parallel at startup. Settings can be refreshed independently of the photo list.
 
 #### Full web kiosk (current React app)
 

@@ -27,6 +27,7 @@ app.listen(config.PORT, () => {
     console.log(`\n=================================`);
     console.log(`Slides API running on http://localhost:${config.PORT}`);
     console.log(`Domain API (/api/v1):`);
+    console.log(`  - GET    /api/v1/meta                   -> { apiVersion, contractVersion }`);
     console.log(`  - GET    /api/v1/slideshow              -> ordered photo list { photos, total }`);
     console.log(`  - GET    /api/v1/settings/resolved      -> merged effective settings`);
     console.log(`  - GET    /api/v1/albums | /people | /locations`);

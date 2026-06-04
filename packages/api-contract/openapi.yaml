@@ -9,8 +9,9 @@ info:
 
     Two client profiles are supported:
 
-    **Slideshow-only** (e.g. Flutter kiosk): call `/slideshow` and
-    `/settings/resolved` in parallel at startup, then proxy images via `/assets`.
+    **Slideshow-only** (e.g. Flutter kiosk): call `GET /meta` first to verify
+    `contractVersion`, then `/slideshow` and `/settings/resolved` in parallel at
+    startup, then proxy images via `/assets`.
 
     **Full web kiosk**: all of the above plus settings CRUD, catalog pickers, and
     weather HUD.
@@ -24,6 +25,25 @@ servers:
 # ─────────────────────────────────────────────────────────────────────────────
 
 paths:
+
+  # ── Meta ─────────────────────────────────────────────────────────────────────
+
+  /meta:
+    get:
+      operationId: getApiMeta
+      summary: API and contract version
+      description: |
+        Discovery endpoint for native/self-hosted clients. Compare `contractVersion`
+        to the version your client was built against. Bump `contractVersion` in
+        OpenAPI `info.version` when making contract-breaking JSON changes (even if
+        the URL stays on `/api/v1`). `apiVersion` reflects the URL path generation.
+      responses:
+        '200':
+          description: Version metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMeta'
 
   # ── Slideshow ──────────────────────────────────────────────────────────────
 
@@ -399,6 +419,19 @@ components:
   # ── Schemas ────────────────────────────────────────────────────────────────
 
   schemas:
+
+    ApiMeta:
+      type: object
+      required: [apiVersion, contractVersion]
+      properties:
+        apiVersion:
+          type: string
+          description: URL path generation (currently `1` for `/api/v1`)
+        contractVersion:
+          type: string
+          description: |
+            OpenAPI `info.version`. Bump when older clients cannot safely parse
+            responses. Clients should compare to their compile-time expectation.
 
     # ── Slideshow ─────────────────────────────────────────────────────────────
 

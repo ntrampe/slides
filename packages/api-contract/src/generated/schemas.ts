@@ -1,6 +1,9 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
+const ApiMeta = z
+  .object({ apiVersion: z.string(), contractVersion: z.string() })
+  .passthrough();
 const PhotoLocation = z
   .object({
     city: z.string(),
@@ -188,6 +191,7 @@ const WeatherData = z
   .passthrough();
 
 export const schemas = {
+  ApiMeta,
   PhotoLocation,
   PhotoCameraInfo,
   PhotoExifSettings,
@@ -365,6 +369,18 @@ the first matching complete &#x60;LocationSelection&#x60; from photo EXIF data, 
         schema: ErrorResponse,
       },
     ],
+  },
+  {
+    method: "get",
+    path: "/meta",
+    alias: "getApiMeta",
+    description: `Discovery endpoint for native/self-hosted clients. Compare &#x60;contractVersion&#x60;
+to the version your client was built against. Bump &#x60;contractVersion&#x60; in
+OpenAPI &#x60;info.version&#x60; when making contract-breaking JSON changes (even if
+the URL stays on &#x60;/api/v1&#x60;). &#x60;apiVersion&#x60; reflects the URL path generation.
+`,
+    requestFormat: "json",
+    response: ApiMeta,
   },
   {
     method: "get",

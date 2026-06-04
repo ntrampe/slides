@@ -13,6 +13,7 @@ import { createWeatherRouter } from './weather.js';
 import { createSettingsRouter } from './settings.js';
 import { createSlideshowRouter } from './slideshow.js';
 import { createAssetsRouter } from './assets.js';
+import { createMetaRouter } from './meta.js';
 
 export function createV1Router(config: ServerConfig): Router {
     const router = Router();
@@ -29,6 +30,7 @@ export function createV1Router(config: ServerConfig): Router {
 
     const catalog = createCatalogRouters(catalogService, immich, config);
 
+    router.use('/meta', createMetaRouter());
     router.use('/slideshow', createSlideshowRouter(slideshowService, config));
     router.use('/albums', catalog.albums);
     router.use('/people', catalog.people);

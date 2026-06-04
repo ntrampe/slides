@@ -10,6 +10,7 @@
     ".": "./src/index.ts",
     "./errors": "./src/errors/index.ts",
     "./constants": "./src/constants.ts",
+    "./apiVersions": "./src/apiVersions.ts",
     "./utils/deepMerge": "./src/utils/deepMerge.ts",
     "./utils/slideshowSeed": "./src/utils/slideshowSeed.ts"
   }

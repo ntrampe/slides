@@ -20,6 +20,7 @@ export type LocationItem = components['schemas']['LocationItem'];
 export type LocationSelection = components['schemas']['LocationSelection'];
 export type MapMarker = components['schemas']['MapMarker'];
 export type WeatherData = components['schemas']['WeatherData'];
+export type ApiMeta = components['schemas']['ApiMeta'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type ApiErrorEnvelope = ErrorResponse;
 
