@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { Router } from 'express';
 import type { ServerConfig } from '../../../config.js';
 import { ImmichClient } from '../../../infra/ImmichClient.js';
@@ -5,6 +6,7 @@ import { ImmichPhotoGateway } from '../../../infra/ImmichPhotoGateway.js';
 import { PhotoQueryService } from '../../../services/PhotoQueryService.js';
 import { CatalogService } from '../../../services/CatalogService.js';
 import { WeatherService } from '../../../services/WeatherService.js';
+import { FileSettingsStore } from '../../../services/FileSettingsStore.js';
 import { SettingsService } from '../../../services/SettingsService.js';
 import { SlideshowService } from '../../../services/SlideshowService.js';
 import { buildDefaultSettings } from '../../../domain/defaultSettings.js';
@@ -25,7 +27,9 @@ export function createV1Router(config: ServerConfig): Router {
     const photoService = new PhotoQueryService(photoGateway);
     const catalogService = new CatalogService(immich);
     const weatherService = new WeatherService(config);
-    const settingsService = new SettingsService(defaults);
+    const settingsFilePath = path.join(process.env.DATA_DIR ?? './data', 'settings.json');
+    const settingsStore = new FileSettingsStore(settingsFilePath);
+    const settingsService = new SettingsService(defaults, settingsStore);
     const slideshowService = new SlideshowService(photoService, settingsService);
 
     const catalog = createCatalogRouters(catalogService, immich, config);

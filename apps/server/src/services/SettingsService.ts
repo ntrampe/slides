@@ -1,6 +1,7 @@
 import type { DomainAppSettings } from '../domain/settings.js';
 import { parseUrlSettings } from '../domain/settings/urlSettingsParser.js';
 import { deepMerge, type DeepPartial } from '@slides/shared/utils/deepMerge';
+import type { SettingsStore } from './SettingsStore.js';
 
 /**
  * Owns settings resolution business logic on the server: runtime defaults
@@ -8,33 +9,34 @@ import { deepMerge, type DeepPartial } from '@slides/shared/utils/deepMerge';
  * URL/query overrides into a fully resolved configuration.
  */
 export class SettingsService {
-    private userOverrides: DeepPartial<DomainAppSettings> | null = null;
-
-    constructor(private readonly defaults: DomainAppSettings) {}
+    constructor(
+        private readonly defaults: DomainAppSettings,
+        private readonly store: SettingsStore
+    ) {}
 
     getDefaults(): DomainAppSettings {
         return this.defaults;
     }
 
-    getOverrides(): DeepPartial<DomainAppSettings> {
-        return this.userOverrides ?? {};
+    async getOverrides(): Promise<DeepPartial<DomainAppSettings>> {
+        return (await this.store.getOverrides()) ?? {};
     }
 
-    setOverrides(overrides: DeepPartial<DomainAppSettings>): void {
-        this.userOverrides = overrides;
+    async setOverrides(overrides: DeepPartial<DomainAppSettings>): Promise<void> {
+        await this.store.setOverrides(overrides);
     }
 
-    clearOverrides(): void {
-        this.userOverrides = null;
+    async clearOverrides(): Promise<void> {
+        await this.store.clearOverrides();
     }
 
-    resolve(search: string): DomainAppSettings {
+    async resolve(search: string): Promise<DomainAppSettings> {
         const urlOverrides = search
             ? parseUrlSettings(stripNonSettingsQueryParams(search), this.defaults)
             : {};
 
         let merged = deepMerge(this.defaults, urlOverrides);
-        merged = deepMerge(merged, this.getOverrides());
+        merged = deepMerge(merged, await this.getOverrides());
         return merged;
     }
 }

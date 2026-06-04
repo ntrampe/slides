@@ -11,7 +11,7 @@ export function createWeatherRouter(service: WeatherService, settings: SettingsS
     router.get(
         '/',
         asyncHandler(async (req, res) => {
-            const resolved = settings.resolve(queryString(req));
+            const resolved = await settings.resolve(queryString(req));
 
             if (!resolved.weather.enabled) {
                 throw new NotFoundError('Weather is not enabled in the current settings');

@@ -20,7 +20,7 @@ export class SlideshowService {
         links: LinkBuilder,
         options: { seed?: string } = {}
     ): Promise<DomainSlideshowResult> {
-        const settings = this.settings.resolve(search);
+        const settings = await this.settings.resolve(search);
 
         const photos = await this.photos.getPhotos(settings.slideshow.filter, links);
 

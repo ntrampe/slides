@@ -15,24 +15,33 @@ export function createSettingsRouter(service: SettingsService): Router {
     router.get(
         '/resolved',
         asyncHandler(async (req, res) => {
-            res.json(toAppSettingsDto(service.resolve(queryString(req))));
+            res.json(toAppSettingsDto(await service.resolve(queryString(req))));
         })
     );
 
-    router.get('/', (_req, res) => {
-        res.json(service.getOverrides());
-    });
+    router.get(
+        '/',
+        asyncHandler(async (_req, res) => {
+            res.json(await service.getOverrides());
+        })
+    );
 
-    router.put('/', asyncHandler(async (req, res) => {
-        const overrides = parseSettingsOverrides(req.body);
-        service.setOverrides(overrides);
-        res.json(service.getOverrides());
-    }));
+    router.put(
+        '/',
+        asyncHandler(async (req, res) => {
+            const overrides = parseSettingsOverrides(req.body);
+            await service.setOverrides(overrides);
+            res.json(await service.getOverrides());
+        })
+    );
 
-    router.delete('/', (_req, res) => {
-        service.clearOverrides();
-        res.json({ message: 'Settings overrides cleared' });
-    });
+    router.delete(
+        '/',
+        asyncHandler(async (_req, res) => {
+            await service.clearOverrides();
+            res.json({ message: 'Settings overrides cleared' });
+        })
+    );
 
     return router;
 }
