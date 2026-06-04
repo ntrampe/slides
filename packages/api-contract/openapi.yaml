@@ -1,0 +1,874 @@
+openapi: 3.1.0
+info:
+  title: Slides API
+  version: "1"
+  description: |
+    Server-driven photo slideshow API. Business logic (Immich filtering, shuffle,
+    settings merge, catalog aggregation) runs entirely on the server. Clients only
+    need to render results.
+
+    Two client profiles are supported:
+
+    **Slideshow-only** (e.g. Flutter kiosk): call `/slideshow` and
+    `/settings/resolved` in parallel at startup, then proxy images via `/assets`.
+
+    **Full web kiosk**: all of the above plus settings CRUD, catalog pickers, and
+    weather HUD.
+
+servers:
+  - url: /api/v1
+    description: Versioned domain API (relative to the Slides host)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────────────────────────────────────
+
+paths:
+
+  # ── Slideshow ──────────────────────────────────────────────────────────────
+
+  /slideshow:
+    get:
+      operationId: getSlideshow
+      summary: Ordered photo list
+      description: |
+        Returns the full ordered photo list for playback in a single response
+        (no cursor/limit pagination). Filtering, shuffle, and ordering are applied
+        server-side using the resolved settings for the request. Fetch
+        `/settings/resolved` in parallel to get configuration.
+
+        `total` equals the length of `photos`. A future paginated API may return
+        a page in `photos` while `total` reflects the full filtered set.
+
+        **Settings are not included in this response.** Use `/settings/resolved`
+        for configuration.
+      parameters:
+        - $ref: '#/components/parameters/SlideshowSeed'
+        - $ref: '#/components/parameters/UrlSettingsOverrides'
+      responses:
+        '200':
+          description: Ordered photo list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlideshowResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '502':
+          $ref: '#/components/responses/ServerError'
+
+  # ── Settings ───────────────────────────────────────────────────────────────
+
+  /settings/resolved:
+    get:
+      operationId: getSettingsResolved
+      summary: Fully resolved settings
+      description: |
+        Returns the effective application configuration after merging all sources
+        in precedence order: hardcoded defaults → `DEFAULT_*` env vars → URL
+        query params → user overrides (saved via `PUT /settings`).
+
+        The following query params are stripped before URL-settings resolution
+        and are **not** treated as settings overrides: `seed`, `cursor`, `limit`,
+        `filter`.
+      parameters:
+        - $ref: '#/components/parameters/UrlSettingsOverrides'
+      responses:
+        '200':
+          description: Resolved settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppSettings'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /settings/defaults:
+    get:
+      operationId: getSettingsDefaults
+      summary: Default settings (env-driven)
+      description: Returns the baseline settings built from `DEFAULT_*` environment variables, before URL or user overrides are applied.
+      responses:
+        '200':
+          description: Default settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppSettings'
+
+  /settings:
+    get:
+      operationId: getSettingsOverrides
+      summary: Current user overrides
+      description: Returns the raw user-saved override object. Empty object `{}` means no overrides are saved.
+      responses:
+        '200':
+          description: User overrides (partial AppSettings)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppSettings'
+
+    put:
+      operationId: putSettingsOverrides
+      summary: Save user overrides
+      description: |
+        Replaces the in-memory user overrides with the supplied object. Overrides
+        are held in server memory and reset on restart. For persistent defaults,
+        use `DEFAULT_*` env vars or URL parameters instead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppSettings'
+      responses:
+        '200':
+          description: Saved overrides echoed back
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppSettings'
+        '400':
+          $ref: '#/components/responses/ClientError'
+
+    delete:
+      operationId: deleteSettingsOverrides
+      summary: Clear user overrides
+      description: Removes all in-memory user overrides, reverting to defaults + URL settings.
+      responses:
+        '200':
+          description: Overrides cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Settings overrides cleared
+
+  # ── Catalog ────────────────────────────────────────────────────────────────
+
+  /albums:
+    get:
+      operationId: getAlbums
+      summary: List albums
+      description: Returns all Immich albums with thumbnail URLs proxied through `/assets`.
+      responses:
+        '200':
+          description: Album list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [albums]
+                properties:
+                  albums:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Album'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '502':
+          $ref: '#/components/responses/ServerError'
+
+  /people:
+    get:
+      operationId: getPeople
+      summary: List people
+      description: Returns all named people recognized by Immich with thumbnail URLs proxied through `/assets`.
+      responses:
+        '200':
+          description: People list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [people]
+                properties:
+                  people:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '502':
+          $ref: '#/components/responses/ServerError'
+
+  /locations:
+    get:
+      operationId: getLocations
+      summary: Location hierarchy
+      description: |
+        Returns a hierarchy of countries → states → cities derived from photo
+        EXIF data. Use this to populate filter pickers.
+
+        `cities` is keyed by `"country:state"` (not bare `state`) so that
+        same-named states in different countries are unambiguous. City IDs use
+        the compound `"country:state:city"` format; state IDs use
+        `"country:state"`.
+      responses:
+        '200':
+          description: Location hierarchy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationHierarchy'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '502':
+          $ref: '#/components/responses/ServerError'
+
+  /locations/markers:
+    get:
+      operationId: getLocationMarkers
+      summary: Raw map markers
+      description: Returns all individual map markers (lat/lon + city/state/country) from photo EXIF data.
+      responses:
+        '200':
+          description: Map markers
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [markers]
+                properties:
+                  markers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MapMarker'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /locations/resolve:
+    get:
+      operationId: resolveLocation
+      summary: Resolve a partial location
+      description: |
+        Given a partial `country`, `state`, and/or `city` query param, returns
+        the first matching complete `LocationSelection` from photo EXIF data, or
+        `null` if no match is found.
+      parameters:
+        - name: country
+          in: query
+          schema: { type: string }
+        - name: state
+          in: query
+          schema: { type: string }
+        - name: city
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Resolved location or null
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/LocationSelection'
+                  - type: 'null'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # ── Weather ────────────────────────────────────────────────────────────────
+
+  /weather:
+    get:
+      operationId: getWeather
+      summary: Current weather
+      description: |
+        Returns current weather for the location resolved from settings
+        (`weather.location.lat` / `weather.location.lng`). No coordinates are
+        required from the caller — the server resolves them from the effective
+        settings (defaults → URL overrides → user overrides).
+
+        Returns `404` when `weather.enabled` is `false` in the resolved settings,
+        or when no location has been configured. Returns `503` when the server's
+        `OWM_KEY` is not set.
+      parameters:
+        - $ref: '#/components/parameters/UrlSettingsOverrides'
+      responses:
+        '200':
+          description: Current weather
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherData'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # ── Assets (binary proxy) ──────────────────────────────────────────────────
+
+  /assets/{id}/thumbnail:
+    get:
+      operationId: getAssetThumbnail
+      summary: Photo thumbnail (binary)
+      description: |
+        Proxies the Immich thumbnail for the given asset ID, injecting the server
+        API key. Returns binary image data. Use this URL directly in `<img src>`
+        or a native image loader — do not parse as JSON.
+
+        Photo URLs in `SlideshowResponse.photos[].url` already point here.
+      parameters:
+        - $ref: '#/components/parameters/AssetId'
+      responses:
+        '200':
+          description: Image bytes
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AuthError'
+
+  /assets/{id}/video:
+    get:
+      operationId: getAssetVideo
+      summary: Live photo video (binary)
+      description: |
+        Proxies the Immich live-photo video for the given asset ID. Only relevant
+        when `photos.livePhoto.enabled` is true and `Photo.livePhotoVideoUrl` is
+        set. Returns binary video data.
+      parameters:
+        - $ref: '#/components/parameters/AssetId'
+      responses:
+        '200':
+          description: Video bytes
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AuthError'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Components
+# ─────────────────────────────────────────────────────────────────────────────
+
+components:
+
+  # ── Parameters ─────────────────────────────────────────────────────────────
+
+  parameters:
+    AssetId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Immich asset UUID
+
+    SlideshowSeed:
+      name: seed
+      in: query
+      required: false
+      schema:
+        type: string
+      description: |
+        Deterministic shuffle seed. Requests with the same seed observe the same
+        photo order, which enables stable navigation without server-side session
+        state. Omit to use a random seed (new order each fetch).
+
+    UrlSettingsOverrides:
+      name: settings (dot-notation)
+      in: query
+      required: false
+      schema:
+        type: object
+        additionalProperties: true
+      description: |
+        Any `AppSettings` field can be overridden via dot-notation query params
+        (e.g. `?slideshow.layout=split&theme.mode=dark`). URL overrides have
+        lower precedence than user overrides saved via `PUT /settings`. The
+        following params are ignored during settings resolution: `seed`, `cursor`,
+        `limit`, `filter`.
+
+  # ── Schemas ────────────────────────────────────────────────────────────────
+
+  schemas:
+
+    # ── Slideshow ─────────────────────────────────────────────────────────────
+
+    SlideshowResponse:
+      type: object
+      required: [photos, total]
+      properties:
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photo'
+        total:
+          type: integer
+          description: |
+            Number of photos in the result. With the current return-all behavior,
+            this equals `photos.length`. Reserved for future pagination when
+            `photos` may contain only one page.
+
+    # ── Photo ─────────────────────────────────────────────────────────────────
+    # This schema describes the wire format (SerializedPhoto in TypeScript).
+    # TypeScript clients revive `createdAt` to a Date via `revivePhoto()`.
+    # Dart clients parse it as DateTime. All other fields are JSON-safe as-is.
+
+    Photo:
+      type: object
+      required: [id, url, type, createdAt, isFavorite]
+      properties:
+        id:
+          type: string
+          description: Immich asset UUID
+        url:
+          type: string
+          format: uri
+          description: Thumbnail URL — points to `/api/v1/assets/{id}/thumbnail`
+        inAppUrl:
+          type: string
+          format: uri
+          description: Deep-link URL into the Immich web UI (optional)
+        livePhotoVideoUrl:
+          type: string
+          format: uri
+          description: Live-photo video URL — points to `/api/v1/assets/{id}/video` (set only when applicable)
+        width:
+          type: integer
+        height:
+          type: integer
+        type:
+          type: string
+          enum: [IMAGE, VIDEO]
+        createdAt:
+          type: string
+          format: date-time
+          description: |
+            ISO 8601 date-time string on the wire (e.g. `"2024-06-01T12:00:00.000Z"`).
+            The TypeScript web client converts this to a `Date` object via `revivePhoto()`.
+            Dart / other clients should parse as `DateTime`.
+        description:
+          type: string
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+        isFavorite:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        location:
+          $ref: '#/components/schemas/PhotoLocation'
+        camera:
+          $ref: '#/components/schemas/PhotoCameraInfo'
+        exifSettings:
+          $ref: '#/components/schemas/PhotoExifSettings'
+        orientation:
+          type: string
+        duration:
+          type: string
+          description: Video duration string (e.g. `"0:00:03.456000"`)
+
+    PhotoLocation:
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+
+    PhotoCameraInfo:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        lensModel:
+          type: string
+
+    PhotoExifSettings:
+      type: object
+      properties:
+        fNumber:
+          type: number
+        exposureTime:
+          type: string
+        iso:
+          type: integer
+        focalLength:
+          type: number
+
+    # ── Settings ──────────────────────────────────────────────────────────────
+
+    AppSettings:
+      type: object
+      required: [slideshow, photos, clock, weather, theme, debug, support]
+      properties:
+        slideshow:
+          type: object
+          required: [layout, intervalMs, shuffle, autoplay, filter, transition, ui]
+          properties:
+            layout:
+              type: string
+              enum: [single, split]
+            intervalMs:
+              type: integer
+              description: Milliseconds between photo advances
+            shuffle:
+              type: boolean
+            autoplay:
+              type: boolean
+            filter:
+              $ref: '#/components/schemas/PhotoFilterParams'
+            transition:
+              type: object
+              required: [type, duration]
+              properties:
+                type:
+                  type: string
+                  enum: [fade, slide, none]
+                  description: |
+                    Cross-platform presentation hint for advancing between slides
+                    (web CSS/view transitions; Flutter e.g. AnimatedSwitcher).
+                duration:
+                  type: number
+                  description: Transition duration in milliseconds (client-defined)
+            ui:
+              type: object
+              required: [showProgressBar]
+              properties:
+                showProgressBar:
+                  type: boolean
+        photos:
+          type: object
+          required: [fit, animation, livePhoto, metadata]
+          properties:
+            fit:
+              type: string
+              enum: [contain, cover, fill, none, scale-down]
+              description: |
+                Cross-platform presentation hint for scaling photos in their frame.
+                Aligns with CSS object-fit and Flutter BoxFit (scale-down → scaleDown).
+            animation:
+              type: object
+              required: [type, duration, intensity]
+              properties:
+                type:
+                  type: string
+                  enum: [none, zoom-in, zoom-out, pan, ken-burns]
+                  description: |
+                    Cross-platform in-frame motion hint while a slide is visible.
+                    Web uses CSS keyframes; other clients map to local animation APIs.
+                duration:
+                  type: number
+                intensity:
+                  type: number
+            livePhoto:
+              type: object
+              required: [enabled, delay]
+              properties:
+                enabled:
+                  type: boolean
+                delay:
+                  type: number
+            metadata:
+              type: object
+              required: [enabled, dateFormat]
+              properties:
+                enabled:
+                  type: boolean
+                dateFormat:
+                  type: string
+        clock:
+          type: object
+          required: [enabled, use24HourFormat, dateFormat]
+          properties:
+            enabled:
+              type: boolean
+            use24HourFormat:
+              type: boolean
+            dateFormat:
+              type: string
+        weather:
+          type: object
+          required: [enabled, location]
+          properties:
+            enabled:
+              type: boolean
+            location:
+              type: object
+              required: [lat, lng]
+              properties:
+                lat:
+                  type: number
+                  format: double
+                lng:
+                  type: number
+                  format: double
+        theme:
+          type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [light, dark]
+        debug:
+          type: object
+          required: [showDebugStats]
+          properties:
+            showDebugStats:
+              type: boolean
+        support:
+          type: object
+          required: [enabled]
+          properties:
+            enabled:
+              type: boolean
+
+    PhotoFilterParams:
+      type: object
+      properties:
+        albumIds:
+          type: array
+          items:
+            type: string
+        albumOperator:
+          $ref: '#/components/schemas/FilterOperator'
+        personIds:
+          type: array
+          items:
+            type: string
+        personOperator:
+          $ref: '#/components/schemas/FilterOperator'
+        excludeAlbumIds:
+          type: array
+          items:
+            type: string
+        excludePersonIds:
+          type: array
+          items:
+            type: string
+        location:
+          type: object
+          properties:
+            country:
+              type: string
+            state:
+              type: string
+            city:
+              type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        globalOperator:
+          $ref: '#/components/schemas/FilterOperator'
+
+    FilterOperator:
+      type: string
+      enum: [AND, OR]
+      description: "`AND` — photo must match all criteria; `OR` — photo must match any criterion"
+
+    # ── Catalog ───────────────────────────────────────────────────────────────
+
+    Album:
+      type: object
+      required: [id, name, description, thumbnailUrl, assetCount, createdAt, updatedAt, shared]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          format: uri
+        assetCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        shared:
+          type: boolean
+
+    Person:
+      type: object
+      required: [id, name, birthDate, thumbnailUrl, isHidden, isFavorite, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        birthDate:
+          type: string
+          format: date
+          nullable: true
+        thumbnailUrl:
+          type: string
+          format: uri
+        isHidden:
+          type: boolean
+        isFavorite:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+
+    LocationHierarchy:
+      type: object
+      required: [countries, states, cities]
+      properties:
+        countries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationItem'
+        states:
+          type: object
+          description: Map of `country` → state LocationItems. State IDs use `"country:state"` format.
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/LocationItem'
+        cities:
+          type: object
+          description: |
+            Map of `"country:state"` → city LocationItems. Keyed by the compound
+            `"country:state"` string (not bare state name) to disambiguate
+            same-named states across countries. City IDs use `"country:state:city"` format.
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/LocationItem'
+
+    LocationSelection:
+      type: object
+      properties:
+        country:
+          type: string
+        state:
+          type: string
+        city:
+          type: string
+
+    LocationItem:
+      type: object
+      required: [id, name, count]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        count:
+          type: integer
+
+    MapMarker:
+      type: object
+      required: [id, lat, lon, city, state, country]
+      properties:
+        id:
+          type: string
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+
+    # ── Weather ───────────────────────────────────────────────────────────────
+
+    WeatherData:
+      type: object
+      required: [temp, condition, city]
+      properties:
+        temp:
+          type: number
+          description: Temperature in the unit configured server-side
+        condition:
+          type: string
+          enum: [sunny, cloudy, rainy, snowy, stormy]
+        city:
+          type: string
+
+    # ── Error envelope ────────────────────────────────────────────────────────
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message]
+          properties:
+            type:
+              type: string
+              enum: [network, auth, client, server]
+              description: Machine-readable error category
+            message:
+              type: string
+              description: Human-readable error description
+            code:
+              type: string
+              description: Optional error code (e.g. `ECONNREFUSED`)
+
+  # ── Responses ──────────────────────────────────────────────────────────────
+
+  responses:
+    ClientError:
+      description: Bad request — invalid parameters or body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    AuthError:
+      description: Authentication failed — invalid or missing Immich API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ServerError:
+      description: Server error or upstream Immich error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

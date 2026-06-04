@@ -1,0 +1,22 @@
+{
+  "name": "@slides/api-contract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "gen": "npm run gen:types && npm run gen:zod",
+    "gen:types": "openapi-typescript openapi.yaml -o src/generated/openapi.ts",
+    "gen:zod": "openapi-zod-client openapi.yaml -o src/generated/schemas.ts --export-schemas"
+  },
+  "dependencies": {
+    "@zodios/core": "^10.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "openapi-zod-client": "^1.18.3"
+  }
+}
