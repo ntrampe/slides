@@ -72,11 +72,11 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 - Weather integration
 - UI customization (theme, overlays, progress bar)
 
-**All UI settings persist via the backend `/api/settings` endpoint** and take highest precedence.
+**All UI settings persist via the backend `/api/v1/settings` endpoint** and take highest precedence.
 These overrides are shared across clients on the same server instance; clients poll every few seconds so changes show up on other displays quickly.
 
 > [!NOTE]
-> **Durability:** UI overrides are held in server memory today. They are cleared when the Slides **container is restarted or recreated** (for example after an image upgrade or host reboot). That is uncommon in normal use. If overrides are lost, reopen the settings panel (`S`) and reapply them—they are quick to set again. For defaults that survive restarts, use `DEFAULT_*` environment variables or URL parameters (see below). Disk persistence for `/api/settings` may be added later.
+> **Durability:** UI overrides are held in server memory today. They are cleared when the Slides **container is restarted or recreated** (for example after an image upgrade or host reboot). That is uncommon in normal use. If overrides are lost, reopen the settings panel (`S`) and reapply them—they are quick to set again. For defaults that survive restarts, use `DEFAULT_*` environment variables or URL parameters (see below). Disk persistence for `/api/v1/settings` may be added later.
 
 The HTTP API is also suitable for home automation (for example Home Assistant `rest_command`) to update kiosk settings remotely.
 
@@ -91,7 +91,7 @@ You can also **exclude** albums or people: photos in an excluded album, or tagge
 
 When you filter by **both** albums and people, an extra control lets you **combine** those two parts with **All** or **Any** (for example, photos must satisfy both the album rules and the people rules, or either set of rules).
 
-These options use the same slideshow filter settings as URL and environment configuration (see `src/features/settings/types.ts` and `src/features/photos/types.ts`).
+These options use the same slideshow filter settings as URL and environment configuration (see `@slides/api-contract` / `apps/web/src/features/settings/types.ts`).
 
 ### 2. 🔗 URL Parameters (Perfect for kiosks & presets)
 
@@ -101,7 +101,7 @@ Configure settings dynamically via URL query parameters using dot-notation:
 http://localhost:3000/?slideshow.layout=split&photos.animation.type=ken-burns&theme.mode=dark
 ```
 
-Refer to `src/features/settings/types.ts` for the settings structure.
+Refer to `@slides/api-contract` (`AppSettings`) or `apps/web/src/features/settings/types.ts` for the settings structure.
 
 **Examples:**
 
@@ -119,7 +119,7 @@ Refer to `src/features/settings/types.ts` for the settings structure.
 ?slideshow.filter.location.country=USA&slideshow.filter.location.state=California
 ```
 
-URL settings override environment defaults but are overridden by user settings from `/api/settings`.
+URL settings override environment defaults but are overridden by user settings from `/api/v1/settings`.
 
 ### 3. 🔧 Environment Variables (Docker & defaults)
 
@@ -140,7 +140,7 @@ See `.env.example` for a complete list.
 
 Settings are resolved in this order (highest to lowest precedence):
 
-1. **User Settings** (`/api/settings`) - Highest priority
+1. **User Settings** (`/api/v1/settings`) - Highest priority
 2. **URL Parameters** - Session-specific overrides
 3. **Environment Variables** (`DEFAULT_*`) - Default configuration
 4. **Hardcoded Fallbacks** - Guaranteed baseline
@@ -149,35 +149,62 @@ This means you can set organization defaults via Docker env vars, allow per-kios
 
 ## 🏗️ Architecture
 
-This project uses a **feature-first architecture** with a secure Backend for Frontend (BFF) pattern:
+This project is an **npm workspaces monorepo** with a **feature-first thin client** and a **server-side domain API** (`/api/v1`):
 
 ```
-src/
-├── features/           # Feature modules
-│   ├── slideshow/     # Slideshow logic
-│   ├── photos/        # Photo management
-│   ├── settings/      # User settings
-│   └── .../          # Other features
-├── shared/            # Shared utilities
-├── server/            # Express backend
-└── App.tsx           # Main app
+apps/web/                    # React + Vite + TanStack Query
+├── src/api/                 # Thin fetchers -> /api/v1 (production only)
+├── src/features/            # UI, hooks (facade pattern)
+└── src/mocks/               # Demo-only fetch interceptor (VITE_USE_MOCK)
+
+apps/server/                 # Express
+├── src/domain/              # Business rules, settings, Immich mapping
+├── src/services/            # Application services
+├── src/http/routes/v1/      # Versioned REST + asset proxy
+└── src/infra/               # Immich client, link builder
+
+packages/api-contract/       # OpenAPI -> generated types + Zod schemas
+packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 ```
 
-Each feature is self-contained with:
-- `components/` - UI components
-- `hooks/` - Business logic
-- `repos/` - API adapters
-- `services/` - External services
-- `types.ts` - Type definitions
+**Server** owns Immich query building, filter operators, exclusions, catalog aggregation, settings resolution, shuffle ordering, and weather mapping.
 
-### Why BFF?
+**Client** hooks call `apps/web/src/api/*` fetchers (TanStack Query). The same `/api/v1` contract can power native clients (e.g. Flutter).
 
-1. **Security**: API keys (`IMMICH_API_KEY`, `OWM_KEY`) never exposed to browser
-2. **Runtime Config**: Docker env vars read at server startup
-3. **Proxy Pattern**: Transparent request forwarding with injected credentials
-4. **Error Handling**: Centralized error transformation
+**Offline demo** (`npm run build:demo`): sets `VITE_USE_MOCK=true`, which installs a global `fetch` interceptor in `apps/web/src/mocks/` — no mock branches in production fetchers.
 
-See [best_practices.md](best_practices.md) for detailed patterns.
+### Client profiles
+
+#### Slideshow-only client (e.g. Flutter kiosk)
+
+| Endpoint | Required |
+|----------|----------|
+| `GET /api/v1/slideshow` | Yes — ordered photo list (filtering + shuffle run server-side) |
+| `GET /api/v1/assets/:id/thumbnail` | Yes — proxied image bytes (API key never exposed) |
+| `GET /api/v1/assets/:id/video` | If live photos are enabled |
+| `GET /api/v1/settings/resolved` | Yes — resolved configuration (defaults + URL + user overrides) |
+| `PUT /api/v1/settings` / `DELETE /api/v1/settings` | Optional — if the client has a settings UI |
+| `GET /api/v1/albums`, `/people`, `/locations` | Optional — only if building a filter picker UI |
+| `GET /api/v1/weather` | Optional — only if displaying a weather HUD |
+
+Call `/slideshow` and `/settings/resolved` in parallel at startup. Settings can be refreshed independently of the photo list.
+
+#### Full web kiosk (current React app)
+
+Everything in the slideshow-only profile, plus:
+
+| Endpoint | Used by |
+|----------|---------|
+| `GET /api/v1/settings/resolved` | `useSettingsData` — polled every 3 s for live sync across displays |
+| `GET/PUT/DELETE /api/v1/settings` | Settings panel overrides CRUD |
+| `GET /api/v1/albums`, `/people`, `/locations` | Settings panel filter pickers |
+| `GET /api/v1/weather` | Slideshow HUD overlay |
+
+`/assets/*` is not a JSON API — it proxies binary media with the Immich API key injected server-side, so the key is never exposed to the browser.
+
+Optional `PUBLIC_BASE_URL` env var emits absolute media URLs for clients that cannot derive the host from requests.
+
+See [best_practices.md](best_practices.md) for detailed patterns, [packages/api-contract/README.md](packages/api-contract/README.md) for the wire contract, and [packages/api-contract/openapi.yaml](packages/api-contract/openapi.yaml) for the machine-readable OpenAPI spec (useful for Flutter codegen).
 
 ## 🛠️ Tech Stack
 
@@ -190,7 +217,7 @@ See [best_practices.md](best_practices.md) for detailed patterns.
 
 **Backend:**
 - Node.js + Express
-- http-proxy-middleware (Immich, Weather proxy)
+- Versioned domain API (`/api/v1`) with Immich client + asset streaming proxy
 - TypeScript (tsx runtime)
 
 ### 💻 Local Development
@@ -223,6 +250,8 @@ For development or manual setup:
 
 3. **Start development servers**
    
+   Place a `.env` file at the **repo root** (next to `docker-compose.yml`). `dev:server` loads it via `node --env-file=../../.env`.
+   
    Terminal 1 - Backend:
    ```bash
    npm run dev:server
@@ -241,12 +270,20 @@ For development or manual setup:
 #### Production Build
 
 ```bash
-# Build frontend
+# Regenerate contract types, build frontend into apps/web/dist
 npm run build
 
-# Start production server (serves built frontend + API)
-node --loader tsx src/server/index.ts
+# Start production server (serves built frontend + API; requires env vars)
+npm run start -w @slides/server
 ```
+
+#### Offline demo build (Netlify / static hosting)
+
+```bash
+npm run build:demo
+```
+
+Serves canned slideshow data via the mock `fetch` interceptor — no Immich server required.
 
 ## 🤝 Contributing
 
