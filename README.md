@@ -59,7 +59,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
    docker-compose up -d
    ```
 
-   Overrides are written to `./data/settings.json` (mounted to `/app/data` inside the container).
+   Overrides are written to `./data/settings.{query,playback,display}.json` (mounted to `/app/data` inside the container).
 
 5. **Open in browser**
    ```
@@ -82,8 +82,8 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 - Weather integration
 - UI customization (theme, overlays, progress bar)
 
-**All UI settings persist via the backend `/api/v1/settings` endpoint** and take highest precedence.
-These overrides are shared across clients on the same server instance; clients poll every few seconds so changes show up on other displays quickly.
+**All UI settings persist via targeted `PATCH /api/v1/settings/{query,playback,display}` endpoints** (full domain body required).
+Changes are pushed to all kiosks over **`GET /api/v1/events`** (domain-scoped SSE events); the web client no longer polls settings.
 
 > [!NOTE]
 > **Durability:** UI overrides survive server restarts. In Docker, mount a volume to `DATA_DIR` (the included `docker-compose.yml` maps `./data` on the host to `/app/data` in the container). If you delete that volume or run without a mount, overrides are lost when the container is recreated.
@@ -103,35 +103,30 @@ When you filter by **both** albums and people, an extra control lets you **combi
 
 These options use the same slideshow filter settings as URL and environment configuration (see `@slides/api-contract` / `apps/web/src/features/settings/types.ts`).
 
-### 2. 🔗 URL Parameters (Perfect for kiosks & presets)
+### 2. URL query overrides (kiosk presets)
 
-Configure settings dynamically via URL query parameters using dot-notation:
+Override settings per browser session via bracket-notation query parameters (not persisted, not broadcast on SSE):
 
 ```
-http://localhost:3000/?slideshow.layout=split&photos.animation.type=ken-burns&theme.mode=dark
+http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&display[themeMode]=dark&query[shuffle]=true
 ```
-
-Refer to `@slides/api-contract` (`AppSettings`) or `apps/web/src/features/settings/types.ts` for the settings structure.
 
 **Examples:**
 
 ```bash
-# Kiosk mode with specific album
-?slideshow.filter.albumIds=abc123,def456&slideshow.autoplay=true
+# Specific albums (comma-separated IDs)
+?query[albumIds]=abc123,def456&playback[autoplay]=true
 
-# Vacation photos with date range
-?slideshow.filter.startDate=2024-01-01&slideshow.filter.endDate=2024-12-31
+# Date range
+?query[startDate]=2024-01-01&query[endDate]=2024-12-31
 
-# Cinematic display with animations
-?photos.animation.type=ken-burns&photos.animation.intensity=1.5&slideshow.transition.type=fade
-
-# Location-specific slideshow
-?slideshow.filter.location.country=USA&slideshow.filter.location.state=California
+# Location filter
+?query[locationCountry]=USA&query[locationState]=California
 ```
 
-URL settings override environment defaults but are overridden by user settings from `/api/v1/settings`.
+`seed` remains a client slideshow param (stable shuffle), not a settings key. Pass settings on `GET /api/v1/settings` and `GET /api/v1/weather`; the web app forwards `window.location.search` automatically.
 
-### 3. 🔧 Environment Variables (Docker & defaults)
+### 3. Environment Variables (Docker & defaults)
 
 Set default configuration via environment variables (prefix: `DEFAULT_*`):
 
@@ -146,16 +141,16 @@ Set default configuration via environment variables (prefix: `DEFAULT_*`):
 
 See `.env.example` for a complete list.
 
-### Configuration Precedence
+### Configuration precedence
 
-Settings are resolved in this order (highest to lowest precedence):
+On each `GET /api/v1/settings` (and weather), effective config merges in order:
 
-1. **User Settings** (`/api/v1/settings`) - Highest priority
-2. **URL Parameters** - Session-specific overrides
-3. **Environment Variables** (`DEFAULT_*`) - Default configuration
-4. **Hardcoded Fallbacks** - Guaranteed baseline
+1. **Hardcoded fallbacks** (`FALLBACK_APP_SETTINGS`)
+2. **Environment variables** (`DEFAULT_*`) — applied at server boot into defaults
+3. **Persisted overrides** (`PATCH /api/v1/settings/{domain}` → `DATA_DIR/settings.{domain}.json`)
+4. **URL query parameters** — session-only, highest precedence (not saved, not in SSE payloads)
 
-This means you can set organization defaults via Docker env vars, allow per-kiosk customization via URLs, and still save personal preferences in the UI.
+Remote updates (UI, Home Assistant, etc.) replace per-domain persisted overrides and broadcast domain events on the SSE stream; kiosks with URL params invalidate and refetch settings after SSE so local query overrides stay applied.
 
 ## 🏗️ Architecture
 
@@ -177,9 +172,9 @@ packages/api-contract/       # OpenAPI -> generated types + Zod schemas
 packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 ```
 
-**Server** owns Immich query building, filter operators, exclusions, catalog aggregation, settings resolution, shuffle ordering, and weather mapping.
+**Server** owns Immich query building, domain-grouped configuration (`query`, `playback`, `display`), and SSE settings broadcast. It does **not** track playback index or timers.
 
-**Client** hooks call `apps/web/src/api/*` fetchers (TanStack Query). The same `/api/v1` contract can power native clients (e.g. Flutter).
+**Client** fetches `GET /settings` once, subscribes to `GET /events`, runs a local playback engine (timer, index, transitions), and loads photos via `POST /slideshow/query`.
 
 **Offline demo** (`npm run build:demo`): sets `VITE_USE_MOCK=true`, which installs a global `fetch` interceptor in `apps/web/src/mocks/` — no mock branches in production fetchers.
 
@@ -190,15 +185,16 @@ packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 | Endpoint | Required |
 |----------|----------|
 | `GET /api/v1/meta` | Yes — `{ apiVersion, contractVersion }` for client/server contract checks |
-| `GET /api/v1/slideshow` | Yes — ordered photo list (filtering + shuffle run server-side) |
+| `GET /api/v1/settings` | Yes — effective domain-grouped configuration |
+| `GET /api/v1/events` | Yes — SSE for settings updates |
+| `POST /api/v1/slideshow/query` | Yes — stateless photo list (query settings in JSON body) |
 | `GET /api/v1/assets/:id/thumbnail` | Yes — proxied image bytes (API key never exposed) |
 | `GET /api/v1/assets/:id/video` | If live photos are enabled |
-| `GET /api/v1/settings/resolved` | Yes — resolved configuration (defaults + URL + user overrides) |
-| `PUT /api/v1/settings` / `DELETE /api/v1/settings` | Optional — if the client has a settings UI |
+| `PATCH /api/v1/settings/{domain}` / `DELETE /api/v1/settings` | Optional — if the client has a settings UI |
 | `GET /api/v1/albums`, `/people`, `/locations` | Optional — only if building a filter picker UI |
 | `GET /api/v1/weather` | Optional — only if displaying a weather HUD |
 
-Call `/meta` first, then `/slideshow` and `/settings/resolved` in parallel at startup. Settings can be refreshed independently of the photo list.
+Call `/meta` first, then `/settings` + `/events`, then `POST /slideshow/query` with query fields from settings.
 
 #### Full web kiosk (current React app)
 
@@ -206,8 +202,10 @@ Everything in the slideshow-only profile, plus:
 
 | Endpoint | Used by |
 |----------|---------|
-| `GET /api/v1/settings/resolved` | `useSettingsData` — polled every 3 s for live sync across displays |
-| `GET/PUT/DELETE /api/v1/settings` | Settings panel overrides CRUD |
+| `GET /api/v1/settings` | `useSettingsData` — boot fetch (no polling) |
+| `GET /api/v1/events` | `useSyncEvents` — live settings sync |
+| `POST /api/v1/slideshow/query` | `useSlideshowData` — photo list from nested `filter` in JSON body |
+| `GET/PUT/DELETE /api/v1/settings` | Settings panel CRUD |
 | `GET /api/v1/albums`, `/people`, `/locations` | Settings panel filter pickers |
 | `GET /api/v1/weather` | Slideshow HUD overlay |
 

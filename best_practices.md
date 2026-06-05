@@ -22,7 +22,7 @@ apps/server/src/
 └── infra/               # ImmichClient, LinkBuilder
 
 packages/api-contract/   # OpenAPI-generated types + Zod schemas
-packages/shared/         # FALLBACK_APP_SETTINGS, errors, deepMerge
+packages/shared/         # FALLBACK_APP_SETTINGS, errors, utilities
 ```
 
 **Types:** `@slides/api-contract` is the source of truth for JSON shapes on `/api/v1`. Edit `packages/api-contract/openapi.yaml`, then run `npm run contract:gen`. React re-exports wire types from `features/*/types.ts` when needed for ergonomics.
@@ -149,13 +149,11 @@ const { data, isLoading } = useQuery({
 
 ## Settings Architecture
 
-User overrides are persisted via `/api/v1/settings` (in-memory on the server; shared across clients; resets on restart). Demo builds (`VITE_USE_MOCK=true`) intercept that endpoint and persist overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
+User overrides are persisted via `PATCH /api/v1/settings/{domain}` (files under `DATA_DIR/settings.{query,playback,display}.json`). Demo builds (`VITE_USE_MOCK=true`) intercept those endpoints and persist per-domain overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
 
-**Resolved settings:** The web client loads configuration via `fetchSettingsResolved` → `GET /api/v1/settings/resolved`. Merge precedence (defaults → URL → user overrides) runs server-side. `FALLBACK_APP_SETTINGS` from `@slides/shared/constants` is used only when that request fails. Settings are polled every 3 s (`useSettingsData`) so changes propagate across displays.
+**Configuration:** `GET /api/v1/settings` returns effective flat `AppSettings` (defaults → persisted overrides → URL query params). Forward `window.location.search` for kiosk presets. `FALLBACK_APP_SETTINGS` is used only when that request fails. Live sync uses SSE; after a `settings` event the client invalidates `['settings', search]` so URL overrides are re-applied server-side.
 
-**Slideshow data:** The web client loads photos via `fetchSlideshow` → `GET /api/v1/slideshow`, including server-side filter, shuffle, and ordering. `SlideshowResponse` contains only `{ photos, total }` — **settings are not included in the slideshow response.**
-
-**Flutter / native clients:** Call both endpoints in parallel at startup — `GET /api/v1/slideshow` for the photo list and `GET /api/v1/settings/resolved` for configuration. The server resolves settings internally to build the photo list, but does not re-expose them in the slideshow response.
+**Slideshow data:** `POST /api/v1/slideshow/query` with filter fields + `shuffle` + `seed` in the JSON body. The server is stateless (no kiosk session). Playback index and timers are client-only (keyboard/HUD on each kiosk).
 
 ### Adding a New Setting
 
@@ -166,11 +164,9 @@ User overrides are persisted via `/api/v1/settings` (in-memory on the server; sh
 ```typescript
 export function buildDefaultSettings(): DomainAppSettings {
     return {
-        // ... existing defaults ...
-        myFeature: {
-            enabled: parseBool(process.env.DEFAULT_MY_FEATURE_ENABLED, true),
-            threshold: parseNumber(process.env.DEFAULT_MY_FEATURE_THRESHOLD, 50),
-        },
+        // ... existing flat keys ...
+        myFeatureEnabled: parseBool(process.env.DEFAULT_MY_FEATURE_ENABLED, true),
+        myFeatureThreshold: parseNumber(process.env.DEFAULT_MY_FEATURE_THRESHOLD, 50),
     };
 }
 ```

@@ -2,4 +2,15 @@
 description: When adding new application settings or modifying existing settings
 ---
 
-When adding settings: 1) Add to AppSettings interface in features/settings/types.ts, 2) Add default in server/config/defaultSettings.ts using DEFAULT_* env vars, 3) Add fallback in src/shared/constants.ts (FALLBACK_APP_SETTINGS), 4) Add env vars to .env.example and Docker if deploying. Access via useSettingsData() hook. Live mode persists user overrides via /api/settings (server in-memory; shared across clients; resets on restart). Mock mode (VITE_USE_MOCK) uses localStorage for overrides only. Defaults are served from /api/settings/defaults. Never hardcode defaults in components; never access localStorage or process.env directly in UI code.
+When adding settings:
+
+1. Add the key to the appropriate domain schema in `packages/api-contract/openapi.yaml` (`QuerySettings`, `PlaybackSettings`, or `DisplaySettings`). `AppSettings` has exactly three top-level keys: `query`, `playback`, `display`.
+2. Run `npm run contract:gen`.
+3. Add `DEFAULT_*` mapping in `apps/server/src/domain/defaultSettings.ts` and fallback in `packages/shared/src/constants.ts`.
+4. Document env vars in `.env.example`.
+
+Access via `useSettingsData()`. Persist with targeted `PATCH /api/v1/settings/{domain}` (full domain body required). Live sync uses `GET /api/v1/events` (SSE) with domain events (`query_updated`, `playback_updated`, `display_updated`, `settings_cleared`).
+
+URL session overrides use bracket notation forwarded to the server (e.g. `?query[shuffle]=false`). The web client never parses URL settings locally.
+
+Mock mode (`VITE_USE_MOCK`) uses `localStorage` for per-domain overrides. Never hardcode defaults in components.
