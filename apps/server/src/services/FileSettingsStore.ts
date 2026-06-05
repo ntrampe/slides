@@ -1,47 +1,83 @@
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import type { DomainAppSettings } from '../domain/settings.js';
-import type { DeepPartial } from '@slides/shared/utils/deepMerge';
+import { dirname, join } from 'node:path';
+import type {
+    DomainAppSettings,
+    DomainDisplaySettings,
+    DomainPlaybackSettings,
+    DomainQuerySettings,
+    SettingsDomain,
+} from '../domain/settings.js';
 import type { SettingsStore } from './SettingsStore.js';
 
+const DOMAIN_FILES: Record<SettingsDomain, string> = {
+    query: 'settings.query.json',
+    playback: 'settings.playback.json',
+    display: 'settings.display.json',
+};
+
 export class FileSettingsStore implements SettingsStore {
-    constructor(private readonly filePath: string) {}
+    constructor(private readonly dataDir: string) {}
 
-    async getOverrides(): Promise<DeepPartial<DomainAppSettings> | null> {
-        let raw: string;
-        try {
-            raw = await readFile(this.filePath, 'utf8');
-        } catch (error) {
-            if (isNodeError(error) && error.code === 'ENOENT') {
-                return null;
-            }
-            throw error;
-        }
+    async getAllDomainOverrides(): Promise<{
+        query: DomainQuerySettings | null;
+        playback: DomainPlaybackSettings | null;
+        display: DomainDisplaySettings | null;
+    }> {
+        const [query, playback, display] = await Promise.all([
+            this.readDomainFile<DomainQuerySettings>('query'),
+            this.readDomainFile<DomainPlaybackSettings>('playback'),
+            this.readDomainFile<DomainDisplaySettings>('display'),
+        ]);
 
-        try {
-            return JSON.parse(raw) as DeepPartial<DomainAppSettings>;
-        } catch (error) {
-            console.warn(
-                `Failed to parse settings file at ${this.filePath}; treating as no overrides:`,
-                error
-            );
-            return null;
-        }
+        return { query, playback, display };
     }
 
-    async setOverrides(overrides: DeepPartial<DomainAppSettings>): Promise<void> {
-        await mkdir(dirname(this.filePath), { recursive: true });
-        await writeFile(this.filePath, JSON.stringify(overrides, null, 2), 'utf8');
+    async setDomainOverrides(
+        domain: SettingsDomain,
+        value: DomainAppSettings[SettingsDomain]
+    ): Promise<void> {
+        const filePath = this.domainPath(domain);
+        await mkdir(dirname(filePath), { recursive: true });
+        await writeFile(filePath, JSON.stringify(value, null, 2), 'utf8');
     }
 
-    async clearOverrides(): Promise<void> {
+    async clearDomainOverrides(domain: SettingsDomain): Promise<void> {
         try {
-            await unlink(this.filePath);
+            await unlink(this.domainPath(domain));
         } catch (error) {
             if (isNodeError(error) && error.code === 'ENOENT') {
                 return;
             }
             throw error;
+        }
+    }
+
+    async clearAllOverrides(): Promise<void> {
+        await Promise.all(
+            (Object.keys(DOMAIN_FILES) as SettingsDomain[]).map((domain) =>
+                this.clearDomainOverrides(domain)
+            )
+        );
+    }
+
+    private domainPath(domain: SettingsDomain): string {
+        return join(this.dataDir, DOMAIN_FILES[domain]);
+    }
+
+    private async readDomainFile<T>(domain: SettingsDomain): Promise<T | null> {
+        const filePath = this.domainPath(domain);
+        try {
+            const raw = await readFile(filePath, 'utf8');
+            return JSON.parse(raw) as T;
+        } catch (error) {
+            if (isNodeError(error) && error.code === 'ENOENT') {
+                return null;
+            }
+            console.warn(
+                `Failed to parse settings file at ${filePath}; treating as no overrides:`,
+                error
+            );
+            return null;
         }
     }
 }

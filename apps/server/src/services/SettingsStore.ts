@@ -1,8 +1,21 @@
-import type { DomainAppSettings } from '../domain/settings.js';
-import type { DeepPartial } from '@slides/shared/utils/deepMerge';
+import type {
+    DomainAppSettings,
+    DomainDisplaySettings,
+    DomainPlaybackSettings,
+    DomainQuerySettings,
+    SettingsDomain,
+} from '../domain/settings.js';
 
 export interface SettingsStore {
-    getOverrides(): Promise<DeepPartial<DomainAppSettings> | null>;
-    setOverrides(overrides: DeepPartial<DomainAppSettings>): Promise<void>;
-    clearOverrides(): Promise<void>;
+    getAllDomainOverrides(): Promise<{
+        query: DomainQuerySettings | null;
+        playback: DomainPlaybackSettings | null;
+        display: DomainDisplaySettings | null;
+    }>;
+    setDomainOverrides(
+        domain: SettingsDomain,
+        value: DomainAppSettings[SettingsDomain]
+    ): Promise<void>;
+    clearDomainOverrides(domain: SettingsDomain): Promise<void>;
+    clearAllOverrides(): Promise<void>;
 }
