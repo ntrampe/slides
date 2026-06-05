@@ -7,8 +7,11 @@ export type Photo = components['schemas']['Photo'];
 /** @deprecated Use `Photo` — kept for client revival helpers during migration */
 export type SerializedPhoto = Photo;
 export type SlideshowResponse = components['schemas']['SlideshowResponse'];
+export type SlideshowQueryRequest = components['schemas']['SlideshowQueryRequest'];
 export type AppSettings = components['schemas']['AppSettings'];
-export type PhotoFilterParams = components['schemas']['PhotoFilterParams'];
+export type QuerySettings = components['schemas']['QuerySettings'];
+export type PlaybackSettings = components['schemas']['PlaybackSettings'];
+export type DisplaySettings = components['schemas']['DisplaySettings'];
 export type PhotoLocation = components['schemas']['PhotoLocation'];
 export type PhotoCameraInfo = components['schemas']['PhotoCameraInfo'];
 export type PhotoExifSettings = components['schemas']['PhotoExifSettings'];
@@ -24,9 +27,9 @@ export type ApiMeta = components['schemas']['ApiMeta'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type ApiErrorEnvelope = ErrorResponse;
 
-export type ObjectFit = AppSettings['photos']['fit'];
-export type LayoutMode = AppSettings['slideshow']['layout'];
-export type PhotoAnimationType = AppSettings['photos']['animation']['type'];
-export type SlideshowTransitionType = AppSettings['slideshow']['transition']['type'];
-export type ThemeMode = AppSettings['theme']['mode'];
+export type ObjectFit = PlaybackSettings['photoFit'];
+export type LayoutMode = PlaybackSettings['layout'];
+export type PhotoAnimationType = PlaybackSettings['photoAnimationType'];
+export type SlideshowTransitionType = PlaybackSettings['transitionType'];
+export type ThemeMode = DisplaySettings['themeMode'];
 export type WeatherCondition = WeatherData['condition'];

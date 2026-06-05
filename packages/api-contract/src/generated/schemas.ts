@@ -4,6 +4,27 @@ import { z } from "zod";
 const ApiMeta = z
   .object({ apiVersion: z.string(), contractVersion: z.string() })
   .passthrough();
+const FilterOperator = z.enum(["AND", "OR"]);
+const QuerySettings = z
+  .object({
+    albumIds: z.array(z.string()),
+    albumOperator: FilterOperator,
+    personIds: z.array(z.string()),
+    personOperator: FilterOperator,
+    excludeAlbumIds: z.array(z.string()),
+    excludePersonIds: z.array(z.string()),
+    locationCountry: z.string().optional(),
+    locationState: z.string().optional(),
+    locationCity: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    globalOperator: FilterOperator,
+    shuffle: z.boolean(),
+  })
+  .passthrough();
+const SlideshowQueryRequest = QuerySettings.and(
+  z.object({ seed: z.string() }).partial().passthrough()
+);
 const PhotoLocation = z
   .object({
     city: z.string(),
@@ -62,77 +83,48 @@ const ErrorResponse = z
       .passthrough(),
   })
   .passthrough();
-const FilterOperator = z.enum(["AND", "OR"]);
-const PhotoFilterParams = z
+const PlaybackSettings = z
   .object({
-    albumIds: z.array(z.string()),
-    albumOperator: FilterOperator,
-    personIds: z.array(z.string()),
-    personOperator: FilterOperator,
-    excludeAlbumIds: z.array(z.string()),
-    excludePersonIds: z.array(z.string()),
-    location: z
-      .object({ country: z.string(), state: z.string(), city: z.string() })
-      .partial()
-      .passthrough(),
-    startDate: z.string(),
-    endDate: z.string(),
-    globalOperator: FilterOperator,
+    intervalMs: z.number().int(),
+    autoplay: z.boolean(),
+    layout: z.enum(["single", "split"]),
+    photoFit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),
+    transitionType: z.enum(["fade", "slide", "none"]),
+    transitionDuration: z.number(),
+    photoAnimationType: z.enum([
+      "none",
+      "zoom-in",
+      "zoom-out",
+      "pan",
+      "ken-burns",
+    ]),
+    photoAnimationDuration: z.number(),
+    photoAnimationIntensity: z.number(),
+    livePhotoEnabled: z.boolean(),
+    livePhotoDelay: z.number(),
   })
-  .partial()
+  .passthrough();
+const DisplaySettings = z
+  .object({
+    themeMode: z.enum(["light", "dark"]),
+    showProgressBar: z.boolean(),
+    showDebugStats: z.boolean(),
+    supportEnabled: z.boolean(),
+    photoMetadataEnabled: z.boolean(),
+    photoMetadataDateFormat: z.string(),
+    showClock: z.boolean(),
+    clockUse24HourFormat: z.boolean(),
+    clockDateFormat: z.string(),
+    showWeather: z.boolean(),
+    weatherLat: z.number(),
+    weatherLng: z.number(),
+  })
   .passthrough();
 const AppSettings = z
   .object({
-    slideshow: z
-      .object({
-        layout: z.enum(["single", "split"]),
-        intervalMs: z.number().int(),
-        shuffle: z.boolean(),
-        autoplay: z.boolean(),
-        filter: PhotoFilterParams,
-        transition: z
-          .object({
-            type: z.enum(["fade", "slide", "none"]),
-            duration: z.number(),
-          })
-          .passthrough(),
-        ui: z.object({ showProgressBar: z.boolean() }).passthrough(),
-      })
-      .passthrough(),
-    photos: z
-      .object({
-        fit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),
-        animation: z
-          .object({
-            type: z.enum(["none", "zoom-in", "zoom-out", "pan", "ken-burns"]),
-            duration: z.number(),
-            intensity: z.number(),
-          })
-          .passthrough(),
-        livePhoto: z
-          .object({ enabled: z.boolean(), delay: z.number() })
-          .passthrough(),
-        metadata: z
-          .object({ enabled: z.boolean(), dateFormat: z.string() })
-          .passthrough(),
-      })
-      .passthrough(),
-    clock: z
-      .object({
-        enabled: z.boolean(),
-        use24HourFormat: z.boolean(),
-        dateFormat: z.string(),
-      })
-      .passthrough(),
-    weather: z
-      .object({
-        enabled: z.boolean(),
-        location: z.object({ lat: z.number(), lng: z.number() }).passthrough(),
-      })
-      .passthrough(),
-    theme: z.object({ mode: z.enum(["light", "dark"]) }).passthrough(),
-    debug: z.object({ showDebugStats: z.boolean() }).passthrough(),
-    support: z.object({ enabled: z.boolean() }).passthrough(),
+    query: QuerySettings,
+    playback: PlaybackSettings,
+    display: DisplaySettings,
   })
   .passthrough();
 const Album = z
@@ -192,14 +184,17 @@ const WeatherData = z
 
 export const schemas = {
   ApiMeta,
+  FilterOperator,
+  QuerySettings,
+  SlideshowQueryRequest,
   PhotoLocation,
   PhotoCameraInfo,
   PhotoExifSettings,
   Photo,
   SlideshowResponse,
   ErrorResponse,
-  FilterOperator,
-  PhotoFilterParams,
+  PlaybackSettings,
+  DisplaySettings,
   AppSettings,
   Album,
   Person,
@@ -221,12 +216,12 @@ const endpoints = makeApi([
     errors: [
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
       {
         status: 502,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -235,12 +230,7 @@ const endpoints = makeApi([
     method: "get",
     path: "/assets/:id/thumbnail",
     alias: "getAssetThumbnail",
-    description: `Proxies the Immich thumbnail for the given asset ID, injecting the server
-API key. Returns binary image data. Use this URL directly in &#x60;&lt;img src&gt;&#x60;
-or a native image loader — do not parse as JSON.
-
-Photo URLs in &#x60;SlideshowResponse.photos[].url&#x60; already point here.
-`,
+    description: `Proxies the Immich thumbnail for the given asset ID.`,
     requestFormat: "json",
     parameters: [
       {
@@ -253,7 +243,7 @@ Photo URLs in &#x60;SlideshowResponse.photos[].url&#x60; already point here.
     errors: [
       {
         status: 401,
-        description: `Authentication failed — invalid or missing Immich API key`,
+        description: `Authentication failed`,
         schema: ErrorResponse,
       },
       {
@@ -267,10 +257,7 @@ Photo URLs in &#x60;SlideshowResponse.photos[].url&#x60; already point here.
     method: "get",
     path: "/assets/:id/video",
     alias: "getAssetVideo",
-    description: `Proxies the Immich live-photo video for the given asset ID. Only relevant
-when &#x60;photos.livePhoto.enabled&#x60; is true and &#x60;Photo.livePhotoVideoUrl&#x60; is
-set. Returns binary video data.
-`,
+    description: `Proxies the Immich live-photo video when &#x60;livePhotoEnabled&#x60; is true.`,
     requestFormat: "json",
     parameters: [
       {
@@ -283,7 +270,7 @@ set. Returns binary video data.
     errors: [
       {
         status: 401,
-        description: `Authentication failed — invalid or missing Immich API key`,
+        description: `Authentication failed`,
         schema: ErrorResponse,
       },
       {
@@ -295,27 +282,39 @@ set. Returns binary video data.
   },
   {
     method: "get",
+    path: "/events",
+    alias: "getEvents",
+    description: `Long-lived &#x60;text/event-stream&#x60; for real-time sync. Clients should treat events as
+invalidation triggers and refetch via &#x60;GET /settings&#x60; (preserving URL overrides).
+
+- &#x60;event: query_updated&#x60; — &#x60;data&#x60; is JSON &#x60;QuerySettings&#x60; (persisted query domain).
+- &#x60;event: playback_updated&#x60; — &#x60;data&#x60; is JSON &#x60;PlaybackSettings&#x60;.
+- &#x60;event: display_updated&#x60; — &#x60;data&#x60; is JSON &#x60;DisplaySettings&#x60;.
+- &#x60;event: settings_cleared&#x60; — &#x60;data&#x60; is JSON &#x60;AppSettings&#x60; (resolved env defaults).
+
+Comment heartbeats (&#x60;: ping&#x60;) are sent periodically to keep connections alive.
+`,
+    requestFormat: "json",
+    response: z.void(),
+  },
+  {
+    method: "get",
     path: "/locations",
     alias: "getLocations",
     description: `Returns a hierarchy of countries → states → cities derived from photo
 EXIF data. Use this to populate filter pickers.
-
-&#x60;cities&#x60; is keyed by &#x60;&quot;country:state&quot;&#x60; (not bare &#x60;state&#x60;) so that
-same-named states in different countries are unambiguous. City IDs use
-the compound &#x60;&quot;country:state:city&quot;&#x60; format; state IDs use
-&#x60;&quot;country:state&quot;&#x60;.
 `,
     requestFormat: "json",
     response: LocationHierarchy,
     errors: [
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
       {
         status: 502,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -324,13 +323,13 @@ the compound &#x60;&quot;country:state:city&quot;&#x60; format; state IDs use
     method: "get",
     path: "/locations/markers",
     alias: "getLocationMarkers",
-    description: `Returns all individual map markers (lat/lon + city/state/country) from photo EXIF data.`,
+    description: `Returns all individual map markers from photo EXIF data.`,
     requestFormat: "json",
     response: z.object({ markers: z.array(MapMarker) }).passthrough(),
     errors: [
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -339,10 +338,6 @@ the compound &#x60;&quot;country:state:city&quot;&#x60; format; state IDs use
     method: "get",
     path: "/locations/resolve",
     alias: "resolveLocation",
-    description: `Given a partial &#x60;country&#x60;, &#x60;state&#x60;, and/or &#x60;city&#x60; query param, returns
-the first matching complete &#x60;LocationSelection&#x60; from photo EXIF data, or
-&#x60;null&#x60; if no match is found.
-`,
     requestFormat: "json",
     parameters: [
       {
@@ -365,7 +360,7 @@ the first matching complete &#x60;LocationSelection&#x60; from photo EXIF data, 
     errors: [
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -374,10 +369,8 @@ the first matching complete &#x60;LocationSelection&#x60; from photo EXIF data, 
     method: "get",
     path: "/meta",
     alias: "getApiMeta",
-    description: `Discovery endpoint for native/self-hosted clients. Compare &#x60;contractVersion&#x60;
-to the version your client was built against. Bump &#x60;contractVersion&#x60; in
-OpenAPI &#x60;info.version&#x60; when making contract-breaking JSON changes (even if
-the URL stays on &#x60;/api/v1&#x60;). &#x60;apiVersion&#x60; reflects the URL path generation.
+    description: `Discovery endpoint. Compare &#x60;contractVersion&#x60; to the version your client was
+built against. Bump OpenAPI &#x60;info.version&#x60; on breaking JSON changes.
 `,
     requestFormat: "json",
     response: ApiMeta,
@@ -392,12 +385,12 @@ the URL stays on &#x60;/api/v1&#x60;). &#x60;apiVersion&#x60; reflects the URL p
     errors: [
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
       {
         status: 502,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -405,32 +398,27 @@ the URL stays on &#x60;/api/v1&#x60;). &#x60;apiVersion&#x60; reflects the URL p
   {
     method: "get",
     path: "/settings",
-    alias: "getSettingsOverrides",
-    description: `Returns the raw user-saved override object. Empty object &#x60;{}&#x60; means no overrides are saved.`,
-    requestFormat: "json",
-    response: AppSettings,
-  },
-  {
-    method: "put",
-    path: "/settings",
-    alias: "putSettingsOverrides",
-    description: `Replaces the in-memory user overrides with the supplied object. Overrides
-are held in server memory and reset on restart. For persistent defaults,
-use &#x60;DEFAULT_*&#x60; env vars or URL parameters instead.
+    alias: "getSettings",
+    description: `Returns the fully effective configuration: &#x60;DEFAULT_*&#x60; env defaults
+shallow-merged with persisted per-domain overrides (&#x60;settings.query.json&#x60;,
+&#x60;settings.playback.json&#x60;, &#x60;settings.display.json&#x60;), then optional URL query
+overrides using bracket notation (e.g. &#x60;?query[shuffle]&#x3D;false&amp;playback[intervalMs]&#x3D;5000&#x60;;
+array values use comma separation &#x60;query[albumIds]&#x3D;id1,id2&#x60;). URL overrides are
+session-only and are not persisted. Ignored params: &#x60;seed&#x60;, &#x60;cursor&#x60;, &#x60;limit&#x60;.
 `,
     requestFormat: "json",
     parameters: [
       {
-        name: "body",
-        type: "Body",
-        schema: AppSettings,
+        name: "query",
+        type: "Query",
+        schema: z.object({}).partial().passthrough().optional(),
       },
     ],
     response: AppSettings,
     errors: [
       {
-        status: 400,
-        description: `Bad request — invalid parameters or body`,
+        status: 500,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -438,86 +426,147 @@ use &#x60;DEFAULT_*&#x60; env vars or URL parameters instead.
   {
     method: "delete",
     path: "/settings",
-    alias: "deleteSettingsOverrides",
-    description: `Removes all in-memory user overrides, reverting to defaults + URL settings.`,
+    alias: "deleteSettings",
+    description: `Removes all persisted overrides (all three domain files), reverting to env defaults.
+Broadcasts &#x60;settings_cleared&#x60; on SSE.
+`,
     requestFormat: "json",
     response: z.object({ message: z.string() }).partial().passthrough(),
   },
   {
-    method: "get",
-    path: "/settings/defaults",
-    alias: "getSettingsDefaults",
-    description: `Returns the baseline settings built from &#x60;DEFAULT_*&#x60; environment variables, before URL or user overrides are applied.`,
-    requestFormat: "json",
-    response: AppSettings,
-  },
-  {
-    method: "get",
-    path: "/settings/resolved",
-    alias: "getSettingsResolved",
-    description: `Returns the effective application configuration after merging all sources
-in precedence order: hardcoded defaults → &#x60;DEFAULT_*&#x60; env vars → URL
-query params → user overrides (saved via &#x60;PUT /settings&#x60;).
-
-The following query params are stripped before URL-settings resolution
-and are **not** treated as settings overrides: &#x60;seed&#x60;, &#x60;cursor&#x60;, &#x60;limit&#x60;,
-&#x60;filter&#x60;.
+    method: "patch",
+    path: "/settings/display",
+    alias: "patchDisplaySettings",
+    description: `Persists the full &#x60;DisplaySettings&#x60; body to &#x60;settings.display.json&#x60; and returns
+the full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;display_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
-        name: "settings (dot-notation)",
-        type: "Query",
-        schema: z.object({}).partial().passthrough().optional(),
+        name: "body",
+        type: "Body",
+        schema: DisplaySettings,
       },
     ],
     response: AppSettings,
     errors: [
       {
-        status: 500,
-        description: `Server error or upstream Immich error`,
+        status: 400,
+        description: `Bad request`,
         schema: ErrorResponse,
       },
     ],
   },
   {
-    method: "get",
-    path: "/slideshow",
-    alias: "getSlideshow",
-    description: `Returns the full ordered photo list for playback in a single response
-(no cursor/limit pagination). Filtering, shuffle, and ordering are applied
-server-side using the resolved settings for the request. Fetch
-&#x60;/settings/resolved&#x60; in parallel to get configuration.
-
-&#x60;total&#x60; equals the length of &#x60;photos&#x60;. A future paginated API may return
-a page in &#x60;photos&#x60; while &#x60;total&#x60; reflects the full filtered set.
-
-**Settings are not included in this response.** Use &#x60;/settings/resolved&#x60;
-for configuration.
+    method: "delete",
+    path: "/settings/display",
+    alias: "deleteDisplaySettings",
+    description: `Removes display overrides, reverting display domain to env defaults.
+Broadcasts &#x60;display_updated&#x60; on SSE.
+`,
+    requestFormat: "json",
+    response: z.object({ message: z.string() }).partial().passthrough(),
+  },
+  {
+    method: "patch",
+    path: "/settings/playback",
+    alias: "patchPlaybackSettings",
+    description: `Persists the full &#x60;PlaybackSettings&#x60; body to &#x60;settings.playback.json&#x60; and returns
+the full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;playback_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
-        name: "seed",
-        type: "Query",
-        schema: z.string().optional(),
+        name: "body",
+        type: "Body",
+        schema: PlaybackSettings,
       },
+    ],
+    response: AppSettings,
+    errors: [
       {
-        name: "settings (dot-notation)",
-        type: "Query",
-        schema: z.object({}).partial().passthrough().optional(),
+        status: 400,
+        description: `Bad request`,
+        schema: ErrorResponse,
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/settings/playback",
+    alias: "deletePlaybackSettings",
+    description: `Removes playback overrides, reverting playback domain to env defaults.
+Broadcasts &#x60;playback_updated&#x60; on SSE.
+`,
+    requestFormat: "json",
+    response: z.object({ message: z.string() }).partial().passthrough(),
+  },
+  {
+    method: "patch",
+    path: "/settings/query",
+    alias: "patchQuerySettings",
+    description: `Persists the full &#x60;QuerySettings&#x60; body to &#x60;settings.query.json&#x60; and returns the
+full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;query_updated&#x60; on SSE.
+`,
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: QuerySettings,
+      },
+    ],
+    response: AppSettings,
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: ErrorResponse,
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/settings/query",
+    alias: "deleteQuerySettings",
+    description: `Removes query overrides, reverting query domain to env defaults.
+Broadcasts &#x60;query_updated&#x60; on SSE.
+`,
+    requestFormat: "json",
+    response: z.object({ message: z.string() }).partial().passthrough(),
+  },
+  {
+    method: "post",
+    path: "/slideshow/query",
+    alias: "postSlideshowQuery",
+    description: `Stateless photo query. Accepts query settings in the JSON body (avoids URL length
+limits for large album ID lists). Returns the full ordered list; shuffle is
+applied server-side when &#x60;shuffle&#x60; is true. The server does not retain kiosk
+session or playback progress.
+`,
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: SlideshowQueryRequest,
       },
     ],
     response: SlideshowResponse,
     errors: [
       {
+        status: 400,
+        description: `Bad request`,
+        schema: ErrorResponse,
+      },
+      {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
       {
         status: 502,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],
@@ -526,23 +575,12 @@ for configuration.
     method: "get",
     path: "/weather",
     alias: "getWeather",
-    description: `Returns current weather for the location resolved from settings
-(&#x60;weather.location.lat&#x60; / &#x60;weather.location.lng&#x60;). No coordinates are
-required from the caller — the server resolves them from the effective
-settings (defaults → URL overrides → user overrides).
-
-Returns &#x60;404&#x60; when &#x60;weather.enabled&#x60; is &#x60;false&#x60; in the resolved settings,
-or when no location has been configured. Returns &#x60;503&#x60; when the server&#x27;s
-&#x60;OWM_KEY&#x60; is not set.
+    description: `Returns current weather for &#x60;display.weatherLat&#x60; / &#x60;display.weatherLng&#x60; from
+effective settings. Supports bracket-notation URL overrides (e.g.
+&#x60;?display[weatherLat]&#x3D;51.5&#x60;). Returns &#x60;404&#x60; when &#x60;display.showWeather&#x60; is false.
+Returns &#x60;503&#x60; when &#x60;OWM_KEY&#x60; is unset.
 `,
     requestFormat: "json",
-    parameters: [
-      {
-        name: "settings (dot-notation)",
-        type: "Query",
-        schema: z.object({}).partial().passthrough().optional(),
-      },
-    ],
     response: WeatherData,
     errors: [
       {
@@ -552,7 +590,7 @@ or when no location has been configured. Returns &#x60;503&#x60; when the server
       },
       {
         status: 500,
-        description: `Server error or upstream Immich error`,
+        description: `Server error`,
         schema: ErrorResponse,
       },
     ],

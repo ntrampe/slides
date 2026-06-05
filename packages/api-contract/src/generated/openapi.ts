@@ -13,10 +13,8 @@ export interface paths {
         };
         /**
          * API and contract version
-         * @description Discovery endpoint for native/self-hosted clients. Compare `contractVersion`
-         *     to the version your client was built against. Bump `contractVersion` in
-         *     OpenAPI `info.version` when making contract-breaking JSON changes (even if
-         *     the URL stays on `/api/v1`). `apiVersion` reflects the URL path generation.
+         * @description Discovery endpoint. Compare `contractVersion` to the version your client was
+         *     built against. Bump OpenAPI `info.version` on breaking JSON changes.
          */
         get: operations["getApiMeta"];
         put?: never;
@@ -27,75 +25,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/slideshow": {
+    "/slideshow/query": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Ordered photo list
-         * @description Returns the full ordered photo list for playback in a single response
-         *     (no cursor/limit pagination). Filtering, shuffle, and ordering are applied
-         *     server-side using the resolved settings for the request. Fetch
-         *     `/settings/resolved` in parallel to get configuration.
-         *
-         *     `total` equals the length of `photos`. A future paginated API may return
-         *     a page in `photos` while `total` reflects the full filtered set.
-         *
-         *     **Settings are not included in this response.** Use `/settings/resolved`
-         *     for configuration.
-         */
-        get: operations["getSlideshow"];
+        get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/settings/resolved": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
         /**
-         * Fully resolved settings
-         * @description Returns the effective application configuration after merging all sources
-         *     in precedence order: hardcoded defaults → `DEFAULT_*` env vars → URL
-         *     query params → user overrides (saved via `PUT /settings`).
-         *
-         *     The following query params are stripped before URL-settings resolution
-         *     and are **not** treated as settings overrides: `seed`, `cursor`, `limit`,
-         *     `filter`.
+         * Query photos for playback
+         * @description Stateless photo query. Accepts query settings in the JSON body (avoids URL length
+         *     limits for large album ID lists). Returns the full ordered list; shuffle is
+         *     applied server-side when `shuffle` is true. The server does not retain kiosk
+         *     session or playback progress.
          */
-        get: operations["getSettingsResolved"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/settings/defaults": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Default settings (env-driven)
-         * @description Returns the baseline settings built from `DEFAULT_*` environment variables, before URL or user overrides are applied.
-         */
-        get: operations["getSettingsDefaults"];
-        put?: never;
-        post?: never;
+        post: operations["postSlideshowQuery"];
         delete?: never;
         options?: never;
         head?: never;
@@ -110,23 +56,129 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Current user overrides
-         * @description Returns the raw user-saved override object. Empty object `{}` means no overrides are saved.
+         * Effective configuration
+         * @description Returns the fully effective configuration: `DEFAULT_*` env defaults
+         *     shallow-merged with persisted per-domain overrides (`settings.query.json`,
+         *     `settings.playback.json`, `settings.display.json`), then optional URL query
+         *     overrides using bracket notation (e.g. `?query[shuffle]=false&playback[intervalMs]=5000`;
+         *     array values use comma separation `query[albumIds]=id1,id2`). URL overrides are
+         *     session-only and are not persisted. Ignored params: `seed`, `cursor`, `limit`.
          */
-        get: operations["getSettingsOverrides"];
-        /**
-         * Save user overrides
-         * @description Replaces the in-memory user overrides with the supplied object. Overrides
-         *     are held in server memory and reset on restart. For persistent defaults,
-         *     use `DEFAULT_*` env vars or URL parameters instead.
-         */
-        put: operations["putSettingsOverrides"];
+        get: operations["getSettings"];
+        put?: never;
         post?: never;
         /**
-         * Clear user overrides
-         * @description Removes all in-memory user overrides, reverting to defaults + URL settings.
+         * Clear all persisted overrides
+         * @description Removes all persisted overrides (all three domain files), reverting to env defaults.
+         *     Broadcasts `settings_cleared` on SSE.
          */
-        delete: operations["deleteSettingsOverrides"];
+        delete: operations["deleteSettings"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settings/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Clear query settings overrides
+         * @description Removes query overrides, reverting query domain to env defaults.
+         *     Broadcasts `query_updated` on SSE.
+         */
+        delete: operations["deleteQuerySettings"];
+        options?: never;
+        head?: never;
+        /**
+         * Replace query settings overrides
+         * @description Persists the full `QuerySettings` body to `settings.query.json` and returns the
+         *     full effective `AppSettings`. Broadcasts `query_updated` on SSE.
+         */
+        patch: operations["patchQuerySettings"];
+        trace?: never;
+    };
+    "/settings/playback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Clear playback settings overrides
+         * @description Removes playback overrides, reverting playback domain to env defaults.
+         *     Broadcasts `playback_updated` on SSE.
+         */
+        delete: operations["deletePlaybackSettings"];
+        options?: never;
+        head?: never;
+        /**
+         * Replace playback settings overrides
+         * @description Persists the full `PlaybackSettings` body to `settings.playback.json` and returns
+         *     the full effective `AppSettings`. Broadcasts `playback_updated` on SSE.
+         */
+        patch: operations["patchPlaybackSettings"];
+        trace?: never;
+    };
+    "/settings/display": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Clear display settings overrides
+         * @description Removes display overrides, reverting display domain to env defaults.
+         *     Broadcasts `display_updated` on SSE.
+         */
+        delete: operations["deleteDisplaySettings"];
+        options?: never;
+        head?: never;
+        /**
+         * Replace display settings overrides
+         * @description Persists the full `DisplaySettings` body to `settings.display.json` and returns
+         *     the full effective `AppSettings`. Broadcasts `display_updated` on SSE.
+         */
+        patch: operations["patchDisplaySettings"];
+        trace?: never;
+    };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Server-Sent Events stream
+         * @description Long-lived `text/event-stream` for real-time sync. Clients should treat events as
+         *     invalidation triggers and refetch via `GET /settings` (preserving URL overrides).
+         *
+         *     - `event: query_updated` — `data` is JSON `QuerySettings` (persisted query domain).
+         *     - `event: playback_updated` — `data` is JSON `PlaybackSettings`.
+         *     - `event: display_updated` — `data` is JSON `DisplaySettings`.
+         *     - `event: settings_cleared` — `data` is JSON `AppSettings` (resolved env defaults).
+         *
+         *     Comment heartbeats (`: ping`) are sent periodically to keep connections alive.
+         */
+        get: operations["getEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -183,11 +235,6 @@ export interface paths {
          * Location hierarchy
          * @description Returns a hierarchy of countries → states → cities derived from photo
          *     EXIF data. Use this to populate filter pickers.
-         *
-         *     `cities` is keyed by `"country:state"` (not bare `state`) so that
-         *     same-named states in different countries are unambiguous. City IDs use
-         *     the compound `"country:state:city"` format; state IDs use
-         *     `"country:state"`.
          */
         get: operations["getLocations"];
         put?: never;
@@ -207,7 +254,7 @@ export interface paths {
         };
         /**
          * Raw map markers
-         * @description Returns all individual map markers (lat/lon + city/state/country) from photo EXIF data.
+         * @description Returns all individual map markers from photo EXIF data.
          */
         get: operations["getLocationMarkers"];
         put?: never;
@@ -225,12 +272,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Resolve a partial location
-         * @description Given a partial `country`, `state`, and/or `city` query param, returns
-         *     the first matching complete `LocationSelection` from photo EXIF data, or
-         *     `null` if no match is found.
-         */
+        /** Resolve a partial location */
         get: operations["resolveLocation"];
         put?: never;
         post?: never;
@@ -249,14 +291,10 @@ export interface paths {
         };
         /**
          * Current weather
-         * @description Returns current weather for the location resolved from settings
-         *     (`weather.location.lat` / `weather.location.lng`). No coordinates are
-         *     required from the caller — the server resolves them from the effective
-         *     settings (defaults → URL overrides → user overrides).
-         *
-         *     Returns `404` when `weather.enabled` is `false` in the resolved settings,
-         *     or when no location has been configured. Returns `503` when the server's
-         *     `OWM_KEY` is not set.
+         * @description Returns current weather for `display.weatherLat` / `display.weatherLng` from
+         *     effective settings. Supports bracket-notation URL overrides (e.g.
+         *     `?display[weatherLat]=51.5`). Returns `404` when `display.showWeather` is false.
+         *     Returns `503` when `OWM_KEY` is unset.
          */
         get: operations["getWeather"];
         put?: never;
@@ -276,11 +314,7 @@ export interface paths {
         };
         /**
          * Photo thumbnail (binary)
-         * @description Proxies the Immich thumbnail for the given asset ID, injecting the server
-         *     API key. Returns binary image data. Use this URL directly in `<img src>`
-         *     or a native image loader — do not parse as JSON.
-         *
-         *     Photo URLs in `SlideshowResponse.photos[].url` already point here.
+         * @description Proxies the Immich thumbnail for the given asset ID.
          */
         get: operations["getAssetThumbnail"];
         put?: never;
@@ -300,9 +334,7 @@ export interface paths {
         };
         /**
          * Live photo video (binary)
-         * @description Proxies the Immich live-photo video for the given asset ID. Only relevant
-         *     when `photos.livePhoto.enabled` is true and `Photo.livePhotoVideoUrl` is
-         *     set. Returns binary video data.
+         * @description Proxies the Immich live-photo video when `livePhotoEnabled` is true.
          */
         get: operations["getAssetVideo"];
         put?: never;
@@ -318,51 +350,30 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         ApiMeta: {
-            /** @description URL path generation (currently `1` for `/api/v1`) */
             apiVersion: string;
-            /**
-             * @description OpenAPI `info.version`. Bump when older clients cannot safely parse
-             *     responses. Clients should compare to their compile-time expectation.
-             */
             contractVersion: string;
         };
         SlideshowResponse: {
             photos: components["schemas"]["Photo"][];
-            /**
-             * @description Number of photos in the result. With the current return-all behavior,
-             *     this equals `photos.length`. Reserved for future pagination when
-             *     `photos` may contain only one page.
-             */
             total: number;
         };
+        SlideshowQueryRequest: components["schemas"]["QuerySettings"] & {
+            /** @description Deterministic shuffle seed; omit for random order per query. */
+            seed?: string;
+        };
         Photo: {
-            /** @description Immich asset UUID */
             id: string;
-            /**
-             * Format: uri
-             * @description Thumbnail URL — points to `/api/v1/assets/{id}/thumbnail`
-             */
+            /** Format: uri */
             url: string;
-            /**
-             * Format: uri
-             * @description Deep-link URL into the Immich web UI (optional)
-             */
+            /** Format: uri */
             inAppUrl?: string;
-            /**
-             * Format: uri
-             * @description Live-photo video URL — points to `/api/v1/assets/{id}/video` (set only when applicable)
-             */
+            /** Format: uri */
             livePhotoVideoUrl?: string;
             width?: number;
             height?: number;
             /** @enum {string} */
             type: "IMAGE" | "VIDEO";
-            /**
-             * Format: date-time
-             * @description ISO 8601 date-time string on the wire (e.g. `"2024-06-01T12:00:00.000Z"`).
-             *     The TypeScript web client converts this to a `Date` object via `revivePhoto()`.
-             *     Dart / other clients should parse as `DateTime`.
-             */
+            /** Format: date-time */
             createdAt: string;
             description?: string;
             rating?: number;
@@ -372,7 +383,6 @@ export interface components {
             camera?: components["schemas"]["PhotoCameraInfo"];
             exifSettings?: components["schemas"]["PhotoExifSettings"];
             orientation?: string;
-            /** @description Video duration string (e.g. `"0:00:03.456000"`) */
             duration?: string;
         };
         PhotoLocation: {
@@ -396,101 +406,62 @@ export interface components {
             focalLength?: number;
         };
         AppSettings: {
-            slideshow: {
-                /** @enum {string} */
-                layout: "single" | "split";
-                /** @description Milliseconds between photo advances */
-                intervalMs: number;
-                shuffle: boolean;
-                autoplay: boolean;
-                filter: components["schemas"]["PhotoFilterParams"];
-                transition: {
-                    /**
-                     * @description Cross-platform presentation hint for advancing between slides
-                     *     (web CSS/view transitions; Flutter e.g. AnimatedSwitcher).
-                     * @enum {string}
-                     */
-                    type: "fade" | "slide" | "none";
-                    /** @description Transition duration in milliseconds (client-defined) */
-                    duration: number;
-                };
-                ui: {
-                    showProgressBar: boolean;
-                };
-            };
-            photos: {
-                /**
-                 * @description Cross-platform presentation hint for scaling photos in their frame.
-                 *     Aligns with CSS object-fit and Flutter BoxFit (scale-down → scaleDown).
-                 * @enum {string}
-                 */
-                fit: "contain" | "cover" | "fill" | "none" | "scale-down";
-                animation: {
-                    /**
-                     * @description Cross-platform in-frame motion hint while a slide is visible.
-                     *     Web uses CSS keyframes; other clients map to local animation APIs.
-                     * @enum {string}
-                     */
-                    type: "none" | "zoom-in" | "zoom-out" | "pan" | "ken-burns";
-                    duration: number;
-                    intensity: number;
-                };
-                livePhoto: {
-                    enabled: boolean;
-                    delay: number;
-                };
-                metadata: {
-                    enabled: boolean;
-                    dateFormat: string;
-                };
-            };
-            clock: {
-                enabled: boolean;
-                use24HourFormat: boolean;
-                dateFormat: string;
-            };
-            weather: {
-                enabled: boolean;
-                location: {
-                    /** Format: double */
-                    lat: number;
-                    /** Format: double */
-                    lng: number;
-                };
-            };
-            theme: {
-                /** @enum {string} */
-                mode: "light" | "dark";
-            };
-            debug: {
-                showDebugStats: boolean;
-            };
-            support: {
-                enabled: boolean;
-            };
+            query: components["schemas"]["QuerySettings"];
+            playback: components["schemas"]["PlaybackSettings"];
+            display: components["schemas"]["DisplaySettings"];
         };
-        PhotoFilterParams: {
-            albumIds?: string[];
-            albumOperator?: components["schemas"]["FilterOperator"];
-            personIds?: string[];
-            personOperator?: components["schemas"]["FilterOperator"];
-            excludeAlbumIds?: string[];
-            excludePersonIds?: string[];
-            location?: {
-                country?: string;
-                state?: string;
-                city?: string;
-            };
+        QuerySettings: {
+            albumIds: string[];
+            albumOperator: components["schemas"]["FilterOperator"];
+            personIds: string[];
+            personOperator: components["schemas"]["FilterOperator"];
+            excludeAlbumIds: string[];
+            excludePersonIds: string[];
+            locationCountry?: string;
+            locationState?: string;
+            locationCity?: string;
             /** Format: date */
             startDate?: string;
             /** Format: date */
             endDate?: string;
-            globalOperator?: components["schemas"]["FilterOperator"];
+            globalOperator: components["schemas"]["FilterOperator"];
+            shuffle: boolean;
         };
-        /**
-         * @description `AND` — photo must match all criteria; `OR` — photo must match any criterion
-         * @enum {string}
-         */
+        PlaybackSettings: {
+            intervalMs: number;
+            autoplay: boolean;
+            /** @enum {string} */
+            layout: "single" | "split";
+            /** @enum {string} */
+            photoFit: "contain" | "cover" | "fill" | "none" | "scale-down";
+            /** @enum {string} */
+            transitionType: "fade" | "slide" | "none";
+            transitionDuration: number;
+            /** @enum {string} */
+            photoAnimationType: "none" | "zoom-in" | "zoom-out" | "pan" | "ken-burns";
+            photoAnimationDuration: number;
+            photoAnimationIntensity: number;
+            livePhotoEnabled: boolean;
+            livePhotoDelay: number;
+        };
+        DisplaySettings: {
+            /** @enum {string} */
+            themeMode: "light" | "dark";
+            showProgressBar: boolean;
+            showDebugStats: boolean;
+            supportEnabled: boolean;
+            photoMetadataEnabled: boolean;
+            photoMetadataDateFormat: string;
+            showClock: boolean;
+            clockUse24HourFormat: boolean;
+            clockDateFormat: string;
+            showWeather: boolean;
+            /** Format: double */
+            weatherLat: number;
+            /** Format: double */
+            weatherLng: number;
+        };
+        /** @enum {string} */
         FilterOperator: "AND" | "OR";
         Album: {
             id: string;
@@ -519,15 +490,9 @@ export interface components {
         };
         LocationHierarchy: {
             countries: components["schemas"]["LocationItem"][];
-            /** @description Map of `country` → state LocationItems. State IDs use `"country:state"` format. */
             states: {
                 [key: string]: components["schemas"]["LocationItem"][];
             };
-            /**
-             * @description Map of `"country:state"` → city LocationItems. Keyed by the compound
-             *     `"country:state"` string (not bare state name) to disambiguate
-             *     same-named states across countries. City IDs use `"country:state:city"` format.
-             */
             cities: {
                 [key: string]: components["schemas"]["LocationItem"][];
             };
@@ -553,7 +518,6 @@ export interface components {
             country: string;
         };
         WeatherData: {
-            /** @description Temperature in the unit configured server-side */
             temp: number;
             /** @enum {string} */
             condition: "sunny" | "cloudy" | "rainy" | "snowy" | "stormy";
@@ -561,20 +525,15 @@ export interface components {
         };
         ErrorResponse: {
             error: {
-                /**
-                 * @description Machine-readable error category
-                 * @enum {string}
-                 */
+                /** @enum {string} */
                 type?: "network" | "auth" | "client" | "server";
-                /** @description Human-readable error description */
                 message: string;
-                /** @description Optional error code (e.g. `ECONNREFUSED`) */
                 code?: string;
             };
         };
     };
     responses: {
-        /** @description Bad request — invalid parameters or body */
+        /** @description Bad request */
         ClientError: {
             headers: {
                 [name: string]: unknown;
@@ -583,7 +542,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
-        /** @description Authentication failed — invalid or missing Immich API key */
+        /** @description Authentication failed */
         AuthError: {
             headers: {
                 [name: string]: unknown;
@@ -601,7 +560,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
-        /** @description Server error or upstream Immich error */
+        /** @description Server error */
         ServerError: {
             headers: {
                 [name: string]: unknown;
@@ -614,22 +573,6 @@ export interface components {
     parameters: {
         /** @description Immich asset UUID */
         AssetId: string;
-        /**
-         * @description Deterministic shuffle seed. Requests with the same seed observe the same
-         *     photo order, which enables stable navigation without server-side session
-         *     state. Omit to use a random seed (new order each fetch).
-         */
-        SlideshowSeed: string;
-        /**
-         * @description Any `AppSettings` field can be overridden via dot-notation query params
-         *     (e.g. `?slideshow.layout=split&theme.mode=dark`). URL overrides have
-         *     lower precedence than user overrides saved via `PUT /settings`. The
-         *     following params are ignored during settings resolution: `seed`, `cursor`,
-         *     `limit`, `filter`.
-         */
-        UrlSettingsOverrides: {
-            [key: string]: unknown;
-        };
     };
     requestBodies: never;
     headers: never;
@@ -657,29 +600,18 @@ export interface operations {
             };
         };
     };
-    getSlideshow: {
+    postSlideshowQuery: {
         parameters: {
-            query?: {
-                /**
-                 * @description Deterministic shuffle seed. Requests with the same seed observe the same
-                 *     photo order, which enables stable navigation without server-side session
-                 *     state. Omit to use a random seed (new order each fetch).
-                 */
-                seed?: components["parameters"]["SlideshowSeed"];
-                /**
-                 * @description Any `AppSettings` field can be overridden via dot-notation query params
-                 *     (e.g. `?slideshow.layout=split&theme.mode=dark`). URL overrides have
-                 *     lower precedence than user overrides saved via `PUT /settings`. The
-                 *     following params are ignored during settings resolution: `seed`, `cursor`,
-                 *     `limit`, `filter`.
-                 */
-                "settings (dot-notation)"?: components["parameters"]["UrlSettingsOverrides"];
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlideshowQueryRequest"];
+            };
+        };
         responses: {
             /** @description Ordered photo list */
             200: {
@@ -690,21 +622,16 @@ export interface operations {
                     "application/json": components["schemas"]["SlideshowResponse"];
                 };
             };
+            400: components["responses"]["ClientError"];
             500: components["responses"]["ServerError"];
             502: components["responses"]["ServerError"];
         };
     };
-    getSettingsResolved: {
+    getSettings: {
         parameters: {
             query?: {
-                /**
-                 * @description Any `AppSettings` field can be overridden via dot-notation query params
-                 *     (e.g. `?slideshow.layout=split&theme.mode=dark`). URL overrides have
-                 *     lower precedence than user overrides saved via `PUT /settings`. The
-                 *     following params are ignored during settings resolution: `seed`, `cursor`,
-                 *     `limit`, `filter`.
-                 */
-                "settings (dot-notation)"?: components["parameters"]["UrlSettingsOverrides"];
+                /** @description Example — domain keys may be passed via bracket notation. */
+                query?: Record<string, never>;
             };
             header?: never;
             path?: never;
@@ -712,7 +639,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Resolved settings */
+            /** @description Effective settings */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -724,72 +651,7 @@ export interface operations {
             500: components["responses"]["ServerError"];
         };
     };
-    getSettingsDefaults: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Default settings */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppSettings"];
-                };
-            };
-        };
-    };
-    getSettingsOverrides: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User overrides (partial AppSettings) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppSettings"];
-                };
-            };
-        };
-    };
-    putSettingsOverrides: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AppSettings"];
-            };
-        };
-        responses: {
-            /** @description Saved overrides echoed back */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AppSettings"];
-                };
-            };
-            400: components["responses"]["ClientError"];
-        };
-    };
-    deleteSettingsOverrides: {
+    deleteSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -808,6 +670,170 @@ export interface operations {
                         /** @example Settings overrides cleared */
                         message?: string;
                     };
+                };
+            };
+        };
+    };
+    deleteQuerySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Query overrides cleared */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Query settings overrides cleared */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchQuerySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuerySettings"];
+            };
+        };
+        responses: {
+            /** @description Effective settings after update */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSettings"];
+                };
+            };
+            400: components["responses"]["ClientError"];
+        };
+    };
+    deletePlaybackSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Playback overrides cleared */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Playback settings overrides cleared */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchPlaybackSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlaybackSettings"];
+            };
+        };
+        responses: {
+            /** @description Effective settings after update */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSettings"];
+                };
+            };
+            400: components["responses"]["ClientError"];
+        };
+    };
+    deleteDisplaySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Display overrides cleared */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Display settings overrides cleared */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchDisplaySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DisplaySettings"];
+            };
+        };
+        responses: {
+            /** @description Effective settings after update */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSettings"];
+                };
+            };
+            400: components["responses"]["ClientError"];
+        };
+    };
+    getEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SSE stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
                 };
             };
         };
@@ -932,16 +958,7 @@ export interface operations {
     };
     getWeather: {
         parameters: {
-            query?: {
-                /**
-                 * @description Any `AppSettings` field can be overridden via dot-notation query params
-                 *     (e.g. `?slideshow.layout=split&theme.mode=dark`). URL overrides have
-                 *     lower precedence than user overrides saved via `PUT /settings`. The
-                 *     following params are ignored during settings resolution: `seed`, `cursor`,
-                 *     `limit`, `filter`.
-                 */
-                "settings (dot-notation)"?: components["parameters"]["UrlSettingsOverrides"];
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;

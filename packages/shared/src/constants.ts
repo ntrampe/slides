@@ -1,68 +1,43 @@
-import type { AppSettings, FilterOperator } from '@slides/api-contract';
+import type { AppSettings } from '@slides/api-contract';
 
-export const DEFAULT_FILTER_OPERATOR: FilterOperator = 'AND';
+export const DEFAULT_FILTER_OPERATOR = 'AND' as const;
 
 export const FALLBACK_APP_SETTINGS: AppSettings = {
-    slideshow: {
+    query: {
+        albumIds: [],
+        albumOperator: 'AND',
+        personIds: [],
+        personOperator: 'AND',
+        excludeAlbumIds: [],
+        excludePersonIds: [],
+        globalOperator: 'AND',
+        shuffle: true,
+    },
+    playback: {
         layout: 'single',
         intervalMs: 10000,
-        shuffle: true,
         autoplay: true,
-        filter: {
-            albumIds: [],
-            albumOperator: 'AND',
-            personIds: [],
-            personOperator: 'AND',
-            excludeAlbumIds: [],
-            excludePersonIds: [],
-            location: {},
-            startDate: undefined,
-            endDate: undefined,
-            globalOperator: 'AND',
-        },
-        transition: {
-            type: 'fade',
-            duration: 500,
-        },
-        ui: {
-            showProgressBar: true,
-        },
+        photoFit: 'cover',
+        transitionType: 'fade',
+        transitionDuration: 500,
+        photoAnimationType: 'zoom-in',
+        photoAnimationDuration: 10000,
+        photoAnimationIntensity: 1.2,
+        livePhotoEnabled: false,
+        livePhotoDelay: 1000,
     },
-    photos: {
-        fit: 'cover',
-        livePhoto: {
-            enabled: false,
-            delay: 1000,
-        },
-        animation: {
-            type: 'zoom-in',
-            duration: 10000,
-            intensity: 1.2,
-        },
-        metadata: {
-            enabled: true,
-            dateFormat: 'MMM dd, yyyy',
-        },
-    },
-    clock: {
-        enabled: true,
-        use24HourFormat: false,
-        dateFormat: 'MMM dd, yyyy',
-    },
-    weather: {
-        enabled: false,
-        location: {
-            lat: 51.5074,
-            lng: -0.1278,
-        },
-    },
-    theme: {
-        mode: 'dark',
-    },
-    debug: {
+    display: {
+        themeMode: 'dark',
+        showProgressBar: true,
         showDebugStats: false,
-    },
-    support: {
-        enabled: true,
+        supportEnabled: true,
+        photoMetadataEnabled: true,
+        photoMetadataDateFormat: 'MMM dd, yyyy',
+        showClock: true,
+        clockUse24HourFormat: false,
+        clockDateFormat: 'MMM dd, yyyy',
+        showWeather: false,
+        weatherLat: 51.5074,
+        weatherLng: -0.1278,
     },
 };
