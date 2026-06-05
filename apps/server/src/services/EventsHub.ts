@@ -46,21 +46,26 @@ export class EventsHub {
     private writeEvent(event: string, data: unknown): void {
         const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
         for (const client of this.clients) {
-            try {
-                client.write(payload);
-            } catch {
-                this.clients.delete(client);
-            }
+            this.writeToClient(client, payload);
         }
     }
 
     private sendPing(): void {
         for (const client of this.clients) {
-            try {
-                client.write(': ping\n\n');
-            } catch {
-                this.clients.delete(client);
-            }
+            this.writeToClient(client, ': ping\n\n');
+        }
+    }
+
+    private writeToClient(client: Response, chunk: string): void {
+        if (client.writableEnded || client.destroyed) {
+            this.clients.delete(client);
+            return;
+        }
+
+        try {
+            client.write(chunk);
+        } catch {
+            this.clients.delete(client);
         }
     }
 }

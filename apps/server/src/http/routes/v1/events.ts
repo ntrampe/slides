@@ -15,9 +15,12 @@ export function createEventsRouter(eventsHub: EventsHub): Router {
 
             eventsHub.addClient(res);
 
-            req.on('close', () => {
+            const cleanup = () => {
                 eventsHub.removeClient(res);
-            });
+            };
+
+            req.on('close', cleanup);
+            res.on('error', cleanup);
         })
     );
 
