@@ -20,6 +20,19 @@ const idArraySchema = z.union([
     ),
 ]);
 
+/** z.coerce.boolean() treats any non-empty string (including "false") as true. */
+const urlBooleanSchema = z
+    .union([z.boolean(), z.string(), z.number()])
+    .transform((v) => {
+        if (typeof v === 'boolean') return v;
+        if (typeof v === 'number') return v !== 0;
+        const s = v.toLowerCase();
+        if (s === 'false' || s === '0' || s === 'no' || s === 'off') return false;
+        if (s === 'true' || s === '1' || s === 'yes' || s === 'on') return true;
+        return false;
+    })
+    .optional();
+
 const queryUrlSchema = z
     .object({
         albumIds: idArraySchema.optional(),
@@ -34,14 +47,14 @@ const queryUrlSchema = z
         startDate: z.string().optional(),
         endDate: z.string().optional(),
         globalOperator: schemas.FilterOperator.optional(),
-        shuffle: z.coerce.boolean().optional(),
+        shuffle: urlBooleanSchema,
     })
     .partial();
 
 const playbackUrlSchema = z
     .object({
         intervalMs: z.coerce.number().optional(),
-        autoplay: z.coerce.boolean().optional(),
+        autoplay: urlBooleanSchema,
         layout: z.enum(['single', 'split']).optional(),
         photoFit: z.enum(['contain', 'cover', 'fill', 'none', 'scale-down']).optional(),
         transitionType: z.enum(['fade', 'slide', 'none']).optional(),
@@ -51,7 +64,7 @@ const playbackUrlSchema = z
             .optional(),
         photoAnimationDuration: z.coerce.number().optional(),
         photoAnimationIntensity: z.coerce.number().optional(),
-        livePhotoEnabled: z.coerce.boolean().optional(),
+        livePhotoEnabled: urlBooleanSchema,
         livePhotoDelay: z.coerce.number().optional(),
     })
     .partial();
@@ -59,15 +72,15 @@ const playbackUrlSchema = z
 const displayUrlSchema = z
     .object({
         themeMode: z.enum(['light', 'dark']).optional(),
-        showProgressBar: z.coerce.boolean().optional(),
-        showDebugStats: z.coerce.boolean().optional(),
-        supportEnabled: z.coerce.boolean().optional(),
-        photoMetadataEnabled: z.coerce.boolean().optional(),
+        showProgressBar: urlBooleanSchema,
+        showDebugStats: urlBooleanSchema,
+        supportEnabled: urlBooleanSchema,
+        photoMetadataEnabled: urlBooleanSchema,
         photoMetadataDateFormat: z.string().optional(),
-        showClock: z.coerce.boolean().optional(),
-        clockUse24HourFormat: z.coerce.boolean().optional(),
+        showClock: urlBooleanSchema,
+        clockUse24HourFormat: urlBooleanSchema,
         clockDateFormat: z.string().optional(),
-        showWeather: z.coerce.boolean().optional(),
+        showWeather: urlBooleanSchema,
         weatherLat: z.coerce.number().optional(),
         weatherLng: z.coerce.number().optional(),
     })
