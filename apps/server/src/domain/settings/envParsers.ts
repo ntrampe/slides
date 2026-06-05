@@ -26,3 +26,12 @@ export function parseString(value: string | undefined): string | undefined {
     if (!value) return undefined;
     return value.trim() || undefined;
 }
+
+export function parseHourFormat(
+    value: string | undefined,
+    fallback: '12' | '24'
+): '12' | '24' {
+    if (value === '24') return '24';
+    if (value === '12') return '12';
+    return fallback;
+}

@@ -28,7 +28,7 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
     },
     configuration: {
         dateFormat: 'MMM dd, yyyy',
-        clockUse24HourFormat: false,
+        hourFormat: '12',
         weatherLat: 51.5074,
         weatherLng: -0.1278,
     },

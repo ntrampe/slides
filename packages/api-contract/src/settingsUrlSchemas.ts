@@ -72,7 +72,7 @@ const playbackUrlSchema = z
 const configurationUrlSchema = z
     .object({
         dateFormat: z.string().optional(),
-        clockUse24HourFormat: urlBooleanSchema,
+        hourFormat: z.enum(['12', '24']).optional(),
         weatherLat: z.coerce.number().optional(),
         weatherLng: z.coerce.number().optional(),
     })

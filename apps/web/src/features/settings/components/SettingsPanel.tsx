@@ -437,18 +437,20 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span>Show Clock</span>
                 </label>
 
-                <label className="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={configuration.clockUse24HourFormat}
+                <label className="block">
+                    <span className="block mb-1">Time Format</span>
+                    <select
+                        value={configuration.hourFormat}
                         onChange={(e) =>
                             updateConfigurationSettings({
-                                clockUse24HourFormat: e.target.checked,
+                                hourFormat: e.target.value as '12' | '24',
                             })
                         }
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>24-Hour Format</span>
+                        className="bg-surface border border-border w-full p-2 rounded"
+                    >
+                        <option value="12">12-hour</option>
+                        <option value="24">24-hour</option>
+                    </select>
                 </label>
 
                 <label className="block">

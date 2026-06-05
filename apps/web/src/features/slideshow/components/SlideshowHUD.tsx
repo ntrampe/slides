@@ -42,7 +42,7 @@ export const SlideshowHUD = ({
         enabled: presentation.showWeather,
     });
 
-    const timeFormat = configuration.clockUse24HourFormat ? 'HH:mm' : 'h:mm a';
+    const timeFormat = configuration.hourFormat === '24' ? 'HH:mm' : 'h:mm a';
     const now = new Date();
 
     const controlsOpacity = areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none';

@@ -104,10 +104,11 @@ const PlaybackSettings = z
     livePhotoDelay: z.number(),
   })
   .passthrough();
+const HourFormat = z.enum(["12", "24"]);
 const ConfigurationSettings = z
   .object({
     dateFormat: z.string(),
-    clockUse24HourFormat: z.boolean(),
+    hourFormat: HourFormat,
     weatherLat: z.number(),
     weatherLng: z.number(),
   })
@@ -162,7 +163,7 @@ const PlaybackSettingsUpdate = z
 const ConfigurationSettingsUpdate = z
   .object({
     dateFormat: z.string(),
-    clockUse24HourFormat: z.boolean(),
+    hourFormat: HourFormat,
     weatherLat: z.number(),
     weatherLng: z.number(),
   })
@@ -235,6 +236,7 @@ export const schemas = {
   SlideshowResponse,
   ErrorResponse,
   PlaybackSettings,
+  HourFormat,
   ConfigurationSettings,
   AppSettings,
   QuerySettingsUpdate,

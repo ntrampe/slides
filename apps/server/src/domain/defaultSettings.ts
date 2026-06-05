@@ -3,6 +3,7 @@ import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
 import {
     parseBool,
     parseFloatEnv,
+    parseHourFormat,
     parseIdArray,
     parseNumber,
     parseString,
@@ -89,9 +90,9 @@ export function buildDefaultSettings(): DomainAppSettings {
         },
         configuration: {
             dateFormat: fallback.configuration.dateFormat,
-            clockUse24HourFormat: parseBool(
-                process.env.DEFAULT_24_HOUR_FORMAT,
-                fallback.configuration.clockUse24HourFormat
+            hourFormat: parseHourFormat(
+                process.env.DEFAULT_HOUR_FORMAT,
+                fallback.configuration.hourFormat
             ),
             weatherLat: parseFloatEnv(
                 process.env.DEFAULT_WEATHER_LAT,

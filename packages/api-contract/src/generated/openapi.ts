@@ -448,7 +448,7 @@ export interface components {
         };
         ConfigurationSettings: {
             dateFormat: string;
-            clockUse24HourFormat: boolean;
+            hourFormat: components["schemas"]["HourFormat"];
             /** Format: double */
             weatherLat: number;
             /** Format: double */
@@ -490,12 +490,14 @@ export interface components {
         };
         ConfigurationSettingsUpdate: {
             dateFormat?: string;
-            clockUse24HourFormat?: boolean;
+            hourFormat?: components["schemas"]["HourFormat"];
             /** Format: double */
             weatherLat?: number;
             /** Format: double */
             weatherLng?: number;
         };
+        /** @enum {string} */
+        HourFormat: "12" | "24";
         /** @enum {string} */
         FilterOperator: "AND" | "OR";
         Album: {

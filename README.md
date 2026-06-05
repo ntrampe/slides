@@ -108,7 +108,7 @@ These options use the same slideshow filter settings as URL and environment conf
 Override settings per browser session via bracket-notation query parameters (not persisted, not broadcast on SSE):
 
 ```
-http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&configuration[clockUse24HourFormat]=true&query[shuffle]=true
+http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&configuration[hourFormat]=24&query[shuffle]=true
 ```
 
 **Examples:**

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Slides API
-  version: "3"
+  version: "5"
   description: |
     Sync-and-play slideshow API. The server is the source of truth for **configuration
     rules** (`AppSettings` grouped by `query`, `playback`, `configuration`) and a **real-time
@@ -666,14 +666,14 @@ components:
       type: object
       required:
         - dateFormat
-        - clockUse24HourFormat
+        - hourFormat
         - weatherLat
         - weatherLng
       properties:
         dateFormat:
           type: string
-        clockUse24HourFormat:
-          type: boolean
+        hourFormat:
+          $ref: '#/components/schemas/HourFormat'
         weatherLat:
           type: number
           format: double
@@ -752,14 +752,18 @@ components:
       properties:
         dateFormat:
           type: string
-        clockUse24HourFormat:
-          type: boolean
+        hourFormat:
+          $ref: '#/components/schemas/HourFormat'
         weatherLat:
           type: number
           format: double
         weatherLng:
           type: number
           format: double
+
+    HourFormat:
+      type: string
+      enum: ['12', '24']
 
     FilterOperator:
       type: string

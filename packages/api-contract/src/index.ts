@@ -14,6 +14,7 @@ export type AppSettings = components['schemas']['AppSettings'];
 export type QuerySettings = components['schemas']['QuerySettings'];
 export type PlaybackSettings = components['schemas']['PlaybackSettings'];
 export type ConfigurationSettings = components['schemas']['ConfigurationSettings'];
+export type HourFormat = components['schemas']['HourFormat'];
 export type PhotoLocation = components['schemas']['PhotoLocation'];
 export type PhotoCameraInfo = components['schemas']['PhotoCameraInfo'];
 export type PhotoExifSettings = components['schemas']['PhotoExifSettings'];
