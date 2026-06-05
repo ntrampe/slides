@@ -204,8 +204,8 @@ Everything in the slideshow-only profile, plus:
 |----------|---------|
 | `GET /api/v1/settings` | `useSettingsData` — boot fetch (no polling) |
 | `GET /api/v1/events` | `useSyncEvents` — live settings sync |
-| `POST /api/v1/slideshow/query` | `useSlideshowData` — photo list from nested `filter` in JSON body |
-| `GET/PUT/DELETE /api/v1/settings` | Settings panel CRUD |
+| `POST /api/v1/slideshow/query` | `useSlideshowData` — `settings.query` spread into body with `seed` |
+| `PATCH/DELETE /api/v1/settings/{domain}` | Settings panel CRUD |
 | `GET /api/v1/albums`, `/people`, `/locations` | Settings panel filter pickers |
 | `GET /api/v1/weather` | Slideshow HUD overlay |
 

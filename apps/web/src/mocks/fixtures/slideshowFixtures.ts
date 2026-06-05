@@ -3,7 +3,7 @@ import type { Photo } from '@slides/api-contract';
 /**
  * Canned slideshow fixtures for the offline demo build (`VITE_USE_MOCK=true`).
  *
- * These are static wire-shaped DTOs that stand in for a `GET /api/v1/slideshow`
+ * These are static wire-shaped DTOs that stand in for a `POST /api/v1/slideshow/query`
  * response. The demo intentionally performs NO filtering, shuffling, or settings
  * resolution on the client — that business logic lives only on the server. This
  * file is fixture data, not domain logic.

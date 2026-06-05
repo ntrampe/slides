@@ -1,42 +1,161 @@
 # Codebase Architecture & Patterns
 
-**Project:** Slides - Photo slideshow (React + TypeScript + Vite)  
+**Project:** Slides — photo slideshow (React + TypeScript + Vite)  
 **Stack:** TanStack Query, Tailwind CSS, Lucide Icons
+
+This document is the single source of truth for architecture, API patterns, and coding conventions. It is tool-agnostic — point any AI agent or contributor here.
 
 ---
 
 ## Architecture
 
-**Monorepo** with feature-first web app and isolated server domain:
+npm workspaces monorepo. The **server is the source of truth**; clients are thin playback/UI shells.
 
 ```
 apps/web/src/
-├── api/                 # Production fetchers (GET/PUT/DELETE /api/v1)
-├── features/[feature]/  # components/, hooks/, types.ts
-└── mocks/               # Demo-only fetch interceptor (VITE_USE_MOCK)
+├── api/                 # Thin fetchers → /api/v1 (no business logic)
+├── features/[feature]/  # components/, hooks/, types.ts, index.ts
+├── components/        # Shared UI (pickers, HUD chrome)
+├── context/           # UI-only context (idle, visibility)
+└── mocks/             # Demo-only fetch interceptor (VITE_USE_MOCK)
 
 apps/server/src/
-├── domain/              # Settings, filters, Immich mapping (no HTTP)
-├── services/            # Catalog, slideshow, settings, weather
+├── domain/              # Business rules (no HTTP)
+├── services/            # Application orchestration
 ├── http/routes/v1/      # Express routes + validation
+├── http/mappers/        # Domain → contract DTOs
 └── infra/               # ImmichClient, LinkBuilder
 
-packages/api-contract/   # OpenAPI-generated types + Zod schemas
+packages/api-contract/   # OpenAPI → generated types + Zod
 packages/shared/         # FALLBACK_APP_SETTINGS, errors, utilities
 ```
 
 **Types:** `@slides/api-contract` is the source of truth for JSON shapes on `/api/v1`. Edit `packages/api-contract/openapi.yaml`, then run `npm run contract:gen`. React re-exports wire types from `features/*/types.ts` when needed for ergonomics.
 
+### Server owns
+
+- Immich integration and API key (never exposed to browser)
+- Photo filtering, exclusions, shuffle (`POST /slideshow/query`)
+- Settings merge: env defaults → persisted JSON → URL overrides
+- Asset proxying (`/assets/:id/thumbnail|video`)
+- Catalog (albums, people, locations), weather
+- SSE broadcast of settings changes (`GET /events`)
+
+### Client owns
+
+- Playback engine: index, timer, transitions, keyboard
+- Photo preloading ring buffer (`usePhotoPool`)
+- UI chrome: theme DOM (`data-theme`), idle/visibility, settings panel
+- Presentation settings: theme mode, HUD visibility toggles (`usePresentationSettings` → `localStorage`)
+- Stable shuffle `seed` (sent in slideshow query body; not a settings key)
+
+### Multi-client goal
+
+React web today; Flutter/mobile/kiosk later. All clients use the same `/api/v1` contract:
+
+`GET /meta` → `GET /settings` + `GET /events` → `POST /slideshow/query` → local timer/index.
+
+See `README.md` client profiles and `packages/api-contract/openapi.yaml`.
+
+### Where does new code go?
+
+| Change | Location |
+|--------|----------|
+| New API endpoint or JSON shape | `packages/api-contract/openapi.yaml` → `npm run contract:gen` |
+| Business rule / filter logic | `apps/server/src/domain/` |
+| Persistence, Immich calls, SSE | `apps/server/src/services/` |
+| HTTP route + validation | `apps/server/src/http/routes/v1/` |
+| Web fetcher | `apps/web/src/api/` |
+| TanStack Query hook | `apps/web/src/features/[feature]/hooks/` |
+| UI component | `apps/web/src/features/[feature]/components/` |
+| Shared UI widget | `apps/web/src/components/` |
+| Cross-app constant/fallback | `packages/shared/` |
+
 ---
 
-## Core Rules
+## API & Settings
+
+### Contract-first workflow
+
+1. Edit `packages/api-contract/openapi.yaml`
+2. Run `npm run contract:gen`
+3. Fix types in `apps/server` (mappers, validation) and `apps/web` (fetchers)
+4. Bump `info.version` and sync `packages/shared/src/apiVersions.ts` `SLIDES_CONTRACT_VERSION` on breaking changes
+
+Import wire types from `@slides/api-contract`. Server validates requests with generated Zod schemas.
+
+### Endpoints (current — not legacy)
+
+| Operation | Endpoint |
+|-----------|----------|
+| Contract version | `GET /meta` |
+| Effective settings | `GET /settings` (+ forward `window.location.search` for URL overrides) |
+| Live settings sync | `GET /events` (SSE) |
+| Photo list | `POST /slideshow/query` (JSON body, not GET) |
+| Persist settings | `PATCH /settings/{query\|playback\|configuration}` |
+| Clear settings | `DELETE /settings` or `DELETE /settings/{domain}` |
+| Media | `GET /assets/:id/thumbnail`, `GET /assets/:id/video` |
+
+### Settings domains
+
+`AppSettings` has exactly three keys: `query`, `playback`, `configuration`. Presentation toggles (theme, HUD visibility) live client-side in `usePresentationSettings` (`localStorage`).
+
+**Precedence (server-side):** `FALLBACK_APP_SETTINGS` → `DEFAULT_*` env → persisted JSON (`DATA_DIR/settings.{domain}.json`) → URL bracket notation (session-only, not SSE-broadcast).
+
+**Web fetchers:** `fetchSettings`, `patchQuerySettings`, `patchPlaybackSettings`, `patchConfigurationSettings`, `clear*Settings` in `apps/web/src/api/settings.ts`.
+
+**Web hooks:** `useSettingsData()` returns `updateQuerySettings`, `updatePlaybackSettings`, `updateConfigurationSettings`, `clearSettings`. `usePresentationSettings()` manages client-only presentation state.
+
+### SSE events
+
+Domain-scoped events on `GET /events`: `query_updated`, `playback_updated`, `configuration_updated`, `settings_cleared`.
+
+`useSyncEvents` invalidates TanStack Query caches — do not poll settings.
+
+### Canonical TanStack Query keys
+
+| Data | Query key |
+|------|-----------|
+| Settings | `['settings', search]` — `staleTime: Infinity` |
+| Slideshow photos | `['slideshow-photos', queryBody]` where `queryBody = { ...settings.query, seed }` |
+| Albums / people / locations | `['albums']`, `['people']`, `['locations']` |
+| Weather | `['weather', lat, lng]` |
+
+After query settings change: invalidate `['slideshow-photos']`. After configuration settings change: invalidate `['weather']`.
+
+### Slideshow query body
+
+```typescript
+const queryBody = { ...settings.query, seed: getSlideshowSeed() };
+await querySlideshow(queryBody); // POST /slideshow/query
+```
+
+Server returns full ordered list; client manages playback index locally.
+
+---
+
+## Web App Patterns
+
+### Feature-first layout
+
+```
+apps/web/src/features/[feature]/
+├── components/    # Presentational UI only
+├── hooks/         # Business logic (facade + sub-hooks)
+├── types.ts       # Re-exports from @slides/api-contract when needed
+└── index.ts       # Public API
+```
+
+Cross-feature fetchers live in `apps/web/src/api/` — not in feature `repos/` folders.
+
+Shared UI: `apps/web/src/components/`. UI-only context: `apps/web/src/context/`.
 
 ### Components
-- ✅ Presentational only (UI + user interactions)
-- ✅ Call **one facade hook** for business logic
-- ❌ Never contain business logic
-- ❌ Never call services directly
-- ❌ Never import DTOs
+
+- Presentational only — UI + user interactions
+- Call **one** facade hook for business logic
+- Never call `apps/web/src/api/*` directly from components
+- Never import Immich DTOs or put filtering/settings logic in JSX
 
 ```tsx
 // ✅ GOOD
@@ -50,10 +169,11 @@ export const Slideshow = () => {
 };
 ```
 
-### Hooks
-- **Facade pattern**: One public hook orchestrates multiple sub-hooks
-- **Return grouping**: `{ state, actions, debug? }`
-- **Explicit types**: Define `Use[Name]Return` interfaces
+### Hooks (facade pattern)
+
+One public hook per screen orchestrates sub-hooks. Return `{ state, actions, debug? }` with explicit `Use[Name]Return` type.
+
+Reference: `apps/web/src/features/slideshow/hooks/useSlideshow.ts`, `apps/web/src/features/settings/hooks/useSettingsData.ts`.
 
 ```typescript
 export function useSlideshow(): UseSlideshowReturn {
@@ -69,31 +189,42 @@ export function useSlideshow(): UseSlideshowReturn {
 ```
 
 ### API fetchers (`apps/web/src/api/`)
+
 - **Production fetchers** only perform `fetch` via `api/http.ts` — no `VITE_USE_MOCK` branches
 - **Demo builds** (`npm run build:demo`): `main.tsx` installs `setupMockFetch()` which intercepts `/api/v1/*` at the network layer
 - Immich DTO → contract mapping happens **server-side** in `apps/server/src/domain` and services
 
 ```typescript
 // ✅ GOOD: thin fetcher + hook (slideshow is the primary data path)
-export async function fetchSlideshow(search: string, seed?: string): Promise<SlideshowData> {
-    const data = await apiGet<SlideshowResponse>(/* /slideshow + search + seed */);
+export async function querySlideshow(body: SlideshowQueryRequest): Promise<SlideshowData> {
+    const data = await apiPost<SlideshowResponse>('/slideshow/query', body);
     return { total: data.total, photos: data.photos.map(revivePhoto) };
 }
 
 // useSlideshowData.ts
+const queryBody = { ...settings.query, seed: getSlideshowSeed() };
 const { data } = useQuery({
-    queryKey: ['slideshow', search, seed],
-    queryFn: () => fetchSlideshow(search, seed),
+    queryKey: ['slideshow-photos', queryBody],
+    queryFn: () => querySlideshow(queryBody),
 });
 ```
+
+### Data hooks
+
+- Use TanStack Query with fetchers from `apps/web/src/api/`
+- `useSettingsData` — boot fetch settings once; per-domain mutations
+- `useSlideshowData` — `querySlideshow` with `['slideshow-photos', queryBody]`
+- `useSyncEvents` — SSE invalidation (mounted in `App.tsx`)
+
+### Demo mode
+
+`VITE_USE_MOCK=true` installs `setupMockFetch()` in `main.tsx`. Extend `apps/web/src/mocks/handlers.ts` — never add mock branches to production fetchers.
 
 ---
 
 ## Theming (Tailwind CSS)
 
-### Semantic Variables (Always Use)
-
-Theme-aware variables defined in CSS, switched via `data-theme` attribute:
+Theme applied via `data-theme` attribute. Semantic Tailwind variables — never hardcoded colors in UI chrome.
 
 | Use Case | Class | Notes |
 |----------|-------|-------|
@@ -106,9 +237,7 @@ Theme-aware variables defined in CSS, switched via `data-theme` attribute:
 ```tsx
 // ✅ GOOD: Theme-aware
 <div className="bg-surface border border-border text-text-primary">
-    <button className="bg-primary-500 hover:bg-primary-600 text-white">
-        Save
-    </button>
+    <button className="bg-primary-500 hover:bg-primary-600 text-white">Save</button>
 </div>
 
 // ❌ BAD: Hardcoded colors (won't adapt)
@@ -119,11 +248,9 @@ Theme-aware variables defined in CSS, switched via `data-theme` attribute:
 
 **Exception**: Overlays on photos can use `text-white`, `bg-black/20` (always on dark media).
 
-### Theme Hook
-
 ```typescript
 const { mode, setMode } = useTheme();
-// Persists via settings, applies via data-theme attribute
+// Persists via usePresentationSettings (localStorage), applies via data-theme attribute
 ```
 
 ---
@@ -132,130 +259,70 @@ const { mode, setMode } = useTheme();
 
 1. **Local UI** → `useState` (transient: hover, focus)
 2. **Business logic** → Custom hooks
-3. **Server data** → TanStack Query
-4. **Global UI** → Context (settings, theme, controls)
+3. **Server data** → TanStack Query (`useSettingsData`, catalog, slideshow)
+4. **Global UI** → Context (visibility, idle) and `usePresentationSettings` (theme, HUD toggles)
 
 ```typescript
-// TanStack Query pattern
 const { data, isLoading } = useQuery({
     queryKey: ['albums'],
     queryFn: () => fetchAlbums(),
 });
-
-// Context for cross-cutting UI state (visibility, idle) — not for API wiring
 ```
 
 ---
 
 ## Settings Architecture
 
-User overrides are persisted via `PATCH /api/v1/settings/{domain}` (files under `DATA_DIR/settings.{query,playback,configuration}.json`). Presentation toggles (theme, HUD visibility) persist client-side via `usePresentationSettings` (`localStorage`). Demo builds (`VITE_USE_MOCK=true`) intercept server settings endpoints and persist per-domain overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
+Server settings persist via `PATCH /api/v1/settings/{domain}` (files under `DATA_DIR/settings.{query,playback,configuration}.json`). Presentation toggles persist client-side via `usePresentationSettings` (`localStorage`). Demo builds intercept server settings endpoints and persist per-domain overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
 
-**Configuration:** `GET /api/v1/settings` returns effective flat `AppSettings` (defaults → persisted overrides → URL query params). Forward `window.location.search` for kiosk presets. `FALLBACK_APP_SETTINGS` is used only when that request fails. Live sync uses SSE; after a `settings` event the client invalidates `['settings', search]` so URL overrides are re-applied server-side.
+**Configuration:** `GET /api/v1/settings` returns effective nested `AppSettings` (defaults → persisted overrides → URL query params). Forward `window.location.search` for kiosk presets. `FALLBACK_APP_SETTINGS` is used only when that request fails. Live sync uses SSE; `useSyncEvents` invalidates `['settings', search]` on domain events.
 
-**Slideshow data:** `POST /api/v1/slideshow/query` with filter fields + `shuffle` + `seed` in the JSON body. The server is stateless (no kiosk session). Playback index and timers are client-only (keyboard/HUD on each kiosk).
+**Slideshow data:** `POST /api/v1/slideshow/query` with `settings.query` fields + `seed` in the JSON body. The server is stateless. Playback index and timers are client-only.
 
-### Adding a New Setting
+### Adding a new setting
 
-1. **Update the OpenAPI schema** in `packages/api-contract/openapi.yaml`, then run `npm run contract:gen`.
-
-2. **Add default value** in `apps/server/src/domain/defaultSettings.ts`:
+1. Add to correct domain schema in `openapi.yaml` → `contract:gen`
+2. Map `DEFAULT_*` in `apps/server/src/domain/defaultSettings.ts`
+3. Add fallback in `packages/shared/src/constants.ts` (`FALLBACK_APP_SETTINGS`)
+4. Document env var in `.env.example`
 
 ```typescript
+// defaultSettings.ts — nested under the correct domain
 export function buildDefaultSettings(): DomainAppSettings {
+    const fallback = FALLBACK_APP_SETTINGS;
     return {
-        // ... existing flat keys ...
-        myFeatureEnabled: parseBool(process.env.DEFAULT_MY_FEATURE_ENABLED, true),
-        myFeatureThreshold: parseNumber(process.env.DEFAULT_MY_FEATURE_THRESHOLD, 50),
+        playback: {
+            // ...existing keys...
+            myFeatureEnabled: parseBool(
+                process.env.DEFAULT_MY_FEATURE_ENABLED,
+                fallback.playback.myFeatureEnabled
+            ),
+        },
     };
 }
 ```
 
-3. **Add fallback value** in `packages/shared/src/constants.ts` (`FALLBACK_APP_SETTINGS`, used when server is unavailable):
+### Using and updating settings
 
 ```typescript
-export const FALLBACK_APP_SETTINGS: AppSettings = {
-    // ... existing fallbacks ...
-    myFeature: {
-        enabled: true,
-        threshold: 50,
-    },
-};
+// In hooks
+const { settings } = useSettingsData();
+const { myFeatureEnabled } = settings.playback;
+
+// Updating (pass only changed fields for the domain)
+const { updatePlaybackSettings } = useSettingsData();
+updatePlaybackSettings({ myFeatureEnabled: false });
 ```
 
-### Using Settings
+### Settings pattern rules
 
-**In hooks** (business logic):
-
-```typescript
-export function useMyFeature() {
-    const { settings } = useSettingsData();
-    const { enabled, threshold } = settings.myFeature;
-    
-    // Use settings in logic
-    if (!enabled) return { state: { disabled: true } };
-    
-    return { state: { threshold, result: calculate(threshold) } };
-}
-```
-
-**In components** (via facade hook):
-
-```typescript
-export const MyComponent = () => {
-    const { state } = useMyFeature(); // Settings accessed via facade
-    
-    if (state.disabled) return null;
-    return <div>Threshold: {state.threshold}</div>;
-};
-```
-
-**Updating settings** (pass only the override slice; do not spread full computed `settings`):
-
-```typescript
-const { updateSettings } = useSettingsData();
-
-updateSettings({
-    myFeature: { enabled: false, threshold: 75 },
-});
-```
-
-**Environment variables** (`.env.example`):
-
-```bash
-DEFAULT_MY_FEATURE_ENABLED=true
-DEFAULT_MY_FEATURE_THRESHOLD=50
-```
-
-**Docker deployment** (runtime configuration via environment variables):
-
-```bash
-docker run -e DEFAULT_MY_FEATURE_ENABLED=true \
-           -e DEFAULT_MY_FEATURE_THRESHOLD=50 \
-           slides
-```
-
-**Docker Compose**:
-
-```yaml
-services:
-  slides:
-    image: slides
-    environment:
-      - DEFAULT_MY_FEATURE_ENABLED=true
-      - DEFAULT_MY_FEATURE_THRESHOLD=50
-```
-
-### Settings Pattern Rules
-
-- ✅ Access via `useSettingsData()` hook
-- ✅ Define defaults in `apps/server/src/domain/defaultSettings.ts` using `process.env.DEFAULT_*` vars
-- ✅ Provide fallbacks in `@slides/shared/constants` (for server failures)
-- ✅ Settings are fetched from server at runtime (allows Docker env var configuration)
+- ✅ Access server settings via `useSettingsData()`; presentation toggles via `usePresentationSettings()`
+- ✅ Define defaults in `defaultSettings.ts` using `process.env.DEFAULT_*` vars
+- ✅ Provide fallbacks in `@slides/shared/constants`
 - ✅ Environment variables follow `DEFAULT_*` naming convention
 - ❌ Never hardcode defaults in components
-- ❌ Never access localStorage or environment variables directly
-- ❌ Don't use `VITE_*` prefix for settings (those are build-time only)
+- ❌ Never access localStorage for server settings
+- ❌ Don't use `VITE_*` prefix for settings (build-time only)
 
 ---
 
@@ -265,7 +332,7 @@ services:
 |------|---------|---------|
 | Component | PascalCase.tsx | `PhotoDisplay.tsx` |
 | Hook | use*.ts | `useSlideshow.ts` |
-| API fetcher | fetch*.ts in `api/` | `fetchSlideshow.ts` |
+| API fetcher | `api/*.ts` | `slideshow.ts` (`querySlideshow`) |
 | Types | types.ts | Feature-level `types.ts` |
 | Hook return | Use[Name]Return | `UseSlideshowReturn` |
 | Component props | [Name]Props | `PhotoDisplayProps` |
@@ -274,7 +341,8 @@ services:
 
 ## Quick Patterns
 
-### Keyboard Shortcuts
+### Keyboard shortcuts
+
 ```typescript
 export function useSlideshowKeyboard({ onNext, onPrevious }: Options) {
     useEffect(() => {
@@ -288,25 +356,13 @@ export function useSlideshowKeyboard({ onNext, onPrevious }: Options) {
 }
 ```
 
-### Slideshow data query
-```typescript
-const { data } = useQuery({
-    queryKey: ['slideshow', search, seed],
-    queryFn: () => fetchSlideshow(search, seed),
-});
-const photos = data?.photos ?? [];
-```
+### Settings mutation
 
-### Settings Mutation
 ```typescript
-const mutation = useMutation({
-    mutationFn: (s: DeepPartial<AppSettings>) => saveSettingsOverrides(s),
-    onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['settings-overrides'] });
-        queryClient.invalidateQueries({ queryKey: ['settings-resolved'] });
-        queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-    },
-});
+const { updateQuerySettings } = useSettingsData();
+updateQuerySettings({ shuffle: false });
+// useSettingsData invalidates ['slideshow-photos'] on query domain success
+// useSyncEvents also invalidates caches when SSE events arrive from other clients
 ```
 
 ---
@@ -318,6 +374,13 @@ const mutation = useMutation({
 - ❌ DTOs leaking into components
 - ❌ Hardcoded theme colors in UI chrome
 - ❌ `any` types (use interfaces)
+- ❌ Feature-level `repos/` or `services/` folders (use `apps/web/src/api/`)
+- ❌ `fetchSlideshow` via GET or `updateSettings` flat mutation
+- ❌ Parsing URL settings on the client (forward `window.location.search` to server)
+- ❌ Put Immich query building, settings merge, or URL override parsing in the web app
+- ❌ Poll settings (use SSE via `useSyncEvents`)
+- ❌ Use `GET /slideshow` or `PUT /settings` (use `POST /slideshow/query` and `PATCH /settings/{domain}`)
+- ❌ Add `VITE_USE_MOCK` branches in production fetchers (mock at network layer in `apps/web/src/mocks/`)
 
 ---
 
@@ -336,11 +399,11 @@ const mutation = useMutation({
 
 ## Notes for AI Agents
 
-- **Components = dumb presentational UI** calling facade hooks
-- **Hooks = orchestrate logic** via facade pattern; call `apps/web/src/api/*`, not server imports
-- **API fetchers = thin `/api/v1` clients** (Immich mapping is server-side only)
-- **Theming = semantic CSS variables** (`bg-surface`, not `bg-gray-100`)
-- **Types = `@slides/api-contract`** for wire shapes; explicit `Use*Return` for hooks
-- Look at `apps/web/src/features/slideshow/` and `apps/web/src/features/settings/hooks/useSettingsData.ts` for reference patterns
-
-**Demo build**: `VITE_USE_MOCK=true` enables `apps/web/src/mocks/setupMockFetch.ts` — extend handlers there, not production fetchers.
+- **This file** is the complete architecture and pattern reference for this repo
+- **Components** = dumb presentational UI calling facade hooks
+- **Hooks** = orchestrate logic via facade pattern; call `apps/web/src/api/*`, not server imports
+- **API fetchers** = thin `/api/v1` clients (Immich mapping is server-side only)
+- **Theming** = semantic CSS variables (`bg-surface`, not `bg-gray-100`)
+- **Types** = `@slides/api-contract` for wire shapes; explicit `Use*Return` for hooks
+- **Reference implementations:** `apps/web/src/features/slideshow/`, `apps/web/src/features/settings/hooks/useSettingsData.ts`
+- **Demo build:** `VITE_USE_MOCK=true` → extend `apps/web/src/mocks/handlers.ts`, not production fetchers
