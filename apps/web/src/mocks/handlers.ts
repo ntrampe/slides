@@ -1,6 +1,4 @@
-import type { AppSettings } from '@slides/api-contract';
-import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
-import { deepMerge, type DeepPartial } from '@slides/shared/utils/deepMerge';
+import type { DisplaySettings, PlaybackSettings, QuerySettings } from '@slides/api-contract';
 import {
     MOCK_ALBUMS,
     MOCK_LOCATION_HIERARCHY,
@@ -9,9 +7,10 @@ import {
 } from './fixtures/catalogFixtures.js';
 import { MOCK_SLIDESHOW_PHOTOS } from './fixtures/slideshowFixtures.js';
 import {
+    clearDomainOverrides,
     clearSettingsOverrides,
-    loadSettingsOverrides,
-    saveSettingsOverrides,
+    getEffectiveMockSettings,
+    saveDomainOverrides,
 } from './settingsStorage.js';
 
 const API_PREFIX = '/api/v1';
@@ -21,10 +20,6 @@ function jsonResponse(body: unknown, status = 200): Response {
         status,
         headers: { 'Content-Type': 'application/json' },
     });
-}
-
-function emptyResponse(status = 204): Response {
-    return new Response(null, { status });
 }
 
 function parseApiPath(url: string): { pathname: string; search: string } | null {
@@ -40,6 +35,53 @@ function parseApiPath(url: string): { pathname: string; search: string } | null 
     } catch {
         return null;
     }
+}
+
+type MockUrlOverrides = {
+    query?: Partial<QuerySettings>;
+    playback?: Partial<PlaybackSettings>;
+    display?: Partial<DisplaySettings>;
+};
+
+function parseBracketSearch(search: string): MockUrlOverrides {
+    const qs = search.startsWith('?') ? search.slice(1) : search;
+    if (!qs) return {};
+
+    const params = new URLSearchParams(qs);
+    const overrides: MockUrlOverrides = {};
+
+    for (const [key, raw] of params.entries()) {
+        const match = key.match(/^(query|playback|display)\[(\w+)\]$/);
+        if (!match) continue;
+
+        const domain = match[1] as keyof MockUrlOverrides;
+        const field = match[2];
+        const bucket: Record<string, unknown> = { ...(overrides[domain] as object) };
+
+        if (raw === 'true' || raw === 'false') {
+            bucket[field] = raw === 'true';
+        } else if (raw.includes(',')) {
+            bucket[field] = raw.split(',').map((s) => s.trim()).filter(Boolean);
+        } else if (!Number.isNaN(Number(raw)) && raw.trim() !== '') {
+            bucket[field] = Number(raw);
+        } else {
+            bucket[field] = raw;
+        }
+
+        overrides[domain] = bucket as MockUrlOverrides[typeof domain];
+    }
+
+    return overrides;
+}
+
+async function readJsonBody(
+    input: RequestInfo | URL,
+    init?: RequestInit
+): Promise<unknown> {
+    const body =
+        init?.body ?? (typeof input === 'object' && 'body' in input ? input.body : null);
+    const text = typeof body === 'string' ? body : body ? await new Response(body).text() : '{}';
+    return JSON.parse(text);
 }
 
 export async function handleMockFetch(
@@ -61,36 +103,56 @@ export async function handleMockFetch(
         return null;
     }
 
-    const { pathname } = api;
+    const { pathname, search } = api;
 
-    if (pathname === '/slideshow' && method === 'GET') {
+    if (pathname === '/slideshow/query' && method === 'POST') {
         return jsonResponse({
             photos: MOCK_SLIDESHOW_PHOTOS,
             total: MOCK_SLIDESHOW_PHOTOS.length,
         });
     }
 
-    if (pathname === '/settings/resolved' && method === 'GET') {
-        const saved = loadSettingsOverrides();
-        const settings = deepMerge(FALLBACK_APP_SETTINGS, saved ?? {});
-        return jsonResponse(settings);
-    }
-
     if (pathname === '/settings' && method === 'GET') {
-        const saved = loadSettingsOverrides();
-        return jsonResponse(saved ?? {});
-    }
-
-    if (pathname === '/settings' && method === 'PUT') {
-        const body = init?.body ?? (typeof input === 'object' && 'body' in input ? input.body : null);
-        const text = typeof body === 'string' ? body : body ? await new Response(body).text() : '{}';
-        saveSettingsOverrides(JSON.parse(text) as DeepPartial<AppSettings>);
-        return emptyResponse();
+        const urlOverrides = parseBracketSearch(search);
+        return jsonResponse(getEffectiveMockSettings(urlOverrides));
     }
 
     if (pathname === '/settings' && method === 'DELETE') {
         clearSettingsOverrides();
-        return emptyResponse();
+        return jsonResponse({ message: 'Settings overrides cleared' });
+    }
+
+    if (pathname === '/settings/query' && method === 'PATCH') {
+        const body = (await readJsonBody(input, init)) as QuerySettings;
+        saveDomainOverrides('query', body);
+        return jsonResponse(getEffectiveMockSettings());
+    }
+
+    if (pathname === '/settings/query' && method === 'DELETE') {
+        clearDomainOverrides('query');
+        return jsonResponse({ message: 'Query settings overrides cleared' });
+    }
+
+    if (pathname === '/settings/playback' && method === 'PATCH') {
+        const body = (await readJsonBody(input, init)) as PlaybackSettings;
+        saveDomainOverrides('playback', body);
+        return jsonResponse(getEffectiveMockSettings());
+    }
+
+    if (pathname === '/settings/playback' && method === 'DELETE') {
+        clearDomainOverrides('playback');
+        return jsonResponse({ message: 'Playback settings overrides cleared' });
+    }
+
+    if (pathname === '/settings/display' && method === 'PATCH') {
+        const body = (await readJsonBody(input, init)) as DisplaySettings;
+        saveDomainOverrides('display', body);
+        return jsonResponse(getEffectiveMockSettings());
+    }
+
+    if (pathname === '/settings/display' && method === 'DELETE') {
+        clearDomainOverrides('display');
+        return jsonResponse({ message: 'Display settings overrides cleared' });
     }
 
     if (pathname === '/albums' && method === 'GET') {
@@ -121,6 +183,10 @@ export async function handleMockFetch(
     }
 
     if (pathname === '/weather' && method === 'GET') {
+        const effective = getEffectiveMockSettings(parseBracketSearch(search));
+        if (!effective.display.showWeather) {
+            return jsonResponse({ error: { message: 'Weather is not enabled' } }, 404);
+        }
         return jsonResponse({ temp: 22, condition: 'sunny', city: 'Demo City' });
     }
 

@@ -57,11 +57,11 @@ export async function apiGet<T>(path: string): Promise<T> {
     return (await res.json()) as T;
 }
 
-export async function apiPut<T>(path: string, body: unknown): Promise<T | undefined> {
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
     let res: Response;
     try {
         res = await fetch(`${API_BASE}${path}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         });
@@ -72,7 +72,25 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T | undefi
         );
     }
     if (!res.ok) throw await parseErrorResponse(res);
-    if (res.status === 204) return undefined;
+    if (res.status === 204) return undefined as T;
+    return (await res.json()) as T;
+}
+
+export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+    let res: Response;
+    try {
+        res = await fetch(`${API_BASE}${path}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+    } catch {
+        throw new NetworkError(
+            'Unable to connect to the server. Check your network connection.',
+            'ECONNREFUSED'
+        );
+    }
+    if (!res.ok) throw await parseErrorResponse(res);
     return (await res.json()) as T;
 }
 
