@@ -2,6 +2,8 @@ import type { components } from './generated/openapi.js';
 
 export type { paths, operations } from './generated/openapi.js';
 export { schemas } from './generated/schemas.js';
+export { settingsUrlSchemas } from './settingsUrlSchemas.js';
+export type { UrlQueryOverrides } from './settingsUrlSchemas.js';
 
 export type Photo = components['schemas']['Photo'];
 /** @deprecated Use `Photo` — kept for client revival helpers during migration */

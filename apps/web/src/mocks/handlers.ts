@@ -1,4 +1,11 @@
-import type { DisplaySettings, PlaybackSettings, QuerySettings } from '@slides/api-contract';
+import {
+    settingsUrlSchemas,
+    type DisplaySettings,
+    type PlaybackSettings,
+    type QuerySettings,
+    type UrlQueryOverrides,
+} from '@slides/api-contract';
+import qs from 'qs';
 import {
     MOCK_ALBUMS,
     MOCK_LOCATION_HIERARCHY,
@@ -37,38 +44,38 @@ function parseApiPath(url: string): { pathname: string; search: string } | null 
     }
 }
 
-type MockUrlOverrides = {
-    query?: Partial<QuerySettings>;
-    playback?: Partial<PlaybackSettings>;
-    display?: Partial<DisplaySettings>;
-};
+const QS_PARSE_OPTIONS = { allowPrototypes: true, allowSparse: true } as const;
 
-function parseBracketSearch(search: string): MockUrlOverrides {
-    const qs = search.startsWith('?') ? search.slice(1) : search;
-    if (!qs) return {};
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
 
-    const params = new URLSearchParams(qs);
-    const overrides: MockUrlOverrides = {};
+function parseBracketSearch(search: string): UrlQueryOverrides {
+    const raw = search.startsWith('?') ? search.slice(1) : search;
+    if (!raw) return {};
 
-    for (const [key, raw] of params.entries()) {
-        const match = key.match(/^(query|playback|display)\[(\w+)\]$/);
-        if (!match) continue;
+    const parsed = qs.parse(raw, QS_PARSE_OPTIONS) as Record<string, unknown>;
+    const overrides: UrlQueryOverrides = {};
 
-        const domain = match[1] as keyof MockUrlOverrides;
-        const field = match[2];
-        const bucket: Record<string, unknown> = { ...(overrides[domain] as object) };
-
-        if (raw === 'true' || raw === 'false') {
-            bucket[field] = raw === 'true';
-        } else if (raw.includes(',')) {
-            bucket[field] = raw.split(',').map((s) => s.trim()).filter(Boolean);
-        } else if (!Number.isNaN(Number(raw)) && raw.trim() !== '') {
-            bucket[field] = Number(raw);
-        } else {
-            bucket[field] = raw;
+    if (isPlainObject(parsed.query)) {
+        const result = settingsUrlSchemas.query.safeParse(parsed.query);
+        if (result.success && Object.keys(result.data).length > 0) {
+            overrides.query = result.data;
         }
+    }
 
-        overrides[domain] = bucket as MockUrlOverrides[typeof domain];
+    if (isPlainObject(parsed.playback)) {
+        const result = settingsUrlSchemas.playback.safeParse(parsed.playback);
+        if (result.success && Object.keys(result.data).length > 0) {
+            overrides.playback = result.data;
+        }
+    }
+
+    if (isPlainObject(parsed.display)) {
+        const result = settingsUrlSchemas.display.safeParse(parsed.display);
+        if (result.success && Object.keys(result.data).length > 0) {
+            overrides.display = result.data;
+        }
     }
 
     return overrides;
