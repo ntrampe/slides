@@ -26,17 +26,10 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         livePhotoEnabled: false,
         livePhotoDelay: 1000,
     },
-    display: {
-        themeMode: 'dark',
-        showProgressBar: true,
-        showDebugStats: false,
-        supportEnabled: true,
-        photoMetadataEnabled: true,
+    configuration: {
         photoMetadataDateFormat: 'MMM dd, yyyy',
-        showClock: true,
         clockUse24HourFormat: false,
         clockDateFormat: 'MMM dd, yyyy',
-        showWeather: false,
         weatherLat: 51.5074,
         weatherLng: -0.1278,
     },

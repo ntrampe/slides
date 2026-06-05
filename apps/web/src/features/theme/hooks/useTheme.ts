@@ -1,26 +1,26 @@
 import { useEffect, useCallback } from 'react';
-import { useSettingsData } from '../../../features/settings/hooks/useSettingsData';
-import type { ThemeMode } from "../types";
+import { usePresentationSettings } from '../../settings';
+import type { ThemeMode } from '../types';
 import type { UseThemeReturn } from './types';
 
 /**
  * Main theme hook - uses Tailwind v4 CSS-based theming with data-theme attribute.
- * Delegates persistence to existing settings system.
+ * Delegates persistence to client-side presentation settings.
  */
 export function useTheme(): UseThemeReturn {
-    const { settings, updateDisplaySettings } = useSettingsData();
-    const mode = settings.display.themeMode;
+    const { presentation, updatePresentationSettings } = usePresentationSettings();
+    const mode = presentation.themeMode;
 
-    // Apply theme to DOM by setting data-theme attribute
-    // CSS handles the rest via :root[data-theme="light"] and :root[data-theme="dark"]
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', mode);
     }, [mode]);
 
-    // Set theme mode
-    const setMode = useCallback((newMode: ThemeMode) => {
-        updateDisplaySettings({ themeMode: newMode });
-    }, [updateDisplaySettings]);
+    const setMode = useCallback(
+        (newMode: ThemeMode) => {
+            updatePresentationSettings({ themeMode: newMode });
+        },
+        [updatePresentationSettings]
+    );
 
     return {
         mode,

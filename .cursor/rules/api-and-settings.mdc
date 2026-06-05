@@ -1,0 +1,71 @@
+---
+description: API contract, settings domains, endpoints, and TanStack Query keys
+globs: apps/web/src/api/**,apps/server/src/**,packages/api-contract/**
+alwaysApply: false
+---
+
+# API & Settings
+
+## Contract-first workflow
+
+1. Edit `packages/api-contract/openapi.yaml`
+2. Run `npm run contract:gen`
+3. Fix types in `apps/server` (mappers, validation) and `apps/web` (fetchers)
+4. Bump `info.version` and sync `packages/shared/src/apiVersions.ts` `SLIDES_CONTRACT_VERSION` on breaking changes
+
+Import wire types from `@slides/api-contract`. Server validates requests with generated Zod schemas.
+
+## Endpoints (current — not legacy)
+
+| Operation | Endpoint |
+|-----------|----------|
+| Contract version | `GET /meta` |
+| Effective settings | `GET /settings` (+ forward `window.location.search` for URL overrides) |
+| Live settings sync | `GET /events` (SSE) |
+| Photo list | `POST /slideshow/query` (JSON body, not GET) |
+| Persist settings | `PATCH /settings/{query\|playback\|configuration}` |
+| Clear settings | `DELETE /settings` or `DELETE /settings/{domain}` |
+| Media | `GET /assets/:id/thumbnail`, `GET /assets/:id/video` |
+
+## Settings domains
+
+`AppSettings` has exactly three keys: `query`, `playback`, `configuration`. Presentation toggles (theme, HUD visibility) live client-side in `usePresentationSettings` (`localStorage`).
+
+Precedence (server-side): `FALLBACK_APP_SETTINGS` → `DEFAULT_*` env → persisted JSON (`DATA_DIR/settings.{domain}.json`) → URL bracket notation (session-only, not SSE-broadcast).
+
+Web fetchers: `fetchSettings`, `patchQuerySettings`, `patchPlaybackSettings`, `patchConfigurationSettings`, `clear*Settings` in `apps/web/src/api/settings.ts`.
+
+Web hooks: `useSettingsData()` returns `updateQuerySettings`, `updatePlaybackSettings`, `updateConfigurationSettings`, `clearSettings`. `usePresentationSettings()` manages client-only presentation state.
+
+## SSE events
+
+Domain-scoped events on `GET /events`: `query_updated`, `playback_updated`, `configuration_updated`, `settings_cleared`.
+
+`useSyncEvents` invalidates TanStack Query caches — do not poll settings.
+
+## Canonical TanStack Query keys
+
+| Data | Query key |
+|------|-----------|
+| Settings | `['settings', search]` — `staleTime: Infinity` |
+| Slideshow photos | `['slideshow-photos', queryBody]` where `queryBody = { ...settings.query, seed }` |
+| Albums / people / locations | `['albums']`, `['people']`, `['locations']` |
+| Weather | `['weather', lat, lng]` |
+
+After query settings change: invalidate `['slideshow-photos']`. After configuration settings change: invalidate `['weather']`.
+
+## Slideshow query body
+
+```typescript
+const queryBody = { ...settings.query, seed: getSlideshowSeed() };
+await querySlideshow(queryBody); // POST /slideshow/query
+```
+
+Server returns full ordered list; client manages playback index locally.
+
+## Adding a setting
+
+1. Add to correct domain schema in `openapi.yaml` → `contract:gen`
+2. Map `DEFAULT_*` in `apps/server/src/domain/defaultSettings.ts`
+3. Add fallback in `packages/shared/src/constants.ts` (`FALLBACK_APP_SETTINGS`)
+4. Document env var in `.env.example`

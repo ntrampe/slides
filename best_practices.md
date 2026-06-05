@@ -149,7 +149,7 @@ const { data, isLoading } = useQuery({
 
 ## Settings Architecture
 
-User overrides are persisted via `PATCH /api/v1/settings/{domain}` (files under `DATA_DIR/settings.{query,playback,display}.json`). Demo builds (`VITE_USE_MOCK=true`) intercept those endpoints and persist per-domain overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
+User overrides are persisted via `PATCH /api/v1/settings/{domain}` (files under `DATA_DIR/settings.{query,playback,configuration}.json`). Presentation toggles (theme, HUD visibility) persist client-side via `usePresentationSettings` (`localStorage`). Demo builds (`VITE_USE_MOCK=true`) intercept server settings endpoints and persist per-domain overrides in `localStorage` via `apps/web/src/mocks/settingsStorage.ts`.
 
 **Configuration:** `GET /api/v1/settings` returns effective flat `AppSettings` (defaults → persisted overrides → URL query params). Forward `window.location.search` for kiosk presets. `FALLBACK_APP_SETTINGS` is used only when that request fails. Live sync uses SSE; after a `settings` event the client invalidates `['settings', search]` so URL overrides are re-applied server-side.
 

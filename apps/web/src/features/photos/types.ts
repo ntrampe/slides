@@ -10,7 +10,8 @@ export type {
     PhotoCameraInfo,
     PhotoExifSettings,
     SlideshowTransitionType,
-    ThemeMode,
 } from '@slides/api-contract';
+
+export type { ThemeMode } from '../theme/types';
 
 export type Photo = Omit<PhotoDto, 'createdAt'> & { createdAt: Date };

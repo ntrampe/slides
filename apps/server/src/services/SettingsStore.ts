@@ -1,6 +1,6 @@
 import type {
     DomainAppSettings,
-    DomainDisplaySettings,
+    DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
     SettingsDomain,
@@ -10,7 +10,7 @@ export interface SettingsStore {
     getAllDomainOverrides(): Promise<{
         query: DomainQuerySettings | null;
         playback: DomainPlaybackSettings | null;
-        display: DomainDisplaySettings | null;
+        configuration: DomainConfigurationSettings | null;
     }>;
     setDomainOverrides(
         domain: SettingsDomain,

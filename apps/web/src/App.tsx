@@ -1,6 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Slideshow } from './features/slideshow';
-import { SettingsPanel, useSettingsPanel, useSyncEvents } from './features/settings';
+import {
+  PresentationSettingsProvider,
+  SettingsPanel,
+  useSettingsPanel,
+  useSyncEvents,
+} from './features/settings';
 import { useTheme } from './features/theme';
 import { IdleProvider } from './context';
 import { VisibilityProvider } from './context/VisibilityContext';
@@ -42,11 +47,13 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <VisibilityProvider>
-        <IdleProvider>
-          <AppContent />
-        </IdleProvider>
-      </VisibilityProvider>
+      <PresentationSettingsProvider>
+        <VisibilityProvider>
+          <IdleProvider>
+            <AppContent />
+          </IdleProvider>
+        </VisibilityProvider>
+      </PresentationSettingsProvider>
     </QueryClientProvider>
   );
 }

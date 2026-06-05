@@ -1,14 +1,18 @@
-import type { DisplaySettings, PlaybackSettings, QuerySettings } from '@slides/api-contract';
+import type {
+    ConfigurationSettings,
+    PlaybackSettings,
+    QuerySettings,
+} from '@slides/api-contract';
 
 /** Server domain mirror of AppSettings from the API contract. */
 export interface DomainAppSettings {
     query: DomainQuerySettings;
     playback: DomainPlaybackSettings;
-    display: DomainDisplaySettings;
+    configuration: DomainConfigurationSettings;
 }
 
 export type DomainQuerySettings = QuerySettings;
 export type DomainPlaybackSettings = PlaybackSettings;
-export type DomainDisplaySettings = DisplaySettings;
+export type DomainConfigurationSettings = ConfigurationSettings;
 
-export type SettingsDomain = 'query' | 'playback' | 'display';
+export type SettingsDomain = 'query' | 'playback' | 'configuration';

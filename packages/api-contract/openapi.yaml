@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
   title: Slides API
-  version: "1"
+  version: "2"
   description: |
     Sync-and-play slideshow API. The server is the source of truth for **configuration
-    rules** (`AppSettings` grouped by `query`, `playback`, `display`) and a **real-time
+    rules** (`AppSettings` grouped by `query`, `playback`, `configuration`) and a **real-time
     broker** (SSE) for domain-scoped settings updates. The server does not track playback
     state (timers, indices).
 
@@ -71,7 +71,7 @@ paths:
       description: |
         Returns the fully effective configuration: `DEFAULT_*` env defaults
         shallow-merged with persisted per-domain overrides (`settings.query.json`,
-        `settings.playback.json`, `settings.display.json`), then optional URL query
+        `settings.playback.json`, `settings.configuration.json`), then optional URL query
         overrides using bracket notation (e.g. `?query[shuffle]=false&playback[intervalMs]=5000`;
         array values use comma separation `query[albumIds]=id1,id2`). URL overrides are
         session-only and are not persisted. Ignored params: `seed`, `cursor`, `limit`.
@@ -196,20 +196,20 @@ paths:
                     type: string
                     example: Playback settings overrides cleared
 
-  /settings/display:
+  /settings/configuration:
     patch:
-      operationId: patchDisplaySettings
-      summary: Partially update display settings overrides
+      operationId: patchConfigurationSettings
+      summary: Partially update configuration settings overrides
       description: |
-        Shallow-merges the partial `DisplaySettingsUpdate` body with existing persisted
-        display overrides in `settings.display.json` and returns the full effective
-        `AppSettings`. Broadcasts `display_updated` on SSE.
+        Shallow-merges the partial `ConfigurationSettingsUpdate` body with existing persisted
+        configuration overrides in `settings.configuration.json` and returns the full effective
+        `AppSettings`. Broadcasts `configuration_updated` on SSE.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DisplaySettingsUpdate'
+              $ref: '#/components/schemas/ConfigurationSettingsUpdate'
       responses:
         '200':
           description: Effective settings after update
@@ -221,14 +221,14 @@ paths:
           $ref: '#/components/responses/ClientError'
 
     delete:
-      operationId: deleteDisplaySettings
-      summary: Clear display settings overrides
+      operationId: deleteConfigurationSettings
+      summary: Clear configuration settings overrides
       description: |
-        Removes display overrides, reverting display domain to env defaults.
-        Broadcasts `display_updated` on SSE.
+        Removes configuration overrides, reverting configuration domain to env defaults.
+        Broadcasts `configuration_updated` on SSE.
       responses:
         '200':
-          description: Display overrides cleared
+          description: Configuration overrides cleared
           content:
             application/json:
               schema:
@@ -236,7 +236,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Display settings overrides cleared
+                    example: Configuration settings overrides cleared
 
   /events:
     get:
@@ -248,7 +248,7 @@ paths:
 
         - `event: query_updated` — `data` is JSON `QuerySettings` (persisted query domain).
         - `event: playback_updated` — `data` is JSON `PlaybackSettings`.
-        - `event: display_updated` — `data` is JSON `DisplaySettings`.
+        - `event: configuration_updated` — `data` is JSON `ConfigurationSettings`.
         - `event: settings_cleared` — `data` is JSON `AppSettings` (resolved env defaults).
 
         Comment heartbeats (`: ping`) are sent periodically to keep connections alive.
@@ -377,10 +377,9 @@ paths:
       operationId: getWeather
       summary: Current weather
       description: |
-        Returns current weather for `display.weatherLat` / `display.weatherLng` from
+        Returns current weather for `configuration.weatherLat` / `configuration.weatherLng` from
         effective settings. Supports bracket-notation URL overrides (e.g.
-        `?display[weatherLat]=51.5`). Returns `404` when `display.showWeather` is false.
-        Returns `503` when `OWM_KEY` is unset.
+        `?configuration[weatherLat]=51.5`). Returns `503` when `OWM_KEY` is unset.
       responses:
         '200':
           description: Current weather
@@ -567,14 +566,14 @@ components:
 
     AppSettings:
       type: object
-      required: [query, playback, display]
+      required: [query, playback, configuration]
       properties:
         query:
           $ref: '#/components/schemas/QuerySettings'
         playback:
           $ref: '#/components/schemas/PlaybackSettings'
-        display:
-          $ref: '#/components/schemas/DisplaySettings'
+        configuration:
+          $ref: '#/components/schemas/ConfigurationSettings'
 
     QuerySettings:
       type: object
@@ -663,43 +662,21 @@ components:
         livePhotoDelay:
           type: number
 
-    DisplaySettings:
+    ConfigurationSettings:
       type: object
       required:
-        - themeMode
-        - showProgressBar
-        - showDebugStats
-        - supportEnabled
-        - photoMetadataEnabled
         - photoMetadataDateFormat
-        - showClock
         - clockUse24HourFormat
         - clockDateFormat
-        - showWeather
         - weatherLat
         - weatherLng
       properties:
-        themeMode:
-          type: string
-          enum: [light, dark]
-        showProgressBar:
-          type: boolean
-        showDebugStats:
-          type: boolean
-        supportEnabled:
-          type: boolean
-        photoMetadataEnabled:
-          type: boolean
         photoMetadataDateFormat:
           type: string
-        showClock:
-          type: boolean
         clockUse24HourFormat:
           type: boolean
         clockDateFormat:
           type: string
-        showWeather:
-          type: boolean
         weatherLat:
           type: number
           format: double
@@ -773,30 +750,15 @@ components:
         livePhotoDelay:
           type: number
 
-    DisplaySettingsUpdate:
+    ConfigurationSettingsUpdate:
       type: object
       properties:
-        themeMode:
-          type: string
-          enum: [light, dark]
-        showProgressBar:
-          type: boolean
-        showDebugStats:
-          type: boolean
-        supportEnabled:
-          type: boolean
-        photoMetadataEnabled:
-          type: boolean
         photoMetadataDateFormat:
           type: string
-        showClock:
-          type: boolean
         clockUse24HourFormat:
           type: boolean
         clockDateFormat:
           type: string
-        showWeather:
-          type: boolean
         weatherLat:
           type: number
           format: double

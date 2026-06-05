@@ -1,6 +1,6 @@
 import type {
     AppSettings,
-    DisplaySettings,
+    ConfigurationSettings,
     PlaybackSettings,
     QuerySettings,
 } from '@slides/api-contract';
@@ -8,7 +8,7 @@ import type {
 export type DomainEvent =
     | { type: 'query_updated'; data: QuerySettings }
     | { type: 'playback_updated'; data: PlaybackSettings }
-    | { type: 'display_updated'; data: DisplaySettings }
+    | { type: 'configuration_updated'; data: ConfigurationSettings }
     | { type: 'settings_cleared'; data: AppSettings };
 
 type EventSubscriber = (event: DomainEvent) => void;
@@ -31,8 +31,8 @@ export class EventsHub {
         this.emit({ type: 'playback_updated', data: playback });
     }
 
-    broadcastDisplayUpdated(display: DisplaySettings): void {
-        this.emit({ type: 'display_updated', data: display });
+    broadcastConfigurationUpdated(configuration: ConfigurationSettings): void {
+        this.emit({ type: 'configuration_updated', data: configuration });
     }
 
     broadcastSettingsCleared(defaults: AppSettings): void {

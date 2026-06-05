@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { usePresentationSettings } from '../../settings';
 import { useIdle } from '../../../hooks';
 import { useSlideshowData } from './useSlideshowData';
 import { useSlideshowTimer } from './useSlideshowTimer';
@@ -10,6 +11,7 @@ import type { Photo } from '../../photos';
 
 export function useSlideshow(): UseSlideshowReturn {
     const { settings } = useSettingsData();
+    const { presentation } = usePresentationSettings();
     const { isIdle } = useIdle();
 
     const data = useSlideshowData({
@@ -110,7 +112,7 @@ export function useSlideshow(): UseSlideshowReturn {
             togglePlayPause: timer.togglePlayPause,
             refetch: data.refetch,
         },
-        debug: settings.display.showDebugStats
+        debug: presentation.showDebugStats
             ? {
                   currentIndex: data.currentIndex,
                   count: data.count,

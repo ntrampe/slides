@@ -3,7 +3,7 @@ import type { AppSettings } from '@slides/api-contract';
 type DomainOverrides = {
     query?: Partial<AppSettings['query']>;
     playback?: Partial<AppSettings['playback']>;
-    display?: Partial<AppSettings['display']>;
+    configuration?: Partial<AppSettings['configuration']>;
 };
 
 /**
@@ -17,6 +17,10 @@ export function mergeEffectiveSettings(
     return {
         query: { ...defaults.query, ...persisted.query, ...urlOverrides.query },
         playback: { ...defaults.playback, ...persisted.playback, ...urlOverrides.playback },
-        display: { ...defaults.display, ...persisted.display, ...urlOverrides.display },
+        configuration: {
+            ...defaults.configuration,
+            ...persisted.configuration,
+            ...urlOverrides.configuration,
+        },
     };
 }

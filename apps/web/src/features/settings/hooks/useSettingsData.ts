@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type {
     AppSettings,
-    DisplaySettings,
+    ConfigurationSettings,
     PlaybackSettings,
     QuerySettings,
 } from '@slides/api-contract';
@@ -10,7 +10,7 @@ import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
 import {
     clearAllSettings,
     fetchSettings,
-    patchDisplaySettings,
+    patchConfigurationSettings,
     patchPlaybackSettings,
     patchQuerySettings,
 } from '../../../api/settings.js';
@@ -19,7 +19,7 @@ export interface UseSettingsDataReturn {
     settings: AppSettings;
     updateQuerySettings: (query: Partial<QuerySettings>) => void;
     updatePlaybackSettings: (playback: Partial<PlaybackSettings>) => void;
-    updateDisplaySettings: (display: Partial<DisplaySettings>) => void;
+    updateConfigurationSettings: (configuration: Partial<ConfigurationSettings>) => void;
     clearSettings: () => void;
 }
 
@@ -54,8 +54,9 @@ export function useSettingsData(): UseSettingsDataReturn {
         },
     });
 
-    const displayMutation = useMutation({
-        mutationFn: (display: Partial<DisplaySettings>) => patchDisplaySettings(display),
+    const configurationMutation = useMutation({
+        mutationFn: (configuration: Partial<ConfigurationSettings>) =>
+            patchConfigurationSettings(configuration),
         onSuccess: (effective) => {
             queryClient.setQueryData(['settings', search], effective);
             void queryClient.invalidateQueries({ queryKey: ['weather'] });
@@ -76,11 +77,11 @@ export function useSettingsData(): UseSettingsDataReturn {
         [playbackMutation]
     );
 
-    const updateDisplaySettings = useCallback(
-        (display: Partial<DisplaySettings>) => {
-            displayMutation.mutate(display);
+    const updateConfigurationSettings = useCallback(
+        (configuration: Partial<ConfigurationSettings>) => {
+            configurationMutation.mutate(configuration);
         },
-        [displayMutation]
+        [configurationMutation]
     );
 
     const clearMutation = useMutation({
@@ -101,7 +102,7 @@ export function useSettingsData(): UseSettingsDataReturn {
         settings,
         updateQuerySettings,
         updatePlaybackSettings,
-        updateDisplaySettings,
+        updateConfigurationSettings,
         clearSettings,
     };
 }

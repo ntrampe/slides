@@ -69,18 +69,11 @@ const playbackUrlSchema = z
     })
     .partial();
 
-const displayUrlSchema = z
+const configurationUrlSchema = z
     .object({
-        themeMode: z.enum(['light', 'dark']).optional(),
-        showProgressBar: urlBooleanSchema,
-        showDebugStats: urlBooleanSchema,
-        supportEnabled: urlBooleanSchema,
-        photoMetadataEnabled: urlBooleanSchema,
         photoMetadataDateFormat: z.string().optional(),
-        showClock: urlBooleanSchema,
         clockUse24HourFormat: urlBooleanSchema,
         clockDateFormat: z.string().optional(),
-        showWeather: urlBooleanSchema,
         weatherLat: z.coerce.number().optional(),
         weatherLng: z.coerce.number().optional(),
     })
@@ -89,11 +82,11 @@ const displayUrlSchema = z
 export type UrlQueryOverrides = {
     query?: Partial<components['schemas']['QuerySettings']>;
     playback?: Partial<components['schemas']['PlaybackSettings']>;
-    display?: Partial<components['schemas']['DisplaySettings']>;
+    configuration?: Partial<components['schemas']['ConfigurationSettings']>;
 };
 
 export const settingsUrlSchemas = {
     query: queryUrlSchema,
     playback: playbackUrlSchema,
-    display: displayUrlSchema,
+    configuration: configurationUrlSchema,
 } as const;

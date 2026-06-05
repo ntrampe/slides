@@ -1,6 +1,6 @@
 import type {
     DomainAppSettings,
-    DomainDisplaySettings,
+    DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
     SettingsDomain,
@@ -24,7 +24,7 @@ export class SettingsService {
     }
 
     async getEffective(reqQuery: Record<string, unknown> = {}): Promise<DomainAppSettings> {
-        const { query, playback, display } = await this.store.getAllDomainOverrides();
+        const { query, playback, configuration } = await this.store.getAllDomainOverrides();
         const urlOverrides = parseUrlQueryOverrides(reqQuery);
 
         return mergeEffectiveSettings(
@@ -32,7 +32,7 @@ export class SettingsService {
             {
                 ...(query ? { query } : {}),
                 ...(playback ? { playback } : {}),
-                ...(display ? { display } : {}),
+                ...(configuration ? { configuration } : {}),
             },
             urlOverrides
         );
@@ -52,10 +52,12 @@ export class SettingsService {
         return this.getEffective();
     }
 
-    async setDisplaySettings(update: Partial<DomainDisplaySettings>): Promise<DomainAppSettings> {
-        const { display } = await this.store.getAllDomainOverrides();
-        const mergedDisplay = { ...(display ?? {}), ...update };
-        await this.store.setDomainOverrides('display', mergedDisplay);
+    async setConfigurationSettings(
+        update: Partial<DomainConfigurationSettings>
+    ): Promise<DomainAppSettings> {
+        const { configuration } = await this.store.getAllDomainOverrides();
+        const mergedConfiguration = { ...(configuration ?? {}), ...update };
+        await this.store.setDomainOverrides('configuration', mergedConfiguration);
         return this.getEffective();
     }
 

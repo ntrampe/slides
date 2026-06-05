@@ -34,7 +34,7 @@ app.listen(config.PORT, () => {
     console.log(`  - POST   /api/v1/slideshow/query        -> stateless photo list`);
     console.log(`  - GET    /api/v1/albums | /people | /locations`);
     console.log(`  - GET    /api/v1/weather                -> OpenWeatherMap`);
-    console.log(`  - PATCH/DELETE /api/v1/settings/{query,playback,display}`);
+    console.log(`  - PATCH/DELETE /api/v1/settings/{query,playback,configuration}`);
     console.log(`  - GET    /api/v1/assets/:id/thumbnail | /video  -> ${config.IMMICH_URL}`);
     console.log(`=================================\n`);
 });

@@ -87,30 +87,21 @@ export function buildDefaultSettings(): DomainAppSettings {
                 fallback.playback.photoAnimationIntensity
             ),
         },
-        display: {
-            showProgressBar: parseBool(
-                process.env.DEFAULT_SHOW_PROGRESS_BAR,
-                fallback.display.showProgressBar
-            ),
-            photoMetadataEnabled: parseBool(
-                process.env.DEFAULT_SHOW_PHOTO_METADATA,
-                fallback.display.photoMetadataEnabled
-            ),
-            photoMetadataDateFormat: fallback.display.photoMetadataDateFormat,
-            showClock: parseBool(process.env.DEFAULT_SHOW_CLOCK, fallback.display.showClock),
+        configuration: {
+            photoMetadataDateFormat: fallback.configuration.photoMetadataDateFormat,
             clockUse24HourFormat: parseBool(
                 process.env.DEFAULT_24_HOUR_FORMAT,
-                fallback.display.clockUse24HourFormat
+                fallback.configuration.clockUse24HourFormat
             ),
-            clockDateFormat: fallback.display.clockDateFormat,
-            showWeather: parseBool(process.env.DEFAULT_SHOW_WEATHER, fallback.display.showWeather),
-            weatherLat: parseFloatEnv(process.env.DEFAULT_WEATHER_LAT, fallback.display.weatherLat),
-            weatherLng: parseFloatEnv(process.env.DEFAULT_WEATHER_LNG, fallback.display.weatherLng),
-            themeMode:
-                (process.env.DEFAULT_THEME as DomainAppSettings['display']['themeMode']) ||
-                fallback.display.themeMode,
-            showDebugStats: fallback.display.showDebugStats,
-            supportEnabled: fallback.display.supportEnabled,
+            clockDateFormat: fallback.configuration.clockDateFormat,
+            weatherLat: parseFloatEnv(
+                process.env.DEFAULT_WEATHER_LAT,
+                fallback.configuration.weatherLat
+            ),
+            weatherLng: parseFloatEnv(
+                process.env.DEFAULT_WEATHER_LNG,
+                fallback.configuration.weatherLng
+            ),
         },
     };
 }

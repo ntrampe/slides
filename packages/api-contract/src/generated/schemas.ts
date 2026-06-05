@@ -104,18 +104,11 @@ const PlaybackSettings = z
     livePhotoDelay: z.number(),
   })
   .passthrough();
-const DisplaySettings = z
+const ConfigurationSettings = z
   .object({
-    themeMode: z.enum(["light", "dark"]),
-    showProgressBar: z.boolean(),
-    showDebugStats: z.boolean(),
-    supportEnabled: z.boolean(),
-    photoMetadataEnabled: z.boolean(),
     photoMetadataDateFormat: z.string(),
-    showClock: z.boolean(),
     clockUse24HourFormat: z.boolean(),
     clockDateFormat: z.string(),
-    showWeather: z.boolean(),
     weatherLat: z.number(),
     weatherLng: z.number(),
   })
@@ -124,7 +117,7 @@ const AppSettings = z
   .object({
     query: QuerySettings,
     playback: PlaybackSettings,
-    display: DisplaySettings,
+    configuration: ConfigurationSettings,
   })
   .passthrough();
 const QuerySettingsUpdate = z
@@ -167,18 +160,11 @@ const PlaybackSettingsUpdate = z
   })
   .partial()
   .passthrough();
-const DisplaySettingsUpdate = z
+const ConfigurationSettingsUpdate = z
   .object({
-    themeMode: z.enum(["light", "dark"]),
-    showProgressBar: z.boolean(),
-    showDebugStats: z.boolean(),
-    supportEnabled: z.boolean(),
-    photoMetadataEnabled: z.boolean(),
     photoMetadataDateFormat: z.string(),
-    showClock: z.boolean(),
     clockUse24HourFormat: z.boolean(),
     clockDateFormat: z.string(),
-    showWeather: z.boolean(),
     weatherLat: z.number(),
     weatherLng: z.number(),
   })
@@ -251,11 +237,11 @@ export const schemas = {
   SlideshowResponse,
   ErrorResponse,
   PlaybackSettings,
-  DisplaySettings,
+  ConfigurationSettings,
   AppSettings,
   QuerySettingsUpdate,
   PlaybackSettingsUpdate,
-  DisplaySettingsUpdate,
+  ConfigurationSettingsUpdate,
   Album,
   Person,
   LocationItem,
@@ -349,7 +335,7 @@ invalidation triggers and refetch via &#x60;GET /settings&#x60; (preserving URL 
 
 - &#x60;event: query_updated&#x60; — &#x60;data&#x60; is JSON &#x60;QuerySettings&#x60; (persisted query domain).
 - &#x60;event: playback_updated&#x60; — &#x60;data&#x60; is JSON &#x60;PlaybackSettings&#x60;.
-- &#x60;event: display_updated&#x60; — &#x60;data&#x60; is JSON &#x60;DisplaySettings&#x60;.
+- &#x60;event: configuration_updated&#x60; — &#x60;data&#x60; is JSON &#x60;ConfigurationSettings&#x60;.
 - &#x60;event: settings_cleared&#x60; — &#x60;data&#x60; is JSON &#x60;AppSettings&#x60; (resolved env defaults).
 
 Comment heartbeats (&#x60;: ping&#x60;) are sent periodically to keep connections alive.
@@ -461,7 +447,7 @@ built against. Bump OpenAPI &#x60;info.version&#x60; on breaking JSON changes.
     alias: "getSettings",
     description: `Returns the fully effective configuration: &#x60;DEFAULT_*&#x60; env defaults
 shallow-merged with persisted per-domain overrides (&#x60;settings.query.json&#x60;,
-&#x60;settings.playback.json&#x60;, &#x60;settings.display.json&#x60;), then optional URL query
+&#x60;settings.playback.json&#x60;, &#x60;settings.configuration.json&#x60;), then optional URL query
 overrides using bracket notation (e.g. &#x60;?query[shuffle]&#x3D;false&amp;playback[intervalMs]&#x3D;5000&#x60;;
 array values use comma separation &#x60;query[albumIds]&#x3D;id1,id2&#x60;). URL overrides are
 session-only and are not persisted. Ignored params: &#x60;seed&#x60;, &#x60;cursor&#x60;, &#x60;limit&#x60;.
@@ -495,18 +481,18 @@ Broadcasts &#x60;settings_cleared&#x60; on SSE.
   },
   {
     method: "patch",
-    path: "/settings/display",
-    alias: "patchDisplaySettings",
-    description: `Shallow-merges the partial &#x60;DisplaySettingsUpdate&#x60; body with existing persisted
-display overrides in &#x60;settings.display.json&#x60; and returns the full effective
-&#x60;AppSettings&#x60;. Broadcasts &#x60;display_updated&#x60; on SSE.
+    path: "/settings/configuration",
+    alias: "patchConfigurationSettings",
+    description: `Shallow-merges the partial &#x60;ConfigurationSettingsUpdate&#x60; body with existing persisted
+configuration overrides in &#x60;settings.configuration.json&#x60; and returns the full effective
+&#x60;AppSettings&#x60;. Broadcasts &#x60;configuration_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
         name: "body",
         type: "Body",
-        schema: DisplaySettingsUpdate,
+        schema: ConfigurationSettingsUpdate,
       },
     ],
     response: AppSettings,
@@ -520,10 +506,10 @@ display overrides in &#x60;settings.display.json&#x60; and returns the full effe
   },
   {
     method: "delete",
-    path: "/settings/display",
-    alias: "deleteDisplaySettings",
-    description: `Removes display overrides, reverting display domain to env defaults.
-Broadcasts &#x60;display_updated&#x60; on SSE.
+    path: "/settings/configuration",
+    alias: "deleteConfigurationSettings",
+    description: `Removes configuration overrides, reverting configuration domain to env defaults.
+Broadcasts &#x60;configuration_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     response: z.object({ message: z.string() }).partial().passthrough(),
@@ -638,10 +624,9 @@ session or playback progress.
     method: "get",
     path: "/weather",
     alias: "getWeather",
-    description: `Returns current weather for &#x60;display.weatherLat&#x60; / &#x60;display.weatherLng&#x60; from
+    description: `Returns current weather for &#x60;configuration.weatherLat&#x60; / &#x60;configuration.weatherLng&#x60; from
 effective settings. Supports bracket-notation URL overrides (e.g.
-&#x60;?display[weatherLat]&#x3D;51.5&#x60;). Returns &#x60;404&#x60; when &#x60;display.showWeather&#x60; is false.
-Returns &#x60;503&#x60; when &#x60;OWM_KEY&#x60; is unset.
+&#x60;?configuration[weatherLat]&#x3D;51.5&#x60;). Returns &#x60;503&#x60; when &#x60;OWM_KEY&#x60; is unset.
 `,
     requestFormat: "json",
     response: WeatherData,

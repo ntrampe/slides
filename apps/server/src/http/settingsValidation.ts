@@ -1,6 +1,6 @@
 import { schemas } from '@slides/api-contract';
 import type {
-    DomainDisplaySettings,
+    DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
 } from '../domain/settings.js';
@@ -22,8 +22,10 @@ export function parsePlaybackSettings(body: unknown): Partial<DomainPlaybackSett
     return result.data;
 }
 
-export function parseDisplaySettings(body: unknown): Partial<DomainDisplaySettings> {
-    const result = schemas.DisplaySettingsUpdate.safeParse(body);
+export function parseConfigurationSettings(
+    body: unknown
+): Partial<DomainConfigurationSettings> {
+    const result = schemas.ConfigurationSettingsUpdate.safeParse(body);
     if (!result.success) {
         throw new ClientError(result.error.message, 400);
     }

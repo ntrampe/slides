@@ -1,6 +1,6 @@
 import {
     settingsUrlSchemas,
-    type DisplaySettings,
+    type ConfigurationSettings,
     type PlaybackSettings,
     type QuerySettings,
     type UrlQueryOverrides,
@@ -71,10 +71,10 @@ function parseBracketSearch(search: string): UrlQueryOverrides {
         }
     }
 
-    if (isPlainObject(parsed.display)) {
-        const result = settingsUrlSchemas.display.safeParse(parsed.display);
+    if (isPlainObject(parsed.configuration)) {
+        const result = settingsUrlSchemas.configuration.safeParse(parsed.configuration);
         if (result.success && Object.keys(result.data).length > 0) {
-            overrides.display = result.data;
+            overrides.configuration = result.data;
         }
     }
 
@@ -151,15 +151,15 @@ export async function handleMockFetch(
         return jsonResponse({ message: 'Playback settings overrides cleared' });
     }
 
-    if (pathname === '/settings/display' && method === 'PATCH') {
-        const body = (await readJsonBody(input, init)) as Partial<DisplaySettings>;
-        saveDomainOverrides('display', body);
+    if (pathname === '/settings/configuration' && method === 'PATCH') {
+        const body = (await readJsonBody(input, init)) as Partial<ConfigurationSettings>;
+        saveDomainOverrides('configuration', body);
         return jsonResponse(getEffectiveMockSettings());
     }
 
-    if (pathname === '/settings/display' && method === 'DELETE') {
-        clearDomainOverrides('display');
-        return jsonResponse({ message: 'Display settings overrides cleared' });
+    if (pathname === '/settings/configuration' && method === 'DELETE') {
+        clearDomainOverrides('configuration');
+        return jsonResponse({ message: 'Configuration settings overrides cleared' });
     }
 
     if (pathname === '/albums' && method === 'GET') {
@@ -190,10 +190,6 @@ export async function handleMockFetch(
     }
 
     if (pathname === '/weather' && method === 'GET') {
-        const effective = getEffectiveMockSettings(parseBracketSearch(search));
-        if (!effective.display.showWeather) {
-            return jsonResponse({ error: { message: 'Weather is not enabled' } }, 404);
-        }
         return jsonResponse({ temp: 22, condition: 'sunny', city: 'Demo City' });
     }
 

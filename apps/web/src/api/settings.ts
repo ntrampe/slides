@@ -1,6 +1,6 @@
 import type {
     AppSettings,
-    DisplaySettings,
+    ConfigurationSettings,
     PlaybackSettings,
     QuerySettings,
 } from '@slides/api-contract';
@@ -19,8 +19,10 @@ export async function patchPlaybackSettings(playback: Partial<PlaybackSettings>)
     return apiPatch<AppSettings>('/settings/playback', playback);
 }
 
-export async function patchDisplaySettings(display: Partial<DisplaySettings>): Promise<AppSettings> {
-    return apiPatch<AppSettings>('/settings/display', display);
+export async function patchConfigurationSettings(
+    configuration: Partial<ConfigurationSettings>
+): Promise<AppSettings> {
+    return apiPatch<AppSettings>('/settings/configuration', configuration);
 }
 
 export async function clearAllSettings(): Promise<void> {
@@ -35,6 +37,6 @@ export async function clearPlaybackSettings(): Promise<void> {
     await apiDelete('/settings/playback');
 }
 
-export async function clearDisplaySettings(): Promise<void> {
-    await apiDelete('/settings/display');
+export async function clearConfigurationSettings(): Promise<void> {
+    await apiDelete('/settings/configuration');
 }

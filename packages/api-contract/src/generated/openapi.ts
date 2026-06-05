@@ -59,7 +59,7 @@ export interface paths {
          * Effective configuration
          * @description Returns the fully effective configuration: `DEFAULT_*` env defaults
          *     shallow-merged with persisted per-domain overrides (`settings.query.json`,
-         *     `settings.playback.json`, `settings.display.json`), then optional URL query
+         *     `settings.playback.json`, `settings.configuration.json`), then optional URL query
          *     overrides using bracket notation (e.g. `?query[shuffle]=false&playback[intervalMs]=5000`;
          *     array values use comma separation `query[albumIds]=id1,id2`). URL overrides are
          *     session-only and are not persisted. Ignored params: `seed`, `cursor`, `limit`.
@@ -132,7 +132,7 @@ export interface paths {
         patch: operations["patchPlaybackSettings"];
         trace?: never;
     };
-    "/settings/display": {
+    "/settings/configuration": {
         parameters: {
             query?: never;
             header?: never;
@@ -143,20 +143,20 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Clear display settings overrides
-         * @description Removes display overrides, reverting display domain to env defaults.
-         *     Broadcasts `display_updated` on SSE.
+         * Clear configuration settings overrides
+         * @description Removes configuration overrides, reverting configuration domain to env defaults.
+         *     Broadcasts `configuration_updated` on SSE.
          */
-        delete: operations["deleteDisplaySettings"];
+        delete: operations["deleteConfigurationSettings"];
         options?: never;
         head?: never;
         /**
-         * Partially update display settings overrides
-         * @description Shallow-merges the partial `DisplaySettingsUpdate` body with existing persisted
-         *     display overrides in `settings.display.json` and returns the full effective
-         *     `AppSettings`. Broadcasts `display_updated` on SSE.
+         * Partially update configuration settings overrides
+         * @description Shallow-merges the partial `ConfigurationSettingsUpdate` body with existing persisted
+         *     configuration overrides in `settings.configuration.json` and returns the full effective
+         *     `AppSettings`. Broadcasts `configuration_updated` on SSE.
          */
-        patch: operations["patchDisplaySettings"];
+        patch: operations["patchConfigurationSettings"];
         trace?: never;
     };
     "/events": {
@@ -173,7 +173,7 @@ export interface paths {
          *
          *     - `event: query_updated` — `data` is JSON `QuerySettings` (persisted query domain).
          *     - `event: playback_updated` — `data` is JSON `PlaybackSettings`.
-         *     - `event: display_updated` — `data` is JSON `DisplaySettings`.
+         *     - `event: configuration_updated` — `data` is JSON `ConfigurationSettings`.
          *     - `event: settings_cleared` — `data` is JSON `AppSettings` (resolved env defaults).
          *
          *     Comment heartbeats (`: ping`) are sent periodically to keep connections alive.
@@ -294,10 +294,9 @@ export interface paths {
         };
         /**
          * Current weather
-         * @description Returns current weather for `display.weatherLat` / `display.weatherLng` from
+         * @description Returns current weather for `configuration.weatherLat` / `configuration.weatherLng` from
          *     effective settings. Supports bracket-notation URL overrides (e.g.
-         *     `?display[weatherLat]=51.5`). Returns `404` when `display.showWeather` is false.
-         *     Returns `503` when `OWM_KEY` is unset.
+         *     `?configuration[weatherLat]=51.5`). Returns `503` when `OWM_KEY` is unset.
          */
         get: operations["getWeather"];
         put?: never;
@@ -411,7 +410,7 @@ export interface components {
         AppSettings: {
             query: components["schemas"]["QuerySettings"];
             playback: components["schemas"]["PlaybackSettings"];
-            display: components["schemas"]["DisplaySettings"];
+            configuration: components["schemas"]["ConfigurationSettings"];
         };
         QuerySettings: {
             albumIds: string[];
@@ -447,18 +446,10 @@ export interface components {
             livePhotoEnabled: boolean;
             livePhotoDelay: number;
         };
-        DisplaySettings: {
-            /** @enum {string} */
-            themeMode: "light" | "dark";
-            showProgressBar: boolean;
-            showDebugStats: boolean;
-            supportEnabled: boolean;
-            photoMetadataEnabled: boolean;
+        ConfigurationSettings: {
             photoMetadataDateFormat: string;
-            showClock: boolean;
             clockUse24HourFormat: boolean;
             clockDateFormat: string;
-            showWeather: boolean;
             /** Format: double */
             weatherLat: number;
             /** Format: double */
@@ -498,18 +489,10 @@ export interface components {
             livePhotoEnabled?: boolean;
             livePhotoDelay?: number;
         };
-        DisplaySettingsUpdate: {
-            /** @enum {string} */
-            themeMode?: "light" | "dark";
-            showProgressBar?: boolean;
-            showDebugStats?: boolean;
-            supportEnabled?: boolean;
-            photoMetadataEnabled?: boolean;
+        ConfigurationSettingsUpdate: {
             photoMetadataDateFormat?: string;
-            showClock?: boolean;
             clockUse24HourFormat?: boolean;
             clockDateFormat?: string;
-            showWeather?: boolean;
             /** Format: double */
             weatherLat?: number;
             /** Format: double */
@@ -824,7 +807,7 @@ export interface operations {
             400: components["responses"]["ClientError"];
         };
     };
-    deleteDisplaySettings: {
+    deleteConfigurationSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -833,21 +816,21 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Display overrides cleared */
+            /** @description Configuration overrides cleared */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Display settings overrides cleared */
+                        /** @example Configuration settings overrides cleared */
                         message?: string;
                     };
                 };
             };
         };
     };
-    patchDisplaySettings: {
+    patchConfigurationSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -856,7 +839,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DisplaySettingsUpdate"];
+                "application/json": components["schemas"]["ConfigurationSettingsUpdate"];
             };
         };
         responses: {

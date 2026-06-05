@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useSettingsData } from "../hooks/useSettingsData";
+import { usePresentationSettings } from '../context/PresentationSettingsProvider';
 import { PeoplePicker } from "../../people/components/PeoplePicker";
 import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
@@ -33,14 +34,17 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
         settings,
         updateQuerySettings,
         updatePlaybackSettings,
-        updateDisplaySettings,
+        updateConfigurationSettings,
         clearSettings,
     } = useSettingsData();
-    const { query, playback, display } = settings;
+    const { presentation, updatePresentationSettings, resetPresentationSettings } =
+        usePresentationSettings();
+    const { query, playback, configuration } = settings;
 
     const handleReset = () => {
         if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
             clearSettings();
+            resetPresentationSettings();
         }
     };
 
@@ -161,9 +165,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.showProgressBar}
+                        checked={presentation.showProgressBar}
                         onChange={(e) =>
-                            updateDisplaySettings({ showProgressBar: e.target.checked })
+                            updatePresentationSettings({ showProgressBar: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -407,9 +411,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.photoMetadataEnabled}
+                        checked={presentation.photoMetadataEnabled}
                         onChange={(e) =>
-                            updateDisplaySettings({
+                            updatePresentationSettings({
                                 photoMetadataEnabled: e.target.checked,
                             })
                         }
@@ -422,9 +426,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Metadata Date Format</span>
                     <input
                         type="text"
-                        value={display.photoMetadataDateFormat}
+                        value={configuration.photoMetadataDateFormat}
                         onChange={(e) =>
-                            updateDisplaySettings({
+                            updateConfigurationSettings({
                                 photoMetadataDateFormat: e.target.value,
                             })
                         }
@@ -438,9 +442,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.showClock}
+                        checked={presentation.showClock}
                         onChange={(e) =>
-                            updateDisplaySettings({ showClock: e.target.checked })
+                            updatePresentationSettings({ showClock: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -450,9 +454,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.clockUse24HourFormat}
+                        checked={configuration.clockUse24HourFormat}
                         onChange={(e) =>
-                            updateDisplaySettings({
+                            updateConfigurationSettings({
                                 clockUse24HourFormat: e.target.checked,
                             })
                         }
@@ -465,9 +469,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Clock Date Format</span>
                     <input
                         type="text"
-                        value={display.clockDateFormat}
+                        value={configuration.clockDateFormat}
                         onChange={(e) =>
-                            updateDisplaySettings({ clockDateFormat: e.target.value })
+                            updateConfigurationSettings({ clockDateFormat: e.target.value })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     />
@@ -479,9 +483,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.showWeather}
+                        checked={presentation.showWeather}
                         onChange={(e) =>
-                            updateDisplaySettings({ showWeather: e.target.checked })
+                            updatePresentationSettings({ showWeather: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -495,9 +499,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         step="0.0001"
-                        value={display.weatherLat}
+                        value={configuration.weatherLat}
                         onChange={(e) =>
-                            updateDisplaySettings({
+                            updateConfigurationSettings({
                                 weatherLat: Number(e.target.value),
                             })
                         }
@@ -510,9 +514,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         step="0.0001"
-                        value={display.weatherLng}
+                        value={configuration.weatherLng}
                         onChange={(e) =>
-                            updateDisplaySettings({
+                            updateConfigurationSettings({
                                 weatherLng: Number(e.target.value),
                             })
                         }
@@ -526,9 +530,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={display.showDebugStats}
+                        checked={presentation.showDebugStats}
                         onChange={(e) =>
-                            updateDisplaySettings({ showDebugStats: e.target.checked })
+                            updatePresentationSettings({ showDebugStats: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -550,7 +554,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </div>
 
             {/* SUPPORT */}
-            {display.supportEnabled && (
+            {presentation.supportEnabled && (
                 <div className="mt-6 pt-24 border-t border-border/60">
                     <div className="text-center">
                         <p className="text-sm text-text-secondary mb-3">
@@ -563,7 +567,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         />
                         <button
                             onClick={() =>
-                                updateDisplaySettings({ supportEnabled: false })
+                                updatePresentationSettings({ supportEnabled: false })
                             }
                             className="mt-3 text-xs text-text-secondary hover:text-text-primary transition-colors underline"
                         >

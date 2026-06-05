@@ -1,6 +1,6 @@
 import type {
     AppSettings,
-    DisplaySettings,
+    ConfigurationSettings,
     PlaybackSettings,
     QuerySettings,
 } from '@slides/api-contract';
@@ -12,7 +12,7 @@ const STORAGE_KEY = 'slides:settings';
 export interface MockDomainOverrides {
     query?: QuerySettings;
     playback?: PlaybackSettings;
-    display?: DisplaySettings;
+    configuration?: ConfigurationSettings;
 }
 
 export function loadSettingsOverrides(): MockDomainOverrides | null {
@@ -54,7 +54,7 @@ export function getEffectiveMockSettings(
     urlOverrides: {
         query?: Partial<QuerySettings>;
         playback?: Partial<PlaybackSettings>;
-        display?: Partial<DisplaySettings>;
+        configuration?: Partial<ConfigurationSettings>;
     } = {}
 ): AppSettings {
     const saved = loadSettingsOverrides() ?? {};

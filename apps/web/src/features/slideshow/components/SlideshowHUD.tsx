@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { WeatherDisplay } from '../../weather';
 import { fetchWeather } from '../../../api/weather.js';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { usePresentationSettings } from '../../settings';
 import { HudButton, HudPanel, hudTextSizes } from '../../../components';
 
 interface SlideshowHUDProps {
@@ -31,15 +32,17 @@ export const SlideshowHUD = ({
     onToggleSettings,
 }: SlideshowHUDProps) => {
     const { settings } = useSettingsData();
+    const { presentation } = usePresentationSettings();
+    const { configuration } = settings;
 
     const { data: weather } = useQuery({
-        queryKey: ['weather', settings.display.weatherLat, settings.display.weatherLng],
+        queryKey: ['weather', configuration.weatherLat, configuration.weatherLng],
         queryFn: () => fetchWeather(),
         refetchInterval: 1000 * 60 * 15,
-        enabled: settings.display.showWeather,
+        enabled: presentation.showWeather,
     });
 
-    const timeFormat = settings.display.clockUse24HourFormat ? 'HH:mm' : 'h:mm a';
+    const timeFormat = configuration.clockUse24HourFormat ? 'HH:mm' : 'h:mm a';
     const now = new Date();
 
     const controlsOpacity = areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none';
@@ -49,20 +52,20 @@ export const SlideshowHUD = ({
             {/* Top Row */}
             <div className="absolute top-safe-or-4 left-safe-or-4 right-safe-or-4 sm:top-safe-or-6 sm:left-safe-or-6 sm:right-safe-or-6 flex justify-between items-start gap-4 flex-wrap">
                 {/* Top Left: Clock */}
-                {settings.display.showClock && (
+                {presentation.showClock && (
                     <HudPanel variant="subtle" className="pointer-events-auto">
                         <div className={`font-light ${hudTextSizes.display}`}>
                             {format(now, timeFormat)}
                         </div>
                         <div className={`font-light opacity-80 mt-1 sm:mt-2 ${hudTextSizes.heading}`}>
-                            {format(now, settings.display.clockDateFormat)}
+                            {format(now, configuration.clockDateFormat)}
                         </div>
                     </HudPanel>
                 )}
 
                 {/* Top Right: Weather + Settings */}
                 <div className="flex items-start gap-4">
-                    {settings.display.showWeather && weather && (
+                    {presentation.showWeather && weather && (
                         <div className="pointer-events-auto">
                             <WeatherDisplay {...weather} />
                         </div>
@@ -114,7 +117,7 @@ export const SlideshowHUD = ({
             )}
 
             {/* Bottom Edge: Progress Bar - with safe area support */}
-            {showPlaybackControls && settings.display.showProgressBar && (
+            {showPlaybackControls && presentation.showProgressBar && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 pointer-events-none">
                     <div
                         className="h-full bg-white transition-all duration-100 ease-linear"

@@ -1,6 +1,7 @@
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 import { useIdle } from '../../../hooks';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
+import { usePresentationSettings } from '../../settings';
 import type { Photo, PhotoScaleMode } from '../types';
 import { useState } from 'react';
 import { LivePhotoDisplay } from './LivePhotoDisplay';
@@ -17,6 +18,7 @@ export const MediaDisplay = ({
 }: MediaDisplayProps) => {
     const { isIdle } = useIdle();
     const { settings } = useSettingsData();
+    const { presentation } = usePresentationSettings();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const showLivePhoto = Boolean(photo.livePhotoVideoUrl) && settings.playback.livePhotoEnabled;
@@ -31,7 +33,7 @@ export const MediaDisplay = ({
             )}
 
             {/* Metadata Overlay */}
-            {settings.display.photoMetadataEnabled && (
+            {presentation.photoMetadataEnabled && (
                 <PhotoMetadataOverlay
                     photo={photo}
                     isExpanded={isExpanded}

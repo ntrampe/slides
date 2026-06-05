@@ -3,7 +3,7 @@ import type { SettingsService } from '../../../services/SettingsService.js';
 import type { EventsHub } from '../../../services/EventsHub.js';
 import { asyncHandler } from '../../middleware/asyncHandler.js';
 import {
-    parseDisplaySettings,
+    parseConfigurationSettings,
     parsePlaybackSettings,
     parseQuerySettings,
 } from '../../settingsValidation.js';
@@ -46,12 +46,12 @@ export function createSettingsRouter(
     );
 
     router.patch(
-        '/display',
+        '/configuration',
         asyncHandler(async (req, res) => {
-            const body = parseDisplaySettings(req.body);
-            const effective = await service.setDisplaySettings(body);
+            const body = parseConfigurationSettings(req.body);
+            const effective = await service.setConfigurationSettings(body);
             const dto = toAppSettingsDto(effective);
-            eventsHub.broadcastDisplayUpdated(dto.display);
+            eventsHub.broadcastConfigurationUpdated(dto.configuration);
             res.json(dto);
         })
     );
@@ -87,12 +87,12 @@ export function createSettingsRouter(
     );
 
     router.delete(
-        '/display',
+        '/configuration',
         asyncHandler(async (_req, res) => {
-            const effective = await service.clearDomainOverrides('display');
+            const effective = await service.clearDomainOverrides('configuration');
             const dto = toAppSettingsDto(effective);
-            eventsHub.broadcastDisplayUpdated(dto.display);
-            res.json({ message: 'Display settings overrides cleared' });
+            eventsHub.broadcastConfigurationUpdated(dto.configuration);
+            res.json({ message: 'Configuration settings overrides cleared' });
         })
     );
 

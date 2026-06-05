@@ -1,0 +1,78 @@
+---
+description: Thin-client, server-centric monorepo architecture and code placement
+alwaysApply: true
+---
+
+# Slides Architecture
+
+npm workspaces monorepo. The server is the source of truth; clients are thin playback/UI shells.
+
+## Layout
+
+```
+apps/web/src/
+├── api/                 # Thin fetchers → /api/v1 (no business logic)
+├── features/[feature]/  # components/, hooks/, types.ts, index.ts
+├── components/          # Shared UI (pickers, HUD chrome)
+├── context/             # UI-only context (idle, visibility)
+└── mocks/               # Demo-only fetch interceptor (VITE_USE_MOCK)
+
+apps/server/src/
+├── domain/              # Business rules (no HTTP)
+├── services/            # Application orchestration
+├── http/routes/v1/      # Express routes + validation
+├── http/mappers/        # Domain → contract DTOs
+└── infra/               # ImmichClient, LinkBuilder
+
+packages/api-contract/   # OpenAPI → generated types + Zod
+packages/shared/         # FALLBACK_APP_SETTINGS, errors, utilities
+```
+
+## Server owns
+
+- Immich integration and API key (never exposed to browser)
+- Photo filtering, exclusions, shuffle (`POST /slideshow/query`)
+- Settings merge: env defaults → persisted JSON → URL overrides
+- Asset proxying (`/assets/:id/thumbnail|video`)
+- Catalog (albums, people, locations), weather
+- SSE broadcast of settings changes (`GET /events`)
+
+## Client owns
+
+- Playback engine: index, timer, transitions, keyboard
+- Photo preloading ring buffer (`usePhotoPool`)
+- UI chrome: theme DOM (`data-theme`), idle/visibility, settings panel
+- Presentation settings: theme mode, HUD visibility toggles (`usePresentationSettings` → `localStorage`)
+- Stable shuffle `seed` (sent in slideshow query body; not a settings key)
+
+## Multi-client goal
+
+React web today; Flutter/mobile/kiosk later. All clients use the same `/api/v1` contract:
+
+`GET /meta` → `GET /settings` + `GET /events` → `POST /slideshow/query` → local timer/index.
+
+See `README.md` client profiles and `packages/api-contract/openapi.yaml`.
+
+## Where does new code go?
+
+| Change | Location |
+|--------|----------|
+| New API endpoint or JSON shape | `packages/api-contract/openapi.yaml` → `npm run contract:gen` |
+| Business rule / filter logic | `apps/server/src/domain/` |
+| Persistence, Immich calls, SSE | `apps/server/src/services/` |
+| HTTP route + validation | `apps/server/src/http/routes/v1/` |
+| Web fetcher | `apps/web/src/api/` |
+| TanStack Query hook | `apps/web/src/features/[feature]/hooks/` |
+| UI component | `apps/web/src/features/[feature]/components/` |
+| Shared UI widget | `apps/web/src/components/` |
+| Cross-app constant/fallback | `packages/shared/` |
+
+## Do not
+
+- Put Immich query building, settings merge, or URL override parsing in the web app
+- Add feature-level `repos/` or `services/` folders (use centralized `apps/web/src/api/`)
+- Poll settings (use SSE via `useSyncEvents`)
+- Use `GET /slideshow` or `PUT /settings` (use `POST /slideshow/query` and `PATCH /settings/{domain}`)
+- Add `VITE_USE_MOCK` branches in production fetchers (mock at network layer in `apps/web/src/mocks/`)
+
+Deeper patterns: `best_practices.md`.

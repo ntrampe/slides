@@ -9,7 +9,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 /**
  * Parse bracket-notation URL overrides from Express req.query.
  * Express extended parsing nests domains before this runs; only query,
- * playback, and display are validated. Reserved top-level params (seed,
+ * playback, and configuration are validated. Reserved top-level params (seed,
  * cursor, limit) are ignored.
  */
 export function parseUrlQueryOverrides(
@@ -31,10 +31,10 @@ export function parseUrlQueryOverrides(
         }
     }
 
-    if (isPlainObject(query.display)) {
-        const result = settingsUrlSchemas.display.safeParse(query.display);
+    if (isPlainObject(query.configuration)) {
+        const result = settingsUrlSchemas.configuration.safeParse(query.configuration);
         if (result.success && Object.keys(result.data).length > 0) {
-            overrides.display = result.data;
+            overrides.configuration = result.data;
         }
     }
 

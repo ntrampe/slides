@@ -59,7 +59,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
    docker-compose up -d
    ```
 
-   Overrides are written to `./data/settings.{query,playback,display}.json` (mounted to `/app/data` inside the container).
+   Overrides are written to `./data/settings.{query,playback,configuration}.json` (mounted to `/app/data` inside the container).
 
 5. **Open in browser**
    ```
@@ -82,7 +82,7 @@ The intuitive settings panel (press `S` or click ⚙️) lets you configure ever
 - Weather integration
 - UI customization (theme, overlays, progress bar)
 
-**All UI settings persist via targeted `PATCH /api/v1/settings/{query,playback,display}` endpoints** (full domain body required).
+**Server settings** persist via targeted `PATCH /api/v1/settings/{query,playback,configuration}` endpoints. **Presentation toggles** (theme, HUD visibility) persist per-browser in `localStorage`.
 Changes are pushed to all kiosks over **`GET /api/v1/events`** (domain-scoped SSE events); the web client no longer polls settings.
 
 > [!NOTE]
@@ -108,7 +108,7 @@ These options use the same slideshow filter settings as URL and environment conf
 Override settings per browser session via bracket-notation query parameters (not persisted, not broadcast on SSE):
 
 ```
-http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&display[themeMode]=dark&query[shuffle]=true
+http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&configuration[clockUse24HourFormat]=true&query[shuffle]=true
 ```
 
 **Examples:**
@@ -172,7 +172,7 @@ packages/api-contract/       # OpenAPI -> generated types + Zod schemas
 packages/shared/             # FALLBACK_APP_SETTINGS, errors, utilities
 ```
 
-**Server** owns Immich query building, domain-grouped configuration (`query`, `playback`, `display`), and SSE settings broadcast. It does **not** track playback index or timers.
+**Server** owns Immich query building, domain-grouped configuration (`query`, `playback`, `configuration`), and SSE settings broadcast. It does **not** track playback index or timers. Presentation preferences (theme, overlays) are client-local.
 
 **Client** fetches `GET /settings` once, subscribes to `GET /events`, runs a local playback engine (timer, index, transitions), and loads photos via `POST /slideshow/query`.
 

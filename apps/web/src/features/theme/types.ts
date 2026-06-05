@@ -1,1 +1,1 @@
-export type { ThemeMode } from '@slides/api-contract';
+export type ThemeMode = 'light' | 'dark';

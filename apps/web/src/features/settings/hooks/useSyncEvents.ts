@@ -27,7 +27,7 @@ export function useSyncEvents(): void {
             invalidateSettings();
         });
 
-        source.addEventListener('display_updated', () => {
+        source.addEventListener('configuration_updated', () => {
             invalidateSettings();
             void queryClient.invalidateQueries({ queryKey: ['weather'] });
         });

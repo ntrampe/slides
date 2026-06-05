@@ -2,7 +2,7 @@ import { mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type {
     DomainAppSettings,
-    DomainDisplaySettings,
+    DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
     SettingsDomain,
@@ -12,7 +12,7 @@ import type { SettingsStore } from './SettingsStore.js';
 const DOMAIN_FILES: Record<SettingsDomain, string> = {
     query: 'settings.query.json',
     playback: 'settings.playback.json',
-    display: 'settings.display.json',
+    configuration: 'settings.configuration.json',
 };
 
 export class FileSettingsStore implements SettingsStore {
@@ -23,15 +23,15 @@ export class FileSettingsStore implements SettingsStore {
     async getAllDomainOverrides(): Promise<{
         query: DomainQuerySettings | null;
         playback: DomainPlaybackSettings | null;
-        display: DomainDisplaySettings | null;
+        configuration: DomainConfigurationSettings | null;
     }> {
-        const [query, playback, display] = await Promise.all([
+        const [query, playback, configuration] = await Promise.all([
             this.readDomainFile<DomainQuerySettings>('query'),
             this.readDomainFile<DomainPlaybackSettings>('playback'),
-            this.readDomainFile<DomainDisplaySettings>('display'),
+            this.readDomainFile<DomainConfigurationSettings>('configuration'),
         ]);
 
-        return { query, playback, display };
+        return { query, playback, configuration };
     }
 
     async setDomainOverrides(
