@@ -36,7 +36,7 @@ export class FileSettingsStore implements SettingsStore {
 
     async setDomainOverrides(
         domain: SettingsDomain,
-        value: DomainAppSettings[SettingsDomain]
+        value: Partial<DomainAppSettings[SettingsDomain]>
     ): Promise<void> {
         return this.writeMutex.run(() => this.setDomainOverridesUnlocked(domain, value));
     }
@@ -51,7 +51,7 @@ export class FileSettingsStore implements SettingsStore {
 
     private async setDomainOverridesUnlocked(
         domain: SettingsDomain,
-        value: DomainAppSettings[SettingsDomain]
+        value: Partial<DomainAppSettings[SettingsDomain]>
     ): Promise<void> {
         const filePath = this.domainPath(domain);
         const tempPath = `${filePath}.tmp`;

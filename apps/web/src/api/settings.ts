@@ -11,15 +11,15 @@ export async function fetchSettings(search = ''): Promise<AppSettings> {
     return apiGet<AppSettings>(path);
 }
 
-export async function patchQuerySettings(query: QuerySettings): Promise<AppSettings> {
+export async function patchQuerySettings(query: Partial<QuerySettings>): Promise<AppSettings> {
     return apiPatch<AppSettings>('/settings/query', query);
 }
 
-export async function patchPlaybackSettings(playback: PlaybackSettings): Promise<AppSettings> {
+export async function patchPlaybackSettings(playback: Partial<PlaybackSettings>): Promise<AppSettings> {
     return apiPatch<AppSettings>('/settings/playback', playback);
 }
 
-export async function patchDisplaySettings(display: DisplaySettings): Promise<AppSettings> {
+export async function patchDisplaySettings(display: Partial<DisplaySettings>): Promise<AppSettings> {
     return apiPatch<AppSettings>('/settings/display', display);
 }
 

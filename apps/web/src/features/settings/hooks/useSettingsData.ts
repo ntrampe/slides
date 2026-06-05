@@ -17,9 +17,9 @@ import {
 
 export interface UseSettingsDataReturn {
     settings: AppSettings;
-    updateQuerySettings: (query: QuerySettings) => void;
-    updatePlaybackSettings: (playback: PlaybackSettings) => void;
-    updateDisplaySettings: (display: DisplaySettings) => void;
+    updateQuerySettings: (query: Partial<QuerySettings>) => void;
+    updatePlaybackSettings: (playback: Partial<PlaybackSettings>) => void;
+    updateDisplaySettings: (display: Partial<DisplaySettings>) => void;
     clearSettings: () => void;
 }
 
@@ -40,7 +40,7 @@ export function useSettingsData(): UseSettingsDataReturn {
     const settings = settingsQuery.data ?? FALLBACK_APP_SETTINGS;
 
     const queryMutation = useMutation({
-        mutationFn: (query: QuerySettings) => patchQuerySettings(query),
+        mutationFn: (query: Partial<QuerySettings>) => patchQuerySettings(query),
         onSuccess: (effective) => {
             queryClient.setQueryData(['settings', search], effective);
             void queryClient.invalidateQueries({ queryKey: ['slideshow-photos'] });
@@ -48,14 +48,14 @@ export function useSettingsData(): UseSettingsDataReturn {
     });
 
     const playbackMutation = useMutation({
-        mutationFn: (playback: PlaybackSettings) => patchPlaybackSettings(playback),
+        mutationFn: (playback: Partial<PlaybackSettings>) => patchPlaybackSettings(playback),
         onSuccess: (effective) => {
             queryClient.setQueryData(['settings', search], effective);
         },
     });
 
     const displayMutation = useMutation({
-        mutationFn: (display: DisplaySettings) => patchDisplaySettings(display),
+        mutationFn: (display: Partial<DisplaySettings>) => patchDisplaySettings(display),
         onSuccess: (effective) => {
             queryClient.setQueryData(['settings', search], effective);
             void queryClient.invalidateQueries({ queryKey: ['weather'] });
@@ -63,21 +63,21 @@ export function useSettingsData(): UseSettingsDataReturn {
     });
 
     const updateQuerySettings = useCallback(
-        (query: QuerySettings) => {
+        (query: Partial<QuerySettings>) => {
             queryMutation.mutate(query);
         },
         [queryMutation]
     );
 
     const updatePlaybackSettings = useCallback(
-        (playback: PlaybackSettings) => {
+        (playback: Partial<PlaybackSettings>) => {
             playbackMutation.mutate(playback);
         },
         [playbackMutation]
     );
 
     const updateDisplaySettings = useCallback(
-        (display: DisplaySettings) => {
+        (display: Partial<DisplaySettings>) => {
             displayMutation.mutate(display);
         },
         [displayMutation]

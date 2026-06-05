@@ -127,6 +127,63 @@ const AppSettings = z
     display: DisplaySettings,
   })
   .passthrough();
+const QuerySettingsUpdate = z
+  .object({
+    albumIds: z.array(z.string()),
+    albumOperator: FilterOperator,
+    personIds: z.array(z.string()),
+    personOperator: FilterOperator,
+    excludeAlbumIds: z.array(z.string()),
+    excludePersonIds: z.array(z.string()),
+    locationCountry: z.string(),
+    locationState: z.string(),
+    locationCity: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    globalOperator: FilterOperator,
+    shuffle: z.boolean(),
+  })
+  .partial()
+  .passthrough();
+const PlaybackSettingsUpdate = z
+  .object({
+    intervalMs: z.number().int(),
+    autoplay: z.boolean(),
+    layout: z.enum(["single", "split"]),
+    photoFit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),
+    transitionType: z.enum(["fade", "slide", "none"]),
+    transitionDuration: z.number(),
+    photoAnimationType: z.enum([
+      "none",
+      "zoom-in",
+      "zoom-out",
+      "pan",
+      "ken-burns",
+    ]),
+    photoAnimationDuration: z.number(),
+    photoAnimationIntensity: z.number(),
+    livePhotoEnabled: z.boolean(),
+    livePhotoDelay: z.number(),
+  })
+  .partial()
+  .passthrough();
+const DisplaySettingsUpdate = z
+  .object({
+    themeMode: z.enum(["light", "dark"]),
+    showProgressBar: z.boolean(),
+    showDebugStats: z.boolean(),
+    supportEnabled: z.boolean(),
+    photoMetadataEnabled: z.boolean(),
+    photoMetadataDateFormat: z.string(),
+    showClock: z.boolean(),
+    clockUse24HourFormat: z.boolean(),
+    clockDateFormat: z.string(),
+    showWeather: z.boolean(),
+    weatherLat: z.number(),
+    weatherLng: z.number(),
+  })
+  .partial()
+  .passthrough();
 const Album = z
   .object({
     id: z.string(),
@@ -196,6 +253,9 @@ export const schemas = {
   PlaybackSettings,
   DisplaySettings,
   AppSettings,
+  QuerySettingsUpdate,
+  PlaybackSettingsUpdate,
+  DisplaySettingsUpdate,
   Album,
   Person,
   LocationItem,
@@ -437,15 +497,16 @@ Broadcasts &#x60;settings_cleared&#x60; on SSE.
     method: "patch",
     path: "/settings/display",
     alias: "patchDisplaySettings",
-    description: `Persists the full &#x60;DisplaySettings&#x60; body to &#x60;settings.display.json&#x60; and returns
-the full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;display_updated&#x60; on SSE.
+    description: `Shallow-merges the partial &#x60;DisplaySettingsUpdate&#x60; body with existing persisted
+display overrides in &#x60;settings.display.json&#x60; and returns the full effective
+&#x60;AppSettings&#x60;. Broadcasts &#x60;display_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
         name: "body",
         type: "Body",
-        schema: DisplaySettings,
+        schema: DisplaySettingsUpdate,
       },
     ],
     response: AppSettings,
@@ -471,15 +532,16 @@ Broadcasts &#x60;display_updated&#x60; on SSE.
     method: "patch",
     path: "/settings/playback",
     alias: "patchPlaybackSettings",
-    description: `Persists the full &#x60;PlaybackSettings&#x60; body to &#x60;settings.playback.json&#x60; and returns
-the full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;playback_updated&#x60; on SSE.
+    description: `Shallow-merges the partial &#x60;PlaybackSettingsUpdate&#x60; body with existing persisted
+playback overrides in &#x60;settings.playback.json&#x60; and returns the full effective
+&#x60;AppSettings&#x60;. Broadcasts &#x60;playback_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
         name: "body",
         type: "Body",
-        schema: PlaybackSettings,
+        schema: PlaybackSettingsUpdate,
       },
     ],
     response: AppSettings,
@@ -505,15 +567,16 @@ Broadcasts &#x60;playback_updated&#x60; on SSE.
     method: "patch",
     path: "/settings/query",
     alias: "patchQuerySettings",
-    description: `Persists the full &#x60;QuerySettings&#x60; body to &#x60;settings.query.json&#x60; and returns the
-full effective &#x60;AppSettings&#x60;. Broadcasts &#x60;query_updated&#x60; on SSE.
+    description: `Shallow-merges the partial &#x60;QuerySettingsUpdate&#x60; body with existing persisted
+query overrides in &#x60;settings.query.json&#x60; and returns the full effective
+&#x60;AppSettings&#x60;. Broadcasts &#x60;query_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
       {
         name: "body",
         type: "Body",
-        schema: QuerySettings,
+        schema: QuerySettingsUpdate,
       },
     ],
     response: AppSettings,

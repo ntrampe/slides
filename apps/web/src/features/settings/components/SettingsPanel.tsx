@@ -73,7 +73,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <SlideshowFilterCombineControl
                         query={query}
                         onGlobalOperatorChange={(globalOperator) =>
-                            updateQuerySettings({ ...query, globalOperator })
+                            updateQuerySettings({ globalOperator })
                         }
                     />
                 </FilterCompartment>
@@ -85,10 +85,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         excludedIds={query.excludeAlbumIds}
                         operator={query.albumOperator ?? DEFAULT_FILTER_OPERATOR}
                         onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
-                            updateQuerySettings({ ...query, albumIds, excludeAlbumIds })
+                            updateQuerySettings({ albumIds, excludeAlbumIds })
                         }
                         onOperatorChange={(albumOperator) =>
-                            updateQuerySettings({ ...query, albumOperator })
+                            updateQuerySettings({ albumOperator })
                         }
                     />
                 </FilterCompartment>
@@ -99,10 +99,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         excludedIds={query.excludePersonIds}
                         operator={query.personOperator ?? DEFAULT_FILTER_OPERATOR}
                         onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
-                            updateQuerySettings({ ...query, personIds, excludePersonIds })
+                            updateQuerySettings({ personIds, excludePersonIds })
                         }
                         onOperatorChange={(personOperator) =>
-                            updateQuerySettings({ ...query, personOperator })
+                            updateQuerySettings({ personOperator })
                         }
                     />
                 </FilterCompartment>
@@ -116,7 +116,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         }}
                         onChange={(location) =>
                             updateQuerySettings({
-                                ...query,
                                 locationCountry: location.country,
                                 locationState: location.state,
                                 locationCity: location.city,
@@ -129,7 +128,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         startDate={query.startDate}
                         endDate={query.endDate}
                         onChange={(startDate, endDate) =>
-                            updateQuerySettings({ ...query, startDate, endDate })
+                            updateQuerySettings({ startDate, endDate })
                         }
                     />
                 </FilterCompartment>
@@ -141,7 +140,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="checkbox"
                         checked={query.shuffle}
-                        onChange={(e) => updateQuerySettings({ ...query, shuffle: e.target.checked })}
+                        onChange={(e) => updateQuerySettings({ shuffle: e.target.checked })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Shuffle</span>
@@ -152,7 +151,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={playback.autoplay}
                         onChange={(e) =>
-                            updatePlaybackSettings({ ...playback, autoplay: e.target.checked })
+                            updatePlaybackSettings({ autoplay: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -164,7 +163,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={display.showProgressBar}
                         onChange={(e) =>
-                            updateDisplaySettings({ ...display, showProgressBar: e.target.checked })
+                            updateDisplaySettings({ showProgressBar: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -187,7 +186,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={Math.min(300, Math.max(1, Math.round(playback.intervalMs / 1000)))}
                         onChange={(e) => {
                             updatePlaybackSettings({
-                                ...playback,
                                 intervalMs: Number(e.target.value) * 1000,
                             });
                         }}
@@ -204,7 +202,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={playback.transitionType}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 transitionType: e.target.value as 'fade' | 'slide' | 'none',
                             })
                         }
@@ -245,7 +242,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         )}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 transitionDuration: Number(e.target.value),
                             })
                         }
@@ -262,7 +258,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={playback.photoFit}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 photoFit: e.target.value as typeof playback.photoFit,
                             })
                         }
@@ -280,7 +275,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={playback.layout}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 layout: e.target.value as typeof playback.layout,
                             })
                         }
@@ -300,7 +294,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={playback.photoAnimationType}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 photoAnimationType: e.target.value as PhotoAnimationType,
                             })
                         }
@@ -331,7 +324,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 value={playback.photoAnimationIntensity}
                                 onChange={(e) =>
                                     updatePlaybackSettings({
-                                        ...playback,
                                         photoAnimationIntensity: Number(e.target.value),
                                     })
                                 }
@@ -348,7 +340,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 onChange={(e) => {
                                     if (e.target.checked) {
                                         updatePlaybackSettings({
-                                            ...playback,
                                             photoAnimationDuration: playback.intervalMs,
                                         });
                                     }
@@ -371,7 +362,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         checked={playback.livePhotoEnabled}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 livePhotoEnabled: e.target.checked,
                             })
                         }
@@ -402,7 +392,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         )}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                ...playback,
                                 livePhotoDelay: Number(e.target.value) * 1000,
                             })
                         }
@@ -420,7 +409,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         checked={display.photoMetadataEnabled}
                         onChange={(e) =>
                             updateDisplaySettings({
-                                ...display,
                                 photoMetadataEnabled: e.target.checked,
                             })
                         }
@@ -436,7 +424,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={display.photoMetadataDateFormat}
                         onChange={(e) =>
                             updateDisplaySettings({
-                                ...display,
                                 photoMetadataDateFormat: e.target.value,
                             })
                         }
@@ -452,7 +439,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={display.showClock}
                         onChange={(e) =>
-                            updateDisplaySettings({ ...display, showClock: e.target.checked })
+                            updateDisplaySettings({ showClock: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -465,7 +452,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         checked={display.clockUse24HourFormat}
                         onChange={(e) =>
                             updateDisplaySettings({
-                                ...display,
                                 clockUse24HourFormat: e.target.checked,
                             })
                         }
@@ -480,7 +466,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="text"
                         value={display.clockDateFormat}
                         onChange={(e) =>
-                            updateDisplaySettings({ ...display, clockDateFormat: e.target.value })
+                            updateDisplaySettings({ clockDateFormat: e.target.value })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     />
@@ -494,7 +480,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={display.showWeather}
                         onChange={(e) =>
-                            updateDisplaySettings({ ...display, showWeather: e.target.checked })
+                            updateDisplaySettings({ showWeather: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -511,7 +497,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={display.weatherLat}
                         onChange={(e) =>
                             updateDisplaySettings({
-                                ...display,
                                 weatherLat: Number(e.target.value),
                             })
                         }
@@ -527,7 +512,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         value={display.weatherLng}
                         onChange={(e) =>
                             updateDisplaySettings({
-                                ...display,
                                 weatherLng: Number(e.target.value),
                             })
                         }
@@ -543,7 +527,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         type="checkbox"
                         checked={display.showDebugStats}
                         onChange={(e) =>
-                            updateDisplaySettings({ ...display, showDebugStats: e.target.checked })
+                            updateDisplaySettings({ showDebugStats: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -578,7 +562,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         />
                         <button
                             onClick={() =>
-                                updateDisplaySettings({ ...display, supportEnabled: false })
+                                updateDisplaySettings({ supportEnabled: false })
                             }
                             className="mt-3 text-xs text-text-secondary hover:text-text-primary transition-colors underline"
                         >

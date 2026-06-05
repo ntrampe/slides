@@ -19,8 +19,8 @@ export function useTheme(): UseThemeReturn {
 
     // Set theme mode
     const setMode = useCallback((newMode: ThemeMode) => {
-        updateDisplaySettings({ ...settings.display, themeMode: newMode });
-    }, [updateDisplaySettings, settings.display]);
+        updateDisplaySettings({ themeMode: newMode });
+    }, [updateDisplaySettings]);
 
     return {
         mode,

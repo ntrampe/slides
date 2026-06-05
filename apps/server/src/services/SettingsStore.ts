@@ -14,7 +14,7 @@ export interface SettingsStore {
     }>;
     setDomainOverrides(
         domain: SettingsDomain,
-        value: DomainAppSettings[SettingsDomain]
+        value: Partial<DomainAppSettings[SettingsDomain]>
     ): Promise<void>;
     clearDomainOverrides(domain: SettingsDomain): Promise<void>;
     clearAllOverrides(): Promise<void>;

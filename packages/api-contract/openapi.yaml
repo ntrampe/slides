@@ -115,16 +115,17 @@ paths:
   /settings/query:
     patch:
       operationId: patchQuerySettings
-      summary: Replace query settings overrides
+      summary: Partially update query settings overrides
       description: |
-        Persists the full `QuerySettings` body to `settings.query.json` and returns the
-        full effective `AppSettings`. Broadcasts `query_updated` on SSE.
+        Shallow-merges the partial `QuerySettingsUpdate` body with existing persisted
+        query overrides in `settings.query.json` and returns the full effective
+        `AppSettings`. Broadcasts `query_updated` on SSE.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuerySettings'
+              $ref: '#/components/schemas/QuerySettingsUpdate'
       responses:
         '200':
           description: Effective settings after update
@@ -156,16 +157,17 @@ paths:
   /settings/playback:
     patch:
       operationId: patchPlaybackSettings
-      summary: Replace playback settings overrides
+      summary: Partially update playback settings overrides
       description: |
-        Persists the full `PlaybackSettings` body to `settings.playback.json` and returns
-        the full effective `AppSettings`. Broadcasts `playback_updated` on SSE.
+        Shallow-merges the partial `PlaybackSettingsUpdate` body with existing persisted
+        playback overrides in `settings.playback.json` and returns the full effective
+        `AppSettings`. Broadcasts `playback_updated` on SSE.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlaybackSettings'
+              $ref: '#/components/schemas/PlaybackSettingsUpdate'
       responses:
         '200':
           description: Effective settings after update
@@ -197,16 +199,17 @@ paths:
   /settings/display:
     patch:
       operationId: patchDisplaySettings
-      summary: Replace display settings overrides
+      summary: Partially update display settings overrides
       description: |
-        Persists the full `DisplaySettings` body to `settings.display.json` and returns
-        the full effective `AppSettings`. Broadcasts `display_updated` on SSE.
+        Shallow-merges the partial `DisplaySettingsUpdate` body with existing persisted
+        display overrides in `settings.display.json` and returns the full effective
+        `AppSettings`. Broadcasts `display_updated` on SSE.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DisplaySettings'
+              $ref: '#/components/schemas/DisplaySettingsUpdate'
       responses:
         '200':
           description: Effective settings after update
@@ -675,6 +678,103 @@ components:
         - showWeather
         - weatherLat
         - weatherLng
+      properties:
+        themeMode:
+          type: string
+          enum: [light, dark]
+        showProgressBar:
+          type: boolean
+        showDebugStats:
+          type: boolean
+        supportEnabled:
+          type: boolean
+        photoMetadataEnabled:
+          type: boolean
+        photoMetadataDateFormat:
+          type: string
+        showClock:
+          type: boolean
+        clockUse24HourFormat:
+          type: boolean
+        clockDateFormat:
+          type: string
+        showWeather:
+          type: boolean
+        weatherLat:
+          type: number
+          format: double
+        weatherLng:
+          type: number
+          format: double
+
+    QuerySettingsUpdate:
+      type: object
+      properties:
+        albumIds:
+          type: array
+          items: { type: string }
+        albumOperator:
+          $ref: '#/components/schemas/FilterOperator'
+        personIds:
+          type: array
+          items: { type: string }
+        personOperator:
+          $ref: '#/components/schemas/FilterOperator'
+        excludeAlbumIds:
+          type: array
+          items: { type: string }
+        excludePersonIds:
+          type: array
+          items: { type: string }
+        locationCountry:
+          type: string
+        locationState:
+          type: string
+        locationCity:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        globalOperator:
+          $ref: '#/components/schemas/FilterOperator'
+        shuffle:
+          type: boolean
+
+    PlaybackSettingsUpdate:
+      type: object
+      properties:
+        intervalMs:
+          type: integer
+        autoplay:
+          type: boolean
+        layout:
+          type: string
+          enum: [single, split]
+        photoFit:
+          type: string
+          enum: [contain, cover, fill, none, scale-down]
+        transitionType:
+          type: string
+          enum: [fade, slide, none]
+        transitionDuration:
+          type: number
+        photoAnimationType:
+          type: string
+          enum: [none, zoom-in, zoom-out, pan, ken-burns]
+        photoAnimationDuration:
+          type: number
+        photoAnimationIntensity:
+          type: number
+        livePhotoEnabled:
+          type: boolean
+        livePhotoDelay:
+          type: number
+
+    DisplaySettingsUpdate:
+      type: object
       properties:
         themeMode:
           type: string

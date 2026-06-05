@@ -27,10 +27,11 @@ export function loadSettingsOverrides(): MockDomainOverrides | null {
 
 export function saveDomainOverrides<K extends keyof MockDomainOverrides>(
     domain: K,
-    value: NonNullable<MockDomainOverrides[K]>
+    value: Partial<NonNullable<MockDomainOverrides[K]>>
 ): void {
     const current = loadSettingsOverrides() ?? {};
-    current[domain] = value;
+    const existing = current[domain] ?? {};
+    current[domain] = { ...existing, ...value } as NonNullable<MockDomainOverrides[K]>;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
 }
 

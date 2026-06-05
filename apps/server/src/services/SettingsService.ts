@@ -38,18 +38,24 @@ export class SettingsService {
         );
     }
 
-    async setQuerySettings(body: DomainQuerySettings): Promise<DomainAppSettings> {
-        await this.store.setDomainOverrides('query', body);
+    async setQuerySettings(update: Partial<DomainQuerySettings>): Promise<DomainAppSettings> {
+        const { query } = await this.store.getAllDomainOverrides();
+        const mergedQuery = { ...(query ?? {}), ...update };
+        await this.store.setDomainOverrides('query', mergedQuery);
         return this.getEffective();
     }
 
-    async setPlaybackSettings(body: DomainPlaybackSettings): Promise<DomainAppSettings> {
-        await this.store.setDomainOverrides('playback', body);
+    async setPlaybackSettings(update: Partial<DomainPlaybackSettings>): Promise<DomainAppSettings> {
+        const { playback } = await this.store.getAllDomainOverrides();
+        const mergedPlayback = { ...(playback ?? {}), ...update };
+        await this.store.setDomainOverrides('playback', mergedPlayback);
         return this.getEffective();
     }
 
-    async setDisplaySettings(body: DomainDisplaySettings): Promise<DomainAppSettings> {
-        await this.store.setDomainOverrides('display', body);
+    async setDisplaySettings(update: Partial<DomainDisplaySettings>): Promise<DomainAppSettings> {
+        const { display } = await this.store.getAllDomainOverrides();
+        const mergedDisplay = { ...(display ?? {}), ...update };
+        await this.store.setDomainOverrides('display', mergedDisplay);
         return this.getEffective();
     }
 

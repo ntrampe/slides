@@ -130,7 +130,7 @@ export async function handleMockFetch(
     }
 
     if (pathname === '/settings/query' && method === 'PATCH') {
-        const body = (await readJsonBody(input, init)) as QuerySettings;
+        const body = (await readJsonBody(input, init)) as Partial<QuerySettings>;
         saveDomainOverrides('query', body);
         return jsonResponse(getEffectiveMockSettings());
     }
@@ -141,7 +141,7 @@ export async function handleMockFetch(
     }
 
     if (pathname === '/settings/playback' && method === 'PATCH') {
-        const body = (await readJsonBody(input, init)) as PlaybackSettings;
+        const body = (await readJsonBody(input, init)) as Partial<PlaybackSettings>;
         saveDomainOverrides('playback', body);
         return jsonResponse(getEffectiveMockSettings());
     }
@@ -152,7 +152,7 @@ export async function handleMockFetch(
     }
 
     if (pathname === '/settings/display' && method === 'PATCH') {
-        const body = (await readJsonBody(input, init)) as DisplaySettings;
+        const body = (await readJsonBody(input, init)) as Partial<DisplaySettings>;
         saveDomainOverrides('display', body);
         return jsonResponse(getEffectiveMockSettings());
     }

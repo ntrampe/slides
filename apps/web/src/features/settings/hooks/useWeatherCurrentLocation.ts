@@ -29,7 +29,7 @@ export interface UseWeatherCurrentLocationReturn {
  * rounded coordinates into weather settings.
  */
 export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
-    const { settings, updateDisplaySettings } = useSettingsData();
+    const { updateDisplaySettings } = useSettingsData();
     const [status, setStatus] = useState<WeatherCurrentLocationStatus>(
         WeatherCurrentLocationStatus.Idle
     );
@@ -66,7 +66,6 @@ export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
                 const lng =
                     Math.round(position.coords.longitude * 10000) / 10000;
                 updateDisplaySettings({
-                    ...settings.display,
                     weatherLat: lat,
                     weatherLng: lng,
                 });
@@ -89,7 +88,7 @@ export function useWeatherCurrentLocation(): UseWeatherCurrentLocationReturn {
                 timeout: 15_000
             }
         );
-    }, [updateDisplaySettings, settings.display]);
+    }, [updateDisplaySettings]);
 
     return {
         state: { status, errorMessage },

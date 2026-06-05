@@ -97,9 +97,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Replace query settings overrides
-         * @description Persists the full `QuerySettings` body to `settings.query.json` and returns the
-         *     full effective `AppSettings`. Broadcasts `query_updated` on SSE.
+         * Partially update query settings overrides
+         * @description Shallow-merges the partial `QuerySettingsUpdate` body with existing persisted
+         *     query overrides in `settings.query.json` and returns the full effective
+         *     `AppSettings`. Broadcasts `query_updated` on SSE.
          */
         patch: operations["patchQuerySettings"];
         trace?: never;
@@ -123,9 +124,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Replace playback settings overrides
-         * @description Persists the full `PlaybackSettings` body to `settings.playback.json` and returns
-         *     the full effective `AppSettings`. Broadcasts `playback_updated` on SSE.
+         * Partially update playback settings overrides
+         * @description Shallow-merges the partial `PlaybackSettingsUpdate` body with existing persisted
+         *     playback overrides in `settings.playback.json` and returns the full effective
+         *     `AppSettings`. Broadcasts `playback_updated` on SSE.
          */
         patch: operations["patchPlaybackSettings"];
         trace?: never;
@@ -149,9 +151,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Replace display settings overrides
-         * @description Persists the full `DisplaySettings` body to `settings.display.json` and returns
-         *     the full effective `AppSettings`. Broadcasts `display_updated` on SSE.
+         * Partially update display settings overrides
+         * @description Shallow-merges the partial `DisplaySettingsUpdate` body with existing persisted
+         *     display overrides in `settings.display.json` and returns the full effective
+         *     `AppSettings`. Broadcasts `display_updated` on SSE.
          */
         patch: operations["patchDisplaySettings"];
         trace?: never;
@@ -461,6 +464,57 @@ export interface components {
             /** Format: double */
             weatherLng: number;
         };
+        QuerySettingsUpdate: {
+            albumIds?: string[];
+            albumOperator?: components["schemas"]["FilterOperator"];
+            personIds?: string[];
+            personOperator?: components["schemas"]["FilterOperator"];
+            excludeAlbumIds?: string[];
+            excludePersonIds?: string[];
+            locationCountry?: string;
+            locationState?: string;
+            locationCity?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            globalOperator?: components["schemas"]["FilterOperator"];
+            shuffle?: boolean;
+        };
+        PlaybackSettingsUpdate: {
+            intervalMs?: number;
+            autoplay?: boolean;
+            /** @enum {string} */
+            layout?: "single" | "split";
+            /** @enum {string} */
+            photoFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+            /** @enum {string} */
+            transitionType?: "fade" | "slide" | "none";
+            transitionDuration?: number;
+            /** @enum {string} */
+            photoAnimationType?: "none" | "zoom-in" | "zoom-out" | "pan" | "ken-burns";
+            photoAnimationDuration?: number;
+            photoAnimationIntensity?: number;
+            livePhotoEnabled?: boolean;
+            livePhotoDelay?: number;
+        };
+        DisplaySettingsUpdate: {
+            /** @enum {string} */
+            themeMode?: "light" | "dark";
+            showProgressBar?: boolean;
+            showDebugStats?: boolean;
+            supportEnabled?: boolean;
+            photoMetadataEnabled?: boolean;
+            photoMetadataDateFormat?: string;
+            showClock?: boolean;
+            clockUse24HourFormat?: boolean;
+            clockDateFormat?: string;
+            showWeather?: boolean;
+            /** Format: double */
+            weatherLat?: number;
+            /** Format: double */
+            weatherLng?: number;
+        };
         /** @enum {string} */
         FilterOperator: "AND" | "OR";
         Album: {
@@ -706,7 +760,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["QuerySettings"];
+                "application/json": components["schemas"]["QuerySettingsUpdate"];
             };
         };
         responses: {
@@ -754,7 +808,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PlaybackSettings"];
+                "application/json": components["schemas"]["PlaybackSettingsUpdate"];
             };
         };
         responses: {
@@ -802,7 +856,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DisplaySettings"];
+                "application/json": components["schemas"]["DisplaySettingsUpdate"];
             };
         };
         responses: {
