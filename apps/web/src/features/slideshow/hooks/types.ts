@@ -25,6 +25,7 @@ export interface UseSlideshowTimerReturn {
     progress: number;
     togglePlayPause: () => void;
     reset: () => void;
+    setPlaying: (playing: boolean) => void;
 }
 
 export interface UseSlideshowReturn {

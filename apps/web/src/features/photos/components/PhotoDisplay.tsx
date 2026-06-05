@@ -24,9 +24,9 @@ export const PhotoDisplay = ({
     const { settings } = useSettingsData();
 
     const { animationClass, animationStyles } = usePhotoAnimation({
-        type: settings.photos.animation.type,
-        duration: settings.photos.animation.duration,
-        intensity: settings.photos.animation.intensity,
+        type: settings.playback.photoAnimationType,
+        duration: settings.playback.photoAnimationDuration,
+        intensity: settings.playback.photoAnimationIntensity,
         photoId: photo.id,
     });
 

@@ -8,8 +8,8 @@ import type { UseThemeReturn } from './types';
  * Delegates persistence to existing settings system.
  */
 export function useTheme(): UseThemeReturn {
-    const { settings, updateSettings } = useSettingsData();
-    const mode = settings.theme.mode;
+    const { settings, updateDisplaySettings } = useSettingsData();
+    const mode = settings.display.themeMode;
 
     // Apply theme to DOM by setting data-theme attribute
     // CSS handles the rest via :root[data-theme="light"] and :root[data-theme="dark"]
@@ -19,8 +19,8 @@ export function useTheme(): UseThemeReturn {
 
     // Set theme mode
     const setMode = useCallback((newMode: ThemeMode) => {
-        updateSettings({ theme: { mode: newMode } });
-    }, [updateSettings]);
+        updateDisplaySettings({ ...settings.display, themeMode: newMode });
+    }, [updateDisplaySettings, settings.display]);
 
     return {
         mode,

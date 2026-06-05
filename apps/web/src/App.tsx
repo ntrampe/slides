@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Slideshow } from './features/slideshow';
-import { SettingsPanel, useSettingsPanel } from './features/settings';
+import { SettingsPanel, useSettingsPanel, useSyncEvents } from './features/settings';
 import { useTheme } from './features/theme';
 import { IdleProvider } from './context';
 import { VisibilityProvider } from './context/VisibilityContext';
@@ -8,6 +8,7 @@ import { VisibilityProvider } from './context/VisibilityContext';
 const queryClient = new QueryClient();
 
 function AppContent() {
+  useSyncEvents();
   useTheme();
 
   const { state: { isOpen: isSettingsPanelVisible }, actions: { toggle: toggleSettings, close: closeSettings } } = useSettingsPanel();

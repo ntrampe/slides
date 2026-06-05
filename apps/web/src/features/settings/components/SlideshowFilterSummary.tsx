@@ -1,12 +1,12 @@
-import type { PhotoFilterParams } from '../../photos/types';
+import type { QuerySettings } from '../../photos/types';
 import { describeSlideshowFilter } from '../utils/describeSlideshowFilter';
 
 export interface SlideshowFilterSummaryProps {
-    filter: PhotoFilterParams;
+    query: QuerySettings;
 }
 
-export const SlideshowFilterSummary = ({ filter }: SlideshowFilterSummaryProps) => {
-    const filterSummaryLines = describeSlideshowFilter(filter);
+export const SlideshowFilterSummary = ({ query }: SlideshowFilterSummaryProps) => {
+    const filterSummaryLines = describeSlideshowFilter(query);
 
     return (
         <div className="space-y-2">

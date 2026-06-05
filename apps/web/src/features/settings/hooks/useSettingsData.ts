@@ -1,18 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import type { AppSettings } from '@slides/api-contract';
+import type {
+    AppSettings,
+    DisplaySettings,
+    PlaybackSettings,
+    QuerySettings,
+} from '@slides/api-contract';
 import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
-import { deepMerge, type DeepPartial } from '@slides/shared/utils/deepMerge';
 import {
-    clearSettingsOverrides,
-    fetchSettingsResolved,
-    loadSettingsOverrides,
-    saveSettingsOverrides,
+    clearAllSettings,
+    fetchSettings,
+    patchDisplaySettings,
+    patchPlaybackSettings,
+    patchQuerySettings,
 } from '../../../api/settings.js';
 
 export interface UseSettingsDataReturn {
     settings: AppSettings;
-    updateSettings: (partialSettings: DeepPartial<AppSettings>) => void;
+    updateQuerySettings: (query: QuerySettings) => void;
+    updatePlaybackSettings: (playback: PlaybackSettings) => void;
+    updateDisplaySettings: (display: DisplaySettings) => void;
     clearSettings: () => void;
 }
 
@@ -22,49 +29,67 @@ export function useSettingsData(): UseSettingsDataReturn {
     const search =
         typeof window !== 'undefined' ? window.location.search : '';
 
-    const resolvedQuery = useQuery({
-        queryKey: ['settings-resolved', search],
-        queryFn: () => fetchSettingsResolved(search),
+    const settingsQuery = useQuery({
+        queryKey: ['settings', search],
+        queryFn: () => fetchSettings(search),
         placeholderData: FALLBACK_APP_SETTINGS,
         retry: 1,
-        refetchInterval: 3000,
-        refetchIntervalInBackground: true,
+        staleTime: Infinity,
     });
 
-    const overridesQuery = useQuery({
-        queryKey: ['settings-overrides'],
-        queryFn: () => loadSettingsOverrides(),
-    });
+    const settings = settingsQuery.data ?? FALLBACK_APP_SETTINGS;
 
-    const settings = resolvedQuery.data ?? FALLBACK_APP_SETTINGS;
-
-    const mutation = useMutation({
-        mutationFn: (newSettings: DeepPartial<AppSettings>) =>
-            saveSettingsOverrides(newSettings),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['settings-overrides'] });
-            queryClient.invalidateQueries({ queryKey: ['settings-resolved'] });
-            queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-            queryClient.invalidateQueries({ queryKey: ['weather'] });
+    const queryMutation = useMutation({
+        mutationFn: (query: QuerySettings) => patchQuerySettings(query),
+        onSuccess: (effective) => {
+            queryClient.setQueryData(['settings', search], effective);
+            void queryClient.invalidateQueries({ queryKey: ['slideshow-photos'] });
         },
     });
 
-    const updateSettings = useCallback(
-        (partialSettings: DeepPartial<AppSettings>) => {
-            const currentSaved = overridesQuery.data ?? {};
-            const merged = deepMerge(currentSaved as AppSettings, partialSettings);
-            mutation.mutate(merged);
+    const playbackMutation = useMutation({
+        mutationFn: (playback: PlaybackSettings) => patchPlaybackSettings(playback),
+        onSuccess: (effective) => {
+            queryClient.setQueryData(['settings', search], effective);
         },
-        [overridesQuery.data, mutation]
+    });
+
+    const displayMutation = useMutation({
+        mutationFn: (display: DisplaySettings) => patchDisplaySettings(display),
+        onSuccess: (effective) => {
+            queryClient.setQueryData(['settings', search], effective);
+            void queryClient.invalidateQueries({ queryKey: ['weather'] });
+        },
+    });
+
+    const updateQuerySettings = useCallback(
+        (query: QuerySettings) => {
+            queryMutation.mutate(query);
+        },
+        [queryMutation]
+    );
+
+    const updatePlaybackSettings = useCallback(
+        (playback: PlaybackSettings) => {
+            playbackMutation.mutate(playback);
+        },
+        [playbackMutation]
+    );
+
+    const updateDisplaySettings = useCallback(
+        (display: DisplaySettings) => {
+            displayMutation.mutate(display);
+        },
+        [displayMutation]
     );
 
     const clearMutation = useMutation({
-        mutationFn: () => clearSettingsOverrides(),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['settings-overrides'] });
-            queryClient.invalidateQueries({ queryKey: ['settings-resolved'] });
-            queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-            queryClient.invalidateQueries({ queryKey: ['weather'] });
+        mutationFn: () => clearAllSettings(),
+        onSuccess: async () => {
+            const effective = await fetchSettings(search);
+            queryClient.setQueryData(['settings', search], effective);
+            void queryClient.invalidateQueries({ queryKey: ['slideshow-photos'] });
+            void queryClient.invalidateQueries({ queryKey: ['weather'] });
         },
     });
 
@@ -74,7 +99,9 @@ export function useSettingsData(): UseSettingsDataReturn {
 
     return {
         settings,
-        updateSettings,
+        updateQuerySettings,
+        updatePlaybackSettings,
+        updateDisplaySettings,
         clearSettings,
     };
 }

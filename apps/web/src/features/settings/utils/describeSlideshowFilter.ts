@@ -1,13 +1,16 @@
-import type { PhotoFilterParams, FilterOperator } from '../../photos/types';
+import type { QuerySettings, FilterOperator } from '../../photos/types';
 import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
 
 function opWord(op: FilterOperator | undefined): 'all' | 'any' {
     return (op ?? DEFAULT_FILTER_OPERATOR) === 'AND' ? 'all' : 'any';
 }
 
-function formatLocation(loc: PhotoFilterParams['location']): string | null {
-    if (!loc) return null;
-    const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+function formatLocation(filter: QuerySettings): string | null {
+    const parts = [
+        filter.locationCity,
+        filter.locationState,
+        filter.locationCountry,
+    ].filter(Boolean);
     return parts.length > 0 ? parts.join(', ') : null;
 }
 
@@ -35,10 +38,7 @@ function selectionTarget(
     return `any of ${count} selected ${label}`;
 }
 
-/**
- * Human-readable summary describing the active slideshow filter (albums, people, location, dates, exclusions).
- */
-export function describeSlideshowFilter(filter: PhotoFilterParams): string[] {
+export function describeSlideshowFilter(filter: QuerySettings): string[] {
     const albumIds = filter.albumIds ?? [];
     const personIds = filter.personIds ?? [];
     const excludeAlbumIds = filter.excludeAlbumIds ?? [];
@@ -75,7 +75,7 @@ export function describeSlideshowFilter(filter: PhotoFilterParams): string[] {
 
     const constraints: string[] = [];
 
-    const loc = formatLocation(filter.location);
+    const loc = formatLocation(filter);
     if (loc) {
         constraints.push(`from ${loc}`);
     }

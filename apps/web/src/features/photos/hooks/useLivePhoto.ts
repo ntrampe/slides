@@ -10,8 +10,8 @@ interface UseLivePhotoReturn {
 
 export function useLivePhoto(photo?: Photo): UseLivePhotoReturn {
     const { settings } = useSettingsData();
-    const livePhotoEnabled = settings.photos.livePhoto.enabled;
-    const livePhotoDelay = settings.photos.livePhoto.delay;
+    const livePhotoEnabled = settings.playback.livePhotoEnabled;
+    const livePhotoDelay = settings.playback.livePhotoDelay;
 
     const [videoReady, setVideoReady] = useState(false);
     const [showVideo, setShowVideo] = useState(false);

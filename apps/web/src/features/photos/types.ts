@@ -4,11 +4,13 @@ export type {
     ObjectFit,
     LayoutMode,
     FilterOperator,
-    PhotoFilterParams,
+    QuerySettings,
     PhotoAnimationType,
     PhotoLocation,
     PhotoCameraInfo,
     PhotoExifSettings,
+    SlideshowTransitionType,
+    ThemeMode,
 } from '@slides/api-contract';
 
 export type Photo = Omit<PhotoDto, 'createdAt'> & { createdAt: Date };

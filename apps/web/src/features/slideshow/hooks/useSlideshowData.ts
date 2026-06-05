@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSlideshow } from '../../../api/slideshow.js';
+import { querySlideshow } from '../../../api/slideshow.js';
 import { usePhotoPool } from '../../photo-pool';
+import { useSettingsData } from '../../settings/hooks/useSettingsData.js';
 import { getSlideshowSeed } from '@slides/shared/utils/slideshowSeed';
 import { AuthError, ClientError, NetworkError } from '@slides/shared/errors';
 import type { UseSlideshowDataReturn } from './types.js';
@@ -15,14 +16,17 @@ export function useSlideshowData({
     preloadForward = 5,
     preloadBackward = 2,
 }: UseSlideshowDataOptions = {}): UseSlideshowDataReturn {
-    const search =
-        typeof window !== 'undefined' ? window.location.search : '';
+    const { settings } = useSettingsData();
     const seed = useMemo(() => getSlideshowSeed(), []);
 
+    const queryBody = useMemo(
+        () => ({ ...settings.query, seed }),
+        [settings.query, seed]
+    );
+
     const slideshowQuery = useQuery({
-        queryKey: ['slideshow', search, seed],
-        queryFn: () => fetchSlideshow(search, seed),
-        refetchInterval: 60 * 60 * 1000,
+        queryKey: ['slideshow-photos', queryBody],
+        queryFn: () => querySlideshow(queryBody),
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
             if (error instanceof NetworkError) return false;
@@ -39,8 +43,8 @@ export function useSlideshowData({
     );
 
     const resetKey = useMemo(
-        () => `${search}:${seed}:${slideshowQuery.dataUpdatedAt}`,
-        [search, seed, slideshowQuery.dataUpdatedAt]
+        () => `${seed}:${slideshowQuery.dataUpdatedAt}`,
+        [seed, slideshowQuery.dataUpdatedAt]
     );
 
     const {

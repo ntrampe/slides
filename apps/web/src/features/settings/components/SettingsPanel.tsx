@@ -29,9 +29,14 @@ const FilterCompartment = ({ children }: { children: ReactNode }) => (
 );
 
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
-    const { settings, updateSettings, clearSettings } = useSettingsData();
-
-    const filter = settings.slideshow.filter;
+    const {
+        settings,
+        updateQuerySettings,
+        updatePlaybackSettings,
+        updateDisplaySettings,
+        clearSettings,
+    } = useSettingsData();
+    const { query, playback, display } = settings;
 
     const handleReset = () => {
         if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
@@ -64,11 +69,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             {/* CONTENT */}
             <CollapsibleSection title="Content">
                 <FilterCompartment>
-                    <SlideshowFilterSummary filter={filter} />
+                    <SlideshowFilterSummary query={query} />
                     <SlideshowFilterCombineControl
-                        filter={filter}
+                        query={query}
                         onGlobalOperatorChange={(globalOperator) =>
-                            updateSettings({ slideshow: { filter: { globalOperator } } })
+                            updateQuerySettings({ ...query, globalOperator })
                         }
                     />
                 </FilterCompartment>
@@ -76,46 +81,55 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <FilterCompartment>
                     <AlbumPicker
                         label="Albums"
-                        selectedIds={settings.slideshow.filter.albumIds || []}
-                        excludedIds={settings.slideshow.filter.excludeAlbumIds || []}
-                        operator={settings.slideshow.filter.albumOperator ?? DEFAULT_FILTER_OPERATOR}
+                        selectedIds={query.albumIds}
+                        excludedIds={query.excludeAlbumIds}
+                        operator={query.albumOperator ?? DEFAULT_FILTER_OPERATOR}
                         onBulkChange={({ selectedIds: albumIds, excludedIds: excludeAlbumIds }) =>
-                            updateSettings({ slideshow: { filter: { albumIds, excludeAlbumIds } } })
+                            updateQuerySettings({ ...query, albumIds, excludeAlbumIds })
                         }
                         onOperatorChange={(albumOperator) =>
-                            updateSettings({ slideshow: { filter: { albumOperator } } })
+                            updateQuerySettings({ ...query, albumOperator })
                         }
                     />
                 </FilterCompartment>
                 <FilterCompartment>
                     <PeoplePicker
                         label="People"
-                        selectedIds={settings.slideshow.filter.personIds || []}
-                        excludedIds={settings.slideshow.filter.excludePersonIds || []}
-                        operator={settings.slideshow.filter.personOperator ?? DEFAULT_FILTER_OPERATOR}
+                        selectedIds={query.personIds}
+                        excludedIds={query.excludePersonIds}
+                        operator={query.personOperator ?? DEFAULT_FILTER_OPERATOR}
                         onBulkChange={({ selectedIds: personIds, excludedIds: excludePersonIds }) =>
-                            updateSettings({ slideshow: { filter: { personIds, excludePersonIds } } })
+                            updateQuerySettings({ ...query, personIds, excludePersonIds })
                         }
                         onOperatorChange={(personOperator) =>
-                            updateSettings({ slideshow: { filter: { personOperator } } })
+                            updateQuerySettings({ ...query, personOperator })
                         }
                     />
                 </FilterCompartment>
                 <FilterCompartment>
                     <LocationPicker
                         label="Location"
-                        selection={settings.slideshow.filter.location || {}}
+                        selection={{
+                            country: query.locationCountry,
+                            state: query.locationState,
+                            city: query.locationCity,
+                        }}
                         onChange={(location) =>
-                            updateSettings({ slideshow: { filter: { location } } })
+                            updateQuerySettings({
+                                ...query,
+                                locationCountry: location.country,
+                                locationState: location.state,
+                                locationCity: location.city,
+                            })
                         }
                     />
                 </FilterCompartment>
                 <FilterCompartment>
                     <DateFilter
-                        startDate={settings.slideshow.filter.startDate}
-                        endDate={settings.slideshow.filter.endDate}
+                        startDate={query.startDate}
+                        endDate={query.endDate}
                         onChange={(startDate, endDate) =>
-                            updateSettings({ slideshow: { filter: { startDate, endDate } } })
+                            updateQuerySettings({ ...query, startDate, endDate })
                         }
                     />
                 </FilterCompartment>
@@ -126,10 +140,8 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.slideshow.shuffle}
-                        onChange={(e) =>
-                            updateSettings({ slideshow: { shuffle: e.target.checked } })
-                        }
+                        checked={query.shuffle}
+                        onChange={(e) => updateQuerySettings({ ...query, shuffle: e.target.checked })}
                         className="mr-2 w-4 h-4"
                     />
                     <span>Shuffle</span>
@@ -138,9 +150,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.slideshow.autoplay}
+                        checked={playback.autoplay}
                         onChange={(e) =>
-                            updateSettings({ slideshow: { autoplay: e.target.checked } })
+                            updatePlaybackSettings({ ...playback, autoplay: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -150,11 +162,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.slideshow.ui.showProgressBar}
+                        checked={display.showProgressBar}
                         onChange={(e) =>
-                            updateSettings({
-                                slideshow: { ui: { showProgressBar: e.target.checked } }
-                            })
+                            updateDisplaySettings({ ...display, showProgressBar: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -165,7 +175,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="flex justify-between items-baseline mb-1 gap-2">
                         <span>Interval</span>
                         <span className="text-sm text-text-secondary tabular-nums shrink-0">
-                            {Math.min(300, Math.max(1, Math.round(settings.slideshow.intervalMs / 1000)))}{' '}
+                            {Math.min(300, Math.max(1, Math.round(playback.intervalMs / 1000)))}{' '}
                             s
                         </span>
                     </span>
@@ -174,10 +184,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         min={1}
                         max={300}
                         step={1}
-                        value={Math.min(300, Math.max(1, Math.round(settings.slideshow.intervalMs / 1000)))}
+                        value={Math.min(300, Math.max(1, Math.round(playback.intervalMs / 1000)))}
                         onChange={(e) => {
-                            const intervalMs = Number(e.target.value) * 1000;
-                            updateSettings({ slideshow: { intervalMs } });
+                            updatePlaybackSettings({
+                                ...playback,
+                                intervalMs: Number(e.target.value) * 1000,
+                            });
                         }}
                         className="w-full"
                     />
@@ -189,14 +201,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Type</span>
                     <select
-                        value={settings.slideshow.transition.type}
+                        value={playback.transitionType}
                         onChange={(e) =>
-                            updateSettings({
-                                slideshow: {
-                                    transition: {
-                                        type: e.target.value as 'fade' | 'slide' | 'none'
-                                    }
-                                }
+                            updatePlaybackSettings({
+                                ...playback,
+                                transitionType: e.target.value as 'fade' | 'slide' | 'none',
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
@@ -215,7 +224,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 5000,
                                 Math.max(
                                     100,
-                                    Math.round(settings.slideshow.transition.duration / 100) * 100
+                                    Math.round(playback.transitionDuration / 100) * 100
                                 )
                             )}{' '}
                             ms
@@ -226,19 +235,18 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         min={100}
                         max={5000}
                         step={100}
-                        disabled={settings.slideshow.transition.type === 'none'}
+                        disabled={playback.transitionType === 'none'}
                         value={Math.min(
                             5000,
                             Math.max(
                                 100,
-                                Math.round(settings.slideshow.transition.duration / 100) * 100
+                                Math.round(playback.transitionDuration / 100) * 100
                             )
                         )}
                         onChange={(e) =>
-                            updateSettings({
-                                slideshow: {
-                                    transition: { duration: Number(e.target.value) }
-                                }
+                            updatePlaybackSettings({
+                                ...playback,
+                                transitionDuration: Number(e.target.value),
                             })
                         }
                         className="w-full"
@@ -251,9 +259,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Photo Fit</span>
                     <select
-                        value={settings.photos.fit}
+                        value={playback.photoFit}
                         onChange={(e) =>
-                            updateSettings({ photos: { fit: e.target.value as any } })
+                            updatePlaybackSettings({
+                                ...playback,
+                                photoFit: e.target.value as typeof playback.photoFit,
+                            })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     >
@@ -266,9 +277,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Layout</span>
                     <select
-                        value={settings.slideshow.layout}
+                        value={playback.layout}
                         onChange={(e) =>
-                            updateSettings({ slideshow: { layout: e.target.value as any } })
+                            updatePlaybackSettings({
+                                ...playback,
+                                layout: e.target.value as typeof playback.layout,
+                            })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     >
@@ -283,14 +297,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="block">
                     <span className="block mb-1">Animation</span>
                     <select
-                        value={settings.photos.animation.type}
+                        value={playback.photoAnimationType}
                         onChange={(e) =>
-                            updateSettings({
-                                photos: {
-                                    animation: {
-                                        type: e.target.value as PhotoAnimationType
-                                    }
-                                }
+                            updatePlaybackSettings({
+                                ...playback,
+                                photoAnimationType: e.target.value as PhotoAnimationType,
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
@@ -303,13 +314,13 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     </select>
                 </label>
 
-                {settings.photos.animation.type !== 'none' && (
+                {playback.photoAnimationType !== 'none' && (
                     <>
                         <label className="block">
                             <span className="flex justify-between items-baseline mb-1 gap-2">
                                 <span>Intensity</span>
                                 <span className="text-sm text-text-secondary tabular-nums shrink-0">
-                                    {settings.photos.animation.intensity.toFixed(1)}×
+                                    {playback.photoAnimationIntensity.toFixed(1)}×
                                 </span>
                             </span>
                             <input
@@ -317,14 +328,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                                 min="1"
                                 max="2"
                                 step="0.1"
-                                value={settings.photos.animation.intensity}
+                                value={playback.photoAnimationIntensity}
                                 onChange={(e) =>
-                                    updateSettings({
-                                        photos: {
-                                            animation: {
-                                                intensity: Number(e.target.value)
-                                            }
-                                        }
+                                    updatePlaybackSettings({
+                                        ...playback,
+                                        photoAnimationIntensity: Number(e.target.value),
                                     })
                                 }
                                 className="w-full"
@@ -335,18 +343,13 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                             <input
                                 type="checkbox"
                                 checked={
-                                    settings.photos.animation.duration ===
-                                    settings.slideshow.intervalMs
+                                    playback.photoAnimationDuration === playback.intervalMs
                                 }
                                 onChange={(e) => {
                                     if (e.target.checked) {
-                                        updateSettings({
-                                            photos: {
-                                                animation: {
-                                                    duration:
-                                                        settings.slideshow.intervalMs
-                                                }
-                                            }
+                                        updatePlaybackSettings({
+                                            ...playback,
+                                            photoAnimationDuration: playback.intervalMs,
                                         });
                                     }
                                 }}
@@ -365,15 +368,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.photos.livePhoto.enabled}
+                        checked={playback.livePhotoEnabled}
                         onChange={(e) =>
-                            updateSettings({
-                                photos: {
-                                    livePhoto: {
-                                        enabled: e.target.checked,
-                                        delay: settings.photos.livePhoto.delay
-                                    }
-                                }
+                            updatePlaybackSettings({
+                                ...playback,
+                                livePhotoEnabled: e.target.checked,
                             })
                         }
                         className="mr-2 w-4 h-4"
@@ -387,7 +386,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         <span className="text-sm text-text-secondary tabular-nums shrink-0">
                             {Math.min(
                                 10,
-                                Math.max(0, Math.round((settings.photos.livePhoto.delay / 1000) * 10) / 10)
+                                Math.max(0, Math.round((playback.livePhotoDelay / 1000) * 10) / 10)
                             ).toFixed(1)}{' '}
                             s
                         </span>
@@ -399,16 +398,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                         step={0.1}
                         value={Math.min(
                             10,
-                            Math.max(0, Math.round((settings.photos.livePhoto.delay / 1000) * 10) / 10)
+                            Math.max(0, Math.round((playback.livePhotoDelay / 1000) * 10) / 10)
                         )}
                         onChange={(e) =>
-                            updateSettings({
-                                photos: {
-                                    livePhoto: {
-                                        enabled: settings.photos.livePhoto.enabled,
-                                        delay: Number(e.target.value) * 1000
-                                    }
-                                }
+                            updatePlaybackSettings({
+                                ...playback,
+                                livePhotoDelay: Number(e.target.value) * 1000,
                             })
                         }
                         className="w-full"
@@ -422,16 +417,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.photos.metadata.enabled}
+                        checked={display.photoMetadataEnabled}
                         onChange={(e) =>
-                            updateSettings({
-                                photos: {
-                                    metadata: {
-                                        enabled: e.target.checked,
-                                        dateFormat:
-                                            settings.photos.metadata.dateFormat
-                                    }
-                                }
+                            updateDisplaySettings({
+                                ...display,
+                                photoMetadataEnabled: e.target.checked,
                             })
                         }
                         className="mr-2 w-4 h-4"
@@ -443,16 +433,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Metadata Date Format</span>
                     <input
                         type="text"
-                        value={settings.photos.metadata.dateFormat}
+                        value={display.photoMetadataDateFormat}
                         onChange={(e) =>
-                            updateSettings({
-                                photos: {
-                                    metadata: {
-                                        enabled:
-                                            settings.photos.metadata.enabled,
-                                        dateFormat: e.target.value
-                                    }
-                                }
+                            updateDisplaySettings({
+                                ...display,
+                                photoMetadataDateFormat: e.target.value,
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
@@ -465,9 +450,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.clock.enabled}
+                        checked={display.showClock}
                         onChange={(e) =>
-                            updateSettings({ clock: { enabled: e.target.checked } })
+                            updateDisplaySettings({ ...display, showClock: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -477,10 +462,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.clock.use24HourFormat}
+                        checked={display.clockUse24HourFormat}
                         onChange={(e) =>
-                            updateSettings({
-                                clock: { use24HourFormat: e.target.checked }
+                            updateDisplaySettings({
+                                ...display,
+                                clockUse24HourFormat: e.target.checked,
                             })
                         }
                         className="mr-2 w-4 h-4"
@@ -492,9 +478,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span className="block mb-1">Clock Date Format</span>
                     <input
                         type="text"
-                        value={settings.clock.dateFormat}
+                        value={display.clockDateFormat}
                         onChange={(e) =>
-                            updateSettings({ clock: { dateFormat: e.target.value } })
+                            updateDisplaySettings({ ...display, clockDateFormat: e.target.value })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     />
@@ -506,9 +492,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.weather.enabled}
+                        checked={display.showWeather}
                         onChange={(e) =>
-                            updateSettings({ weather: { enabled: e.target.checked } })
+                            updateDisplaySettings({ ...display, showWeather: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -522,14 +508,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         step="0.0001"
-                        value={settings.weather.location.lat}
+                        value={display.weatherLat}
                         onChange={(e) =>
-                            updateSettings({
-                                weather: {
-                                    location: {
-                                        lat: Number(e.target.value)
-                                    }
-                                }
+                            updateDisplaySettings({
+                                ...display,
+                                weatherLat: Number(e.target.value),
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
@@ -541,14 +524,11 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <input
                         type="number"
                         step="0.0001"
-                        value={settings.weather.location.lng}
+                        value={display.weatherLng}
                         onChange={(e) =>
-                            updateSettings({
-                                weather: {
-                                    location: {
-                                        lng: Number(e.target.value)
-                                    }
-                                }
+                            updateDisplaySettings({
+                                ...display,
+                                weatherLng: Number(e.target.value),
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
@@ -561,11 +541,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={settings.debug.showDebugStats}
+                        checked={display.showDebugStats}
                         onChange={(e) =>
-                            updateSettings({
-                                debug: { showDebugStats: e.target.checked }
-                            })
+                            updateDisplaySettings({ ...display, showDebugStats: e.target.checked })
                         }
                         className="mr-2 w-4 h-4"
                     />
@@ -587,7 +565,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </div>
 
             {/* SUPPORT */}
-            {settings.support.enabled && (
+            {display.supportEnabled && (
                 <div className="mt-6 pt-24 border-t border-border/60">
                     <div className="text-center">
                         <p className="text-sm text-text-secondary mb-3">
@@ -599,7 +577,9 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                             className="w-full justify-center"
                         />
                         <button
-                            onClick={() => updateSettings({ support: { enabled: false } })}
+                            onClick={() =>
+                                updateDisplaySettings({ ...display, supportEnabled: false })
+                            }
                             className="mt-3 text-xs text-text-secondary hover:text-text-primary transition-colors underline"
                         >
                             Hide Forever

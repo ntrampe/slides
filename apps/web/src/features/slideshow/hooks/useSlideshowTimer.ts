@@ -18,41 +18,39 @@ export function useSlideshowTimer({
     isLoading,
     isTransitioning = false,
 }: UseSlideshowTimerOptions): UseSlideshowTimerReturn {
-    const { settings, updateSettings } = useSettingsData();
+    const { settings } = useSettingsData();
     const [progress, setProgress] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(settings.playback.autoplay);
     const { isVisible } = useVisibility();
 
-    // Get playing state and interval from settings
-    const isPlaying = settings.slideshow.autoplay;
-    const interval = settings.slideshow.intervalMs;
+    useEffect(() => {
+        setIsPlaying(settings.playback.autoplay);
+    }, [settings.playback.autoplay]);
 
-    // Reset progress manually when navigating
+    const interval = settings.playback.intervalMs;
+
     const reset = useCallback(() => {
         setProgress(0);
     }, []);
 
-    // Toggle play/pause by updating settings
     const togglePlayPause = useCallback(() => {
-        updateSettings({
-            slideshow: { autoplay: !settings.slideshow.autoplay },
-        });
-    }, [settings.slideshow.autoplay, updateSettings]);
+        setIsPlaying((prev) => !prev);
+    }, []);
 
-    // Timer effect: handles progress tracking and auto-advance
+    const setPlaying = useCallback((playing: boolean) => {
+        setIsPlaying(playing);
+    }, []);
+
     useEffect(() => {
-        // Don't run timer if paused, if current photo isn't loaded yet, we don't have any photos, or during transitions, or is we aren't visible.
         if (!isPlaying || isLoading || isEmpty || isTransitioning || !isVisible) {
-            // Only reset progress if not transitioning (preserve progress during transitions)
             if (!isTransitioning) {
                 setProgress(0);
             }
             return;
         }
 
-        // Reset progress when timer starts or when index changes
         setProgress(0);
 
-        // Update progress every 100ms for smooth animation
         const progressInterval = setInterval(() => {
             setProgress((prev) => {
                 const increment = (100 / interval) * 100;
@@ -60,7 +58,6 @@ export function useSlideshowTimer({
             });
         }, 100);
 
-        // Auto-advance after interval
         const timer = setInterval(() => {
             onAdvance();
         }, interval);
@@ -76,5 +73,6 @@ export function useSlideshowTimer({
         progress,
         togglePlayPause,
         reset,
+        setPlaying,
     };
 }

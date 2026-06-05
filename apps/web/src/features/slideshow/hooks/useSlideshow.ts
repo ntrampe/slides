@@ -22,27 +22,26 @@ export function useSlideshow(): UseSlideshowReturn {
     const nextLoaded = data.getPhotoAt(data.currentIndex + 1);
 
     const shouldUseSplitLayout = useMemo(() => {
-        if (settings.slideshow.layout === 'single') {
+        if (settings.playback.layout === 'single') {
             return false;
         }
 
-        if (settings.slideshow.layout === 'split') {
+        if (settings.playback.layout === 'split') {
             return areBothPortrait(data.currentLoaded?.photo, nextLoaded?.photo);
         }
 
         return false;
-    }, [
-        settings.slideshow.layout,
-        data.currentLoaded?.photo,
-        nextLoaded?.photo,
-    ]);
+    }, [settings.playback.layout, data.currentLoaded?.photo, nextLoaded?.photo]);
 
     const layoutClass = shouldUseSplitLayout ? 'grid-cols-2 gap-2' : 'grid-cols-1';
 
     const transition = useSlideshowTransition({
         currentPhoto: data.currentLoaded?.photo,
         nextPhoto: nextLoaded?.photo,
-        transitionSettings: settings.slideshow.transition,
+        transitionSettings: {
+            type: settings.playback.transitionType,
+            duration: settings.playback.transitionDuration,
+        },
         layoutClass,
     });
 
@@ -103,7 +102,7 @@ export function useSlideshow(): UseSlideshowReturn {
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
             layoutClass: transition.displayedLayoutClass,
-            objectFit: settings.photos.fit,
+            objectFit: settings.playback.photoFit,
         },
         actions: {
             goToPrevious: handlePrevious,
@@ -111,7 +110,7 @@ export function useSlideshow(): UseSlideshowReturn {
             togglePlayPause: timer.togglePlayPause,
             refetch: data.refetch,
         },
-        debug: settings.debug.showDebugStats
+        debug: settings.display.showDebugStats
             ? {
                   currentIndex: data.currentIndex,
                   count: data.count,

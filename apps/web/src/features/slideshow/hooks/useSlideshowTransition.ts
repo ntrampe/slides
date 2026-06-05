@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import type { Photo } from '../../photos/types';
-import type { AppSettings } from '../../settings/types';
+import type { SlideshowTransitionType } from '@slides/api-contract';
+
+interface TransitionSettings {
+    type: SlideshowTransitionType;
+    duration: number;
+}
 
 interface UseSlideshowTransitionParams {
     currentPhoto: Photo | undefined;
     nextPhoto: Photo | undefined;
-    transitionSettings: AppSettings['slideshow']['transition'];
+    transitionSettings: TransitionSettings;
     layoutClass: string;
 }
 

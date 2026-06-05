@@ -33,13 +33,13 @@ export const SlideshowHUD = ({
     const { settings } = useSettingsData();
 
     const { data: weather } = useQuery({
-        queryKey: ['weather', settings.weather.location],
+        queryKey: ['weather', settings.display.weatherLat, settings.display.weatherLng],
         queryFn: () => fetchWeather(),
-        refetchInterval: 1000 * 60 * 15, // Update weather every 15 mins
-        enabled: settings.weather.enabled,
+        refetchInterval: 1000 * 60 * 15,
+        enabled: settings.display.showWeather,
     });
 
-    const timeFormat = settings.clock.use24HourFormat ? 'HH:mm' : 'h:mm a';
+    const timeFormat = settings.display.clockUse24HourFormat ? 'HH:mm' : 'h:mm a';
     const now = new Date();
 
     const controlsOpacity = areControlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none';
@@ -49,20 +49,20 @@ export const SlideshowHUD = ({
             {/* Top Row */}
             <div className="absolute top-safe-or-4 left-safe-or-4 right-safe-or-4 sm:top-safe-or-6 sm:left-safe-or-6 sm:right-safe-or-6 flex justify-between items-start gap-4 flex-wrap">
                 {/* Top Left: Clock */}
-                {settings.clock.enabled && (
+                {settings.display.showClock && (
                     <HudPanel variant="subtle" className="pointer-events-auto">
                         <div className={`font-light ${hudTextSizes.display}`}>
                             {format(now, timeFormat)}
                         </div>
                         <div className={`font-light opacity-80 mt-1 sm:mt-2 ${hudTextSizes.heading}`}>
-                            {format(now, settings.clock.dateFormat)}
+                            {format(now, settings.display.clockDateFormat)}
                         </div>
                     </HudPanel>
                 )}
 
                 {/* Top Right: Weather + Settings */}
                 <div className="flex items-start gap-4">
-                    {settings.weather.enabled && weather && (
+                    {settings.display.showWeather && weather && (
                         <div className="pointer-events-auto">
                             <WeatherDisplay {...weather} />
                         </div>
@@ -114,7 +114,7 @@ export const SlideshowHUD = ({
             )}
 
             {/* Bottom Edge: Progress Bar - with safe area support */}
-            {showPlaybackControls && settings.slideshow.ui.showProgressBar && (
+            {showPlaybackControls && settings.display.showProgressBar && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 pointer-events-none">
                     <div
                         className="h-full bg-white transition-all duration-100 ease-linear"
