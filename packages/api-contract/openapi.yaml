@@ -627,7 +627,7 @@ components:
         - intervalMs
         - autoplay
         - layout
-        - photoFit
+        - photoScaleMode
         - transitionType
         - transitionDuration
         - photoAnimationType
@@ -643,9 +643,9 @@ components:
         layout:
           type: string
           enum: [single, split]
-        photoFit:
+        photoScaleMode:
           type: string
-          enum: [contain, cover, fill, none, scale-down]
+          enum: [fit_inside, fill_crop, stretch, original]
         transitionType:
           type: string
           enum: [fade, slide, none]
@@ -753,9 +753,9 @@ components:
         layout:
           type: string
           enum: [single, split]
-        photoFit:
+        photoScaleMode:
           type: string
-          enum: [contain, cover, fill, none, scale-down]
+          enum: [fit_inside, fill_crop, stretch, original]
         transitionType:
           type: string
           enum: [fade, slide, none]

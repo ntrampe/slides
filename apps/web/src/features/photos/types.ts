@@ -1,7 +1,7 @@
 import type { Photo as PhotoDto } from '@slides/api-contract';
 
 export type {
-    ObjectFit,
+    PhotoScaleMode,
     LayoutMode,
     FilterOperator,
     QuerySettings,

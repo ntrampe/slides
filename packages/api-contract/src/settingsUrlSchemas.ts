@@ -56,7 +56,7 @@ const playbackUrlSchema = z
         intervalMs: z.coerce.number().optional(),
         autoplay: urlBooleanSchema,
         layout: z.enum(['single', 'split']).optional(),
-        photoFit: z.enum(['contain', 'cover', 'fill', 'none', 'scale-down']).optional(),
+        photoScaleMode: z.enum(['fit_inside', 'fill_crop', 'stretch', 'original']).optional(),
         transitionType: z.enum(['fade', 'slide', 'none']).optional(),
         transitionDuration: z.coerce.number().optional(),
         photoAnimationType: z

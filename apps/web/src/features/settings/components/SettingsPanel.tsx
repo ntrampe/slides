@@ -253,19 +253,20 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             {/* APPEARANCE */}
             <CollapsibleSection title="Appearance">
                 <label className="block">
-                    <span className="block mb-1">Photo Fit</span>
+                    <span className="block mb-1">Scale Mode</span>
                     <select
-                        value={playback.photoFit}
+                        value={playback.photoScaleMode}
                         onChange={(e) =>
                             updatePlaybackSettings({
-                                photoFit: e.target.value as typeof playback.photoFit,
+                                photoScaleMode: e.target.value as typeof playback.photoScaleMode,
                             })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     >
-                        <option value="contain">Contain</option>
-                        <option value="cover">Cover</option>
-                        <option value="fill">Fill</option>
+                        <option value="fit_inside">Fit Inside</option>
+                        <option value="fill_crop">Fill Crop</option>
+                        <option value="stretch">Stretch</option>
+                        <option value="original">Original</option>
                     </select>
                 </label>
 

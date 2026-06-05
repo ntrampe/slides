@@ -436,7 +436,7 @@ export interface components {
             /** @enum {string} */
             layout: "single" | "split";
             /** @enum {string} */
-            photoFit: "contain" | "cover" | "fill" | "none" | "scale-down";
+            photoScaleMode: "fit_inside" | "fill_crop" | "stretch" | "original";
             /** @enum {string} */
             transitionType: "fade" | "slide" | "none";
             transitionDuration: number;
@@ -487,7 +487,7 @@ export interface components {
             /** @enum {string} */
             layout?: "single" | "split";
             /** @enum {string} */
-            photoFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+            photoScaleMode?: "fit_inside" | "fill_crop" | "stretch" | "original";
             /** @enum {string} */
             transitionType?: "fade" | "slide" | "none";
             transitionDuration?: number;

@@ -1,4 +1,4 @@
-import type { Photo, ObjectFit } from '../../photos';
+import type { Photo, PhotoScaleMode } from '../../photos';
 import type { LoadedPhoto } from '../../photo-pool';
 import type { PoolDebugInfo, SlideshowDebugInfo } from '../../debug-panel';
 
@@ -47,7 +47,7 @@ export interface UseSlideshowReturn {
         isTransitioning: boolean;
         transitionStyles: React.CSSProperties;
         layoutClass: string;
-        objectFit: ObjectFit;
+        photoScaleMode: PhotoScaleMode;
     };
     actions: {
         goToPrevious: () => void;

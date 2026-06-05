@@ -64,9 +64,9 @@ export function buildDefaultSettings(): DomainAppSettings {
                 process.env.DEFAULT_TRANSITION_DURATION,
                 fallback.playback.transitionDuration
             ),
-            photoFit:
-                (process.env.DEFAULT_OBJECT_FIT as DomainAppSettings['playback']['photoFit']) ||
-                fallback.playback.photoFit,
+            photoScaleMode:
+                (process.env.DEFAULT_PHOTO_SCALE_MODE as DomainAppSettings['playback']['photoScaleMode']) ||
+                fallback.playback.photoScaleMode,
             livePhotoEnabled: parseBool(
                 process.env.DEFAULT_SHOW_LIVE_PHOTO,
                 fallback.playback.livePhotoEnabled

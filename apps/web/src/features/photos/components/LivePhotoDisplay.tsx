@@ -1,15 +1,16 @@
-import type { ObjectFit, Photo } from '../types';
+import type { Photo, PhotoScaleMode } from '../types';
 import { PhotoDisplay } from './PhotoDisplay';
 import { useLivePhoto } from '../hooks/useLivePhoto';
+import { scaleModeToCss } from '../utils/scaleModeToCss';
 
 interface LivePhotoDisplayProps {
     photo: Photo;
-    objectFit?: ObjectFit;
+    photoScaleMode?: PhotoScaleMode;
 }
 
 export const LivePhotoDisplay = ({
     photo,
-    objectFit = 'cover',
+    photoScaleMode = 'fill_crop',
 }: LivePhotoDisplayProps) => {
     const { hasVideo, showVideo, onVideoCanPlay } = useLivePhoto(photo);
 
@@ -18,7 +19,7 @@ export const LivePhotoDisplay = ({
             {/* Base Image */}
             <PhotoDisplay
                 photo={photo}
-                objectFit={objectFit}
+                photoScaleMode={photoScaleMode}
                 className={`transition-opacity duration-500 ${showVideo ? 'opacity-0' : 'opacity-100'
                     }`}
             />
@@ -33,11 +34,9 @@ export const LivePhotoDisplay = ({
                     loop
                     preload="auto"
                     onCanPlay={onVideoCanPlay}
-                    className={`absolute inset-0 w-full h-full ${objectFit === 'cover'
-                        ? 'object-cover'
-                        : 'object-contain'
-                        } transition-opacity duration-500 ${showVideo ? 'opacity-100' : 'opacity-0'
+                    className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${showVideo ? 'opacity-100' : 'opacity-0'
                         }`}
+                    style={{ objectFit: scaleModeToCss(photoScaleMode) }}
                 />
             )}
         </>

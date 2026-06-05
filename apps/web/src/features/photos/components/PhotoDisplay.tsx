@@ -1,26 +1,19 @@
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import type { ObjectFit, Photo } from '../types';
+import type { Photo, PhotoScaleMode } from '../types';
 import { usePhotoAnimation } from '../hooks/usePhotoAnimation';
+import { scaleModeToCss } from '../utils/scaleModeToCss';
 
 interface PhotoDisplayProps {
     photo: Photo;
-    objectFit?: ObjectFit;
+    photoScaleMode?: PhotoScaleMode;
     className?: string;
 }
 
 export const PhotoDisplay = ({
     photo,
-    objectFit = 'cover',
+    photoScaleMode = 'fill_crop',
     className = '',
 }: PhotoDisplayProps) => {
-    const objectFitClasses: Record<ObjectFit, string> = {
-        contain: 'object-contain',
-        cover: 'object-cover',
-        fill: 'object-fill',
-        none: 'object-none',
-        'scale-down': 'object-scale-down',
-    };
-
     const { settings } = useSettingsData();
 
     const { animationClass, animationStyles } = usePhotoAnimation({
@@ -34,8 +27,8 @@ export const PhotoDisplay = ({
         <img
             src={photo.url}
             alt={photo.description || 'Photo'}
-            className={`absolute inset-0 w-full h-full ${objectFitClasses[objectFit]} ${animationClass} ${className}`}
-            style={animationStyles}
+            className={`absolute inset-0 w-full h-full ${animationClass} ${className}`}
+            style={{ objectFit: scaleModeToCss(photoScaleMode), ...animationStyles }}
         />
     );
 };

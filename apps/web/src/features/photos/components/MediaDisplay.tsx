@@ -1,19 +1,19 @@
 import { PhotoMetadataOverlay } from './PhotoMetadataOverlay';
 import { useIdle } from '../../../hooks';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
-import type { ObjectFit, Photo } from '../types';
+import type { Photo, PhotoScaleMode } from '../types';
 import { useState } from 'react';
 import { LivePhotoDisplay } from './LivePhotoDisplay';
 import { PhotoDisplay } from './PhotoDisplay';
 
 interface MediaDisplayProps {
     photo: Photo;
-    objectFit?: ObjectFit;
+    photoScaleMode?: PhotoScaleMode;
 }
 
 export const MediaDisplay = ({
     photo,
-    objectFit = 'cover',
+    photoScaleMode = 'fill_crop',
 }: MediaDisplayProps) => {
     const { isIdle } = useIdle();
     const { settings } = useSettingsData();
@@ -25,9 +25,9 @@ export const MediaDisplay = ({
         <div className="relative h-full w-full overflow-hidden">
             {/* Media Layer */}
             {showLivePhoto ? (
-                <LivePhotoDisplay photo={photo} objectFit={objectFit} />
+                <LivePhotoDisplay photo={photo} photoScaleMode={photoScaleMode} />
             ) : (
-                <PhotoDisplay photo={photo} objectFit={objectFit} />
+                <PhotoDisplay photo={photo} photoScaleMode={photoScaleMode} />
             )}
 
             {/* Metadata Overlay */}

@@ -29,7 +29,7 @@ export type ApiMeta = components['schemas']['ApiMeta'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type ApiErrorEnvelope = ErrorResponse;
 
-export type ObjectFit = PlaybackSettings['photoFit'];
+export type PhotoScaleMode = PlaybackSettings['photoScaleMode'];
 export type LayoutMode = PlaybackSettings['layout'];
 export type PhotoAnimationType = PlaybackSettings['photoAnimationType'];
 export type SlideshowTransitionType = PlaybackSettings['transitionType'];

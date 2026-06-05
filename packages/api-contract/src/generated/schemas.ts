@@ -88,7 +88,7 @@ const PlaybackSettings = z
     intervalMs: z.number().int(),
     autoplay: z.boolean(),
     layout: z.enum(["single", "split"]),
-    photoFit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),
+    photoScaleMode: z.enum(["fit_inside", "fill_crop", "stretch", "original"]),
     transitionType: z.enum(["fade", "slide", "none"]),
     transitionDuration: z.number(),
     photoAnimationType: z.enum([
@@ -150,7 +150,7 @@ const PlaybackSettingsUpdate = z
     intervalMs: z.number().int(),
     autoplay: z.boolean(),
     layout: z.enum(["single", "split"]),
-    photoFit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),
+    photoScaleMode: z.enum(["fit_inside", "fill_crop", "stretch", "original"]),
     transitionType: z.enum(["fade", "slide", "none"]),
     transitionDuration: z.number(),
     photoAnimationType: z.enum([

@@ -17,7 +17,7 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         layout: 'single',
         intervalMs: 10000,
         autoplay: true,
-        photoFit: 'cover',
+        photoScaleMode: 'fill_crop',
         transitionType: 'fade',
         transitionDuration: 500,
         photoAnimationType: 'zoom-in',

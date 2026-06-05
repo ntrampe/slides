@@ -65,7 +65,7 @@ function SlideshowPhotoLoading({ currentIndex, count }: { currentIndex: number; 
 }
 
 function SlideshowSlides({ state }: { state: SlideshowState }) {
-    const { displayedPhoto, displayedNextPhoto, layoutClass, transitionStyles, objectFit } = state;
+    const { displayedPhoto, displayedNextPhoto, layoutClass, transitionStyles, photoScaleMode } = state;
     if (!displayedPhoto) {
         return null;
     }
@@ -78,13 +78,13 @@ function SlideshowSlides({ state }: { state: SlideshowState }) {
             <MediaDisplay
                 key={displayedPhoto.id}
                 photo={displayedPhoto}
-                objectFit={objectFit}
+                photoScaleMode={photoScaleMode}
             />
             {layoutClass.includes('grid-cols-2') && displayedNextPhoto && (
                 <MediaDisplay
                     key={displayedNextPhoto.id}
                     photo={displayedNextPhoto}
-                    objectFit={objectFit}
+                    photoScaleMode={photoScaleMode}
                 />
             )}
         </div>

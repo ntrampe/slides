@@ -102,7 +102,7 @@ export function useSlideshow(): UseSlideshowReturn {
             isTransitioning: transition.isTransitioning,
             transitionStyles: transition.transitionStyles,
             layoutClass: transition.displayedLayoutClass,
-            objectFit: settings.playback.photoFit,
+            photoScaleMode: settings.playback.photoScaleMode,
         },
         actions: {
             goToPrevious: handlePrevious,
