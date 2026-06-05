@@ -1,4 +1,4 @@
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type {
     DomainAppSettings,
@@ -37,8 +37,28 @@ export class FileSettingsStore implements SettingsStore {
         value: DomainAppSettings[SettingsDomain]
     ): Promise<void> {
         const filePath = this.domainPath(domain);
+        const tempPath = `${filePath}.tmp`;
+        const payload = JSON.stringify(value, null, 2);
+
         await mkdir(dirname(filePath), { recursive: true });
-        await writeFile(filePath, JSON.stringify(value, null, 2), 'utf8');
+
+        try {
+            await writeFile(tempPath, payload, 'utf8');
+        } catch (error) {
+            try {
+                await unlink(tempPath);
+            } catch (cleanupError) {
+                if (!isNodeError(cleanupError) || cleanupError.code !== 'ENOENT') {
+                    console.warn(
+                        `Failed to remove orphaned settings temp file at ${tempPath}:`,
+                        cleanupError
+                    );
+                }
+            }
+            throw error;
+        }
+
+        await rename(tempPath, filePath);
     }
 
     async clearDomainOverrides(domain: SettingsDomain): Promise<void> {
