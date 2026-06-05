@@ -58,7 +58,7 @@ export const SlideshowHUD = ({
                             {format(now, timeFormat)}
                         </div>
                         <div className={`font-light opacity-80 mt-1 sm:mt-2 ${hudTextSizes.heading}`}>
-                            {format(now, configuration.clockDateFormat)}
+                            {format(now, configuration.dateFormat)}
                         </div>
                     </HudPanel>
                 )}

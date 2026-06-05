@@ -447,9 +447,8 @@ export interface components {
             livePhotoDelay: number;
         };
         ConfigurationSettings: {
-            photoMetadataDateFormat: string;
+            dateFormat: string;
             clockUse24HourFormat: boolean;
-            clockDateFormat: string;
             /** Format: double */
             weatherLat: number;
             /** Format: double */
@@ -490,9 +489,8 @@ export interface components {
             livePhotoDelay?: number;
         };
         ConfigurationSettingsUpdate: {
-            photoMetadataDateFormat?: string;
+            dateFormat?: string;
             clockUse24HourFormat?: boolean;
-            clockDateFormat?: string;
             /** Format: double */
             weatherLat?: number;
             /** Format: double */

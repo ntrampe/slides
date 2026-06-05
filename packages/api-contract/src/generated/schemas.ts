@@ -106,9 +106,8 @@ const PlaybackSettings = z
   .passthrough();
 const ConfigurationSettings = z
   .object({
-    photoMetadataDateFormat: z.string(),
+    dateFormat: z.string(),
     clockUse24HourFormat: z.boolean(),
-    clockDateFormat: z.string(),
     weatherLat: z.number(),
     weatherLng: z.number(),
   })
@@ -162,9 +161,8 @@ const PlaybackSettingsUpdate = z
   .passthrough();
 const ConfigurationSettingsUpdate = z
   .object({
-    photoMetadataDateFormat: z.string(),
+    dateFormat: z.string(),
     clockUse24HourFormat: z.boolean(),
-    clockDateFormat: z.string(),
     weatherLat: z.number(),
     weatherLng: z.number(),
   })

@@ -422,20 +422,6 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span>Show Photo Metadata</span>
                 </label>
 
-                <label className="block">
-                    <span className="block mb-1">Metadata Date Format</span>
-                    <input
-                        type="text"
-                        value={configuration.photoMetadataDateFormat}
-                        onChange={(e) =>
-                            updateConfigurationSettings({
-                                photoMetadataDateFormat: e.target.value,
-                            })
-                        }
-                        className="bg-surface border border-border w-full p-2 rounded"
-                    />
-                </label>
-
                 <Divider />
 
                 {/* Clock */}
@@ -466,12 +452,12 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </label>
 
                 <label className="block">
-                    <span className="block mb-1">Clock Date Format</span>
+                    <span className="block mb-1">Date Format</span>
                     <input
                         type="text"
-                        value={configuration.clockDateFormat}
+                        value={configuration.dateFormat}
                         onChange={(e) =>
-                            updateConfigurationSettings({ clockDateFormat: e.target.value })
+                            updateConfigurationSettings({ dateFormat: e.target.value })
                         }
                         className="bg-surface border border-border w-full p-2 rounded"
                     />

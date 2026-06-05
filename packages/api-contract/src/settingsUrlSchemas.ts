@@ -71,9 +71,8 @@ const playbackUrlSchema = z
 
 const configurationUrlSchema = z
     .object({
-        photoMetadataDateFormat: z.string().optional(),
+        dateFormat: z.string().optional(),
         clockUse24HourFormat: urlBooleanSchema,
-        clockDateFormat: z.string().optional(),
         weatherLat: z.coerce.number().optional(),
         weatherLng: z.coerce.number().optional(),
     })

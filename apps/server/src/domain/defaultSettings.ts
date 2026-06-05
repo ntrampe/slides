@@ -88,12 +88,11 @@ export function buildDefaultSettings(): DomainAppSettings {
             ),
         },
         configuration: {
-            photoMetadataDateFormat: fallback.configuration.photoMetadataDateFormat,
+            dateFormat: fallback.configuration.dateFormat,
             clockUse24HourFormat: parseBool(
                 process.env.DEFAULT_24_HOUR_FORMAT,
                 fallback.configuration.clockUse24HourFormat
             ),
-            clockDateFormat: fallback.configuration.clockDateFormat,
             weatherLat: parseFloatEnv(
                 process.env.DEFAULT_WEATHER_LAT,
                 fallback.configuration.weatherLat

@@ -27,9 +27,8 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         livePhotoDelay: 1000,
     },
     configuration: {
-        photoMetadataDateFormat: 'MMM dd, yyyy',
+        dateFormat: 'MMM dd, yyyy',
         clockUse24HourFormat: false,
-        clockDateFormat: 'MMM dd, yyyy',
         weatherLat: 51.5074,
         weatherLng: -0.1278,
     },
