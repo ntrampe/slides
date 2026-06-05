@@ -2,6 +2,8 @@ import { Router } from 'express';
 import type { EventsHub } from '../../../services/EventsHub.js';
 import { asyncHandler } from '../../middleware/asyncHandler.js';
 
+const PING_INTERVAL_MS = 30_000;
+
 export function createEventsRouter(eventsHub: EventsHub): Router {
     const router = Router();
 
@@ -13,11 +15,49 @@ export function createEventsRouter(eventsHub: EventsHub): Router {
             res.setHeader('Connection', 'keep-alive');
             res.flushHeaders?.();
 
-            eventsHub.addClient(res);
+            let cleanedUp = false;
+            let pingTimer: ReturnType<typeof setInterval> | null = null;
+
+            const writeChunk = (chunk: string): boolean => {
+                if (res.writableEnded || res.destroyed) {
+                    return false;
+                }
+
+                try {
+                    res.write(chunk);
+                    return true;
+                } catch {
+                    return false;
+                }
+            };
 
             const cleanup = () => {
-                eventsHub.removeClient(res);
+                if (cleanedUp) {
+                    return;
+                }
+                cleanedUp = true;
+
+                unsubscribe();
+                if (pingTimer != null) {
+                    clearInterval(pingTimer);
+                    pingTimer = null;
+                }
             };
+
+            const unsubscribe = eventsHub.subscribe((event) => {
+                const ok = writeChunk(
+                    `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`
+                );
+                if (!ok) {
+                    cleanup();
+                }
+            });
+
+            pingTimer = setInterval(() => {
+                if (!writeChunk(': ping\n\n')) {
+                    cleanup();
+                }
+            }, PING_INTERVAL_MS);
 
             req.on('close', cleanup);
             res.on('error', cleanup);

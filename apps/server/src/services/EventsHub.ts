@@ -1,4 +1,3 @@
-import type { Response } from 'express';
 import type {
     AppSettings,
     DisplaySettings,
@@ -6,66 +5,43 @@ import type {
     QuerySettings,
 } from '@slides/api-contract';
 
-const PING_INTERVAL_MS = 30_000;
+export type DomainEvent =
+    | { type: 'query_updated'; data: QuerySettings }
+    | { type: 'playback_updated'; data: PlaybackSettings }
+    | { type: 'display_updated'; data: DisplaySettings }
+    | { type: 'settings_cleared'; data: AppSettings };
+
+type EventSubscriber = (event: DomainEvent) => void;
 
 export class EventsHub {
-    private readonly clients = new Set<Response>();
-    private pingTimer: ReturnType<typeof setInterval> | null = null;
+    private readonly subscribers = new Set<EventSubscriber>();
 
-    addClient(res: Response): void {
-        this.clients.add(res);
-        if (this.pingTimer == null) {
-            this.pingTimer = setInterval(() => this.sendPing(), PING_INTERVAL_MS);
-        }
-    }
-
-    removeClient(res: Response): void {
-        this.clients.delete(res);
-        if (this.clients.size === 0 && this.pingTimer != null) {
-            clearInterval(this.pingTimer);
-            this.pingTimer = null;
-        }
+    subscribe(callback: EventSubscriber): () => void {
+        this.subscribers.add(callback);
+        return () => {
+            this.subscribers.delete(callback);
+        };
     }
 
     broadcastQueryUpdated(query: QuerySettings): void {
-        this.writeEvent('query_updated', query);
+        this.emit({ type: 'query_updated', data: query });
     }
 
     broadcastPlaybackUpdated(playback: PlaybackSettings): void {
-        this.writeEvent('playback_updated', playback);
+        this.emit({ type: 'playback_updated', data: playback });
     }
 
     broadcastDisplayUpdated(display: DisplaySettings): void {
-        this.writeEvent('display_updated', display);
+        this.emit({ type: 'display_updated', data: display });
     }
 
     broadcastSettingsCleared(defaults: AppSettings): void {
-        this.writeEvent('settings_cleared', defaults);
+        this.emit({ type: 'settings_cleared', data: defaults });
     }
 
-    private writeEvent(event: string, data: unknown): void {
-        const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-        for (const client of this.clients) {
-            this.writeToClient(client, payload);
-        }
-    }
-
-    private sendPing(): void {
-        for (const client of this.clients) {
-            this.writeToClient(client, ': ping\n\n');
-        }
-    }
-
-    private writeToClient(client: Response, chunk: string): void {
-        if (client.writableEnded || client.destroyed) {
-            this.clients.delete(client);
-            return;
-        }
-
-        try {
-            client.write(chunk);
-        } catch {
-            this.clients.delete(client);
+    private emit(event: DomainEvent): void {
+        for (const subscriber of this.subscribers) {
+            subscriber(event);
         }
     }
 }
