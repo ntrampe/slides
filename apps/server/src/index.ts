@@ -13,6 +13,7 @@ const config = loadConfig();
 const app = express();
 
 app.set('trust proxy', true);
+app.set('query parser', 'extended');
 
 app.use('/api', createApiRouter(config));
 
@@ -28,11 +29,12 @@ app.listen(config.PORT, () => {
     console.log(`Slides API running on http://localhost:${config.PORT}`);
     console.log(`Domain API (/api/v1):`);
     console.log(`  - GET    /api/v1/meta                   -> { apiVersion, contractVersion }`);
-    console.log(`  - GET    /api/v1/slideshow              -> ordered photo list { photos, total }`);
-    console.log(`  - GET    /api/v1/settings/resolved      -> merged effective settings`);
+    console.log(`  - GET    /api/v1/settings               -> effective domain configuration`);
+    console.log(`  - GET    /api/v1/events                 -> SSE (domain settings updates)`);
+    console.log(`  - POST   /api/v1/slideshow/query        -> stateless photo list`);
     console.log(`  - GET    /api/v1/albums | /people | /locations`);
     console.log(`  - GET    /api/v1/weather                -> OpenWeatherMap`);
-    console.log(`  - GET/PUT/DELETE /api/v1/settings[/defaults]`);
+    console.log(`  - PATCH/DELETE /api/v1/settings/{query,playback,display}`);
     console.log(`  - GET    /api/v1/assets/:id/thumbnail | /video  -> ${config.IMMICH_URL}`);
     console.log(`=================================\n`);
 });

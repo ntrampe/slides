@@ -1,32 +1,23 @@
+import type { SlideshowQueryRequest } from '@slides/api-contract';
 import type { PhotoQueryService } from './PhotoQueryService.js';
-import type { SettingsService } from './SettingsService.js';
 import type { LinkBuilder } from '../infra/LinkBuilder.js';
 import type { DomainSlideshowResult } from '../domain/slideshow.js';
 import { seededShuffle } from '../domain/seededShuffle.js';
 
 /**
- * The headline thin-client endpoint logic: resolve settings, query photos with
- * the configured filter, and apply ordering/shuffle server-side so a client
- * (e.g. a native mobile app) only needs to render the result.
+ * Stateless slideshow photo query — filter/shuffle from request body only.
  */
 export class SlideshowService {
-    constructor(
-        private readonly photos: PhotoQueryService,
-        private readonly settings: SettingsService
-    ) {}
+    constructor(private readonly photos: PhotoQueryService) {}
 
-    async getSlideshow(
-        search: string,
-        links: LinkBuilder,
-        options: { seed?: string } = {}
+    async queryPhotos(
+        body: SlideshowQueryRequest,
+        links: LinkBuilder
     ): Promise<DomainSlideshowResult> {
-        const settings = await this.settings.resolve(search);
+        const { shuffle: _shuffle, seed, ...queryParams } = body;
+        const photos = await this.photos.getPhotos(queryParams, links);
 
-        const photos = await this.photos.getPhotos(settings.slideshow.filter, links);
-
-        const ordered = settings.slideshow.shuffle
-            ? seededShuffle(photos, options.seed ?? defaultSeed())
-            : photos;
+        const ordered = body.shuffle ? seededShuffle(photos, seed ?? defaultSeed()) : photos;
 
         return { photos: ordered, total: ordered.length };
     }

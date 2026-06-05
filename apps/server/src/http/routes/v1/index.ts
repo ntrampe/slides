@@ -9,11 +9,13 @@ import { WeatherService } from '../../../services/WeatherService.js';
 import { FileSettingsStore } from '../../../services/FileSettingsStore.js';
 import { SettingsService } from '../../../services/SettingsService.js';
 import { SlideshowService } from '../../../services/SlideshowService.js';
+import { EventsHub } from '../../../services/EventsHub.js';
 import { buildDefaultSettings } from '../../../domain/defaultSettings.js';
 import { createCatalogRouters } from './catalog.js';
 import { createWeatherRouter } from './weather.js';
 import { createSettingsRouter } from './settings.js';
 import { createSlideshowRouter } from './slideshow.js';
+import { createEventsRouter } from './events.js';
 import { createAssetsRouter } from './assets.js';
 import { createMetaRouter } from './meta.js';
 
@@ -21,26 +23,28 @@ export function createV1Router(config: ServerConfig): Router {
     const router = Router();
 
     const defaults = buildDefaultSettings();
+    const eventsHub = new EventsHub();
 
     const immich = new ImmichClient(config);
     const photoGateway = new ImmichPhotoGateway(immich);
     const photoService = new PhotoQueryService(photoGateway);
     const catalogService = new CatalogService(immich);
     const weatherService = new WeatherService(config);
-    const settingsFilePath = path.join(process.env.DATA_DIR ?? './data', 'settings.json');
-    const settingsStore = new FileSettingsStore(settingsFilePath);
+    const dataDir = process.env.DATA_DIR ?? './data';
+    const settingsStore = new FileSettingsStore(dataDir);
     const settingsService = new SettingsService(defaults, settingsStore);
-    const slideshowService = new SlideshowService(photoService, settingsService);
+    const slideshowService = new SlideshowService(photoService);
 
     const catalog = createCatalogRouters(catalogService, immich, config);
 
     router.use('/meta', createMetaRouter());
     router.use('/slideshow', createSlideshowRouter(slideshowService, config));
+    router.use('/events', createEventsRouter(eventsHub));
     router.use('/albums', catalog.albums);
     router.use('/people', catalog.people);
     router.use('/locations', catalog.locations);
     router.use('/weather', createWeatherRouter(weatherService, settingsService));
-    router.use('/settings', createSettingsRouter(settingsService));
+    router.use('/settings', createSettingsRouter(settingsService, eventsHub));
     router.use('/assets', createAssetsRouter(immich));
 
     return router;

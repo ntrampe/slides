@@ -1,10 +1,7 @@
+import type { QuerySettings } from '@slides/api-contract';
 import type { ImmichPhotoGateway, PhotoQuery } from '../infra/ImmichPhotoGateway';
 import type { LinkBuilder } from '../infra/LinkBuilder';
-import {
-    type DomainPhoto,
-    type DomainPhotoFilterParams,
-    type FilterOperator,
-} from '../domain/photos.js';
+import { type DomainPhoto, type FilterOperator } from '../domain/photos.js';
 import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
 
 /**
@@ -17,7 +14,10 @@ import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
 export class PhotoQueryService {
     constructor(private readonly gateway: ImmichPhotoGateway) {}
 
-    async getPhotos(params: DomainPhotoFilterParams, links: LinkBuilder): Promise<DomainPhoto[]> {
+    async getPhotos(
+        params: Partial<Omit<QuerySettings, 'shuffle'>>,
+        links: LinkBuilder
+    ): Promise<DomainPhoto[]> {
         const {
             albumIds,
             albumOperator = DEFAULT_FILTER_OPERATOR,
@@ -25,11 +25,22 @@ export class PhotoQueryService {
             personOperator = DEFAULT_FILTER_OPERATOR,
             excludeAlbumIds,
             excludePersonIds,
-            location,
+            locationCountry,
+            locationState,
+            locationCity,
             startDate,
             endDate,
             globalOperator = DEFAULT_FILTER_OPERATOR,
         } = params;
+
+        const location =
+            locationCountry || locationState || locationCity
+                ? {
+                      country: locationCountry,
+                      state: locationState,
+                      city: locationCity,
+                  }
+                : undefined;
 
         // IDs can appear in both selected and excluded (picker Minus on a chip). Inclusion must not
         // require an entity we later subtract, or AND results empty out.

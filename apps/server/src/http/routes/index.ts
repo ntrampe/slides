@@ -13,7 +13,7 @@ export function createApiRouter(config: ServerConfig): Router {
     const corsOrigin = config.CORS_ALLOWED_ORIGIN ?? '*';
     router.use((req: Request, res: Response, next: NextFunction) => {
         res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         if (req.method === 'OPTIONS') {
             res.sendStatus(204);
