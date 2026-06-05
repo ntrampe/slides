@@ -16,6 +16,8 @@ const DOMAIN_FILES: Record<SettingsDomain, string> = {
 };
 
 export class FileSettingsStore implements SettingsStore {
+    private readonly writeMutex = new AsyncMutex();
+
     constructor(private readonly dataDir: string) {}
 
     async getAllDomainOverrides(): Promise<{
@@ -33,6 +35,21 @@ export class FileSettingsStore implements SettingsStore {
     }
 
     async setDomainOverrides(
+        domain: SettingsDomain,
+        value: DomainAppSettings[SettingsDomain]
+    ): Promise<void> {
+        return this.writeMutex.run(() => this.setDomainOverridesUnlocked(domain, value));
+    }
+
+    async clearDomainOverrides(domain: SettingsDomain): Promise<void> {
+        return this.writeMutex.run(() => this.clearDomainOverridesUnlocked(domain));
+    }
+
+    async clearAllOverrides(): Promise<void> {
+        return this.writeMutex.run(() => this.clearAllOverridesUnlocked());
+    }
+
+    private async setDomainOverridesUnlocked(
         domain: SettingsDomain,
         value: DomainAppSettings[SettingsDomain]
     ): Promise<void> {
@@ -61,7 +78,7 @@ export class FileSettingsStore implements SettingsStore {
         await rename(tempPath, filePath);
     }
 
-    async clearDomainOverrides(domain: SettingsDomain): Promise<void> {
+    private async clearDomainOverridesUnlocked(domain: SettingsDomain): Promise<void> {
         try {
             await unlink(this.domainPath(domain));
         } catch (error) {
@@ -72,10 +89,10 @@ export class FileSettingsStore implements SettingsStore {
         }
     }
 
-    async clearAllOverrides(): Promise<void> {
+    private async clearAllOverridesUnlocked(): Promise<void> {
         await Promise.all(
             (Object.keys(DOMAIN_FILES) as SettingsDomain[]).map((domain) =>
-                this.clearDomainOverrides(domain)
+                this.clearDomainOverridesUnlocked(domain)
             )
         );
     }
@@ -99,6 +116,19 @@ export class FileSettingsStore implements SettingsStore {
             );
             return null;
         }
+    }
+}
+
+class AsyncMutex {
+    private tail: Promise<void> = Promise.resolve();
+
+    run<T>(fn: () => Promise<T>): Promise<T> {
+        const result = this.tail.then(() => fn());
+        this.tail = result.then(
+            () => undefined,
+            () => undefined
+        );
+        return result;
     }
 }
 
