@@ -60,7 +60,13 @@ export class PhotoQueryService {
             globalOperator,
         });
 
-        const results = await Promise.all(queries.map((query) => this.gateway.search(query, links)));
+        const results: DomainPhoto[][] = [];
+        for (const chunk of this.chunkArray(queries, 3)) {
+            const chunkResults = await Promise.all(
+                chunk.map((query) => this.gateway.search(query, links))
+            );
+            results.push(...chunkResults);
+        }
 
         let combinedPhotos = this.combineResults(results, {
             albumOperator,
@@ -215,6 +221,14 @@ export class PhotoQueryService {
         return Array.from(photoMap.values());
     }
 
+    private chunkArray<T>(arr: T[], size: number): T[][] {
+        const chunks: T[][] = [];
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+    }
+
     /**
      * Apply exclusions by fetching IDs to subtract and filtering them out.
      * Items within each exclude list are OR'd together (union).
@@ -249,7 +263,13 @@ export class PhotoQueryService {
 
         if (excludeQueries.length === 0) return photos;
 
-        const idResults = await Promise.all(excludeQueries.map((q) => this.gateway.searchIds(q)));
+        const idResults: string[][] = [];
+        for (const chunk of this.chunkArray(excludeQueries, 3)) {
+            const chunkResults = await Promise.all(
+                chunk.map((q) => this.gateway.searchIds(q))
+            );
+            idResults.push(...chunkResults);
+        }
         const excludeIds = new Set(idResults.flat());
         return photos.filter((p) => !excludeIds.has(p.id));
     }
