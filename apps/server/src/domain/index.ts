@@ -6,3 +6,4 @@ export * from './people.js';
 export * from './locations.js';
 export * from './weather.js';
 export * from './theme.js';
+export * from './resolveDateRange.js';

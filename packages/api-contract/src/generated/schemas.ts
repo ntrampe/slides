@@ -5,6 +5,7 @@ const ApiMeta = z
   .object({ apiVersion: z.string(), contractVersion: z.string() })
   .passthrough();
 const FilterOperator = z.enum(["AND", "OR"]);
+const DatePreset = z.enum(["all", "today", "week", "month", "year", "custom"]);
 const QuerySettings = z
   .object({
     albumIds: z.array(z.string()),
@@ -18,6 +19,7 @@ const QuerySettings = z
     locationCity: z.string().optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
+    datePreset: DatePreset.optional(),
     globalOperator: FilterOperator,
     shuffle: z.boolean(),
   })
@@ -133,6 +135,7 @@ const QuerySettingsUpdate = z
     locationCity: z.string().nullable(),
     startDate: z.string().nullable(),
     endDate: z.string().nullable(),
+    datePreset: DatePreset.nullable(),
     globalOperator: FilterOperator.nullable(),
     shuffle: z.boolean().nullable(),
   })
@@ -225,6 +228,7 @@ const WeatherData = z
 export const schemas = {
   ApiMeta,
   FilterOperator,
+  DatePreset,
   QuerySettings,
   SlideshowQueryRequest,
   PhotoLocation,

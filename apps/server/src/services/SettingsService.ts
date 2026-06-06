@@ -7,6 +7,10 @@ import type {
     SettingsDomain,
 } from '../domain/settings.js';
 import { parseUrlQueryOverrides } from '../domain/settings/urlQueryOverrides.js';
+import {
+    applyResolvedQueryDates,
+    normalizeQuerySettingsForPersist,
+} from '../domain/resolveDateRange.js';
 import type { SettingsStore } from './SettingsStore.js';
 import { applyPartialSettingsUpdate } from '@slides/shared/utils/applyPartialSettingsUpdate';
 import { mergeEffectiveSettings } from '@slides/shared/utils/mergeEffectiveSettings';
@@ -29,7 +33,7 @@ export class SettingsService {
         const { query, playback, configuration } = await this.store.getAllDomainOverrides();
         const urlOverrides = parseUrlQueryOverrides(reqQuery);
 
-        return mergeEffectiveSettings(
+        const merged = mergeEffectiveSettings(
             this.defaults,
             {
                 ...(query ? { query } : {}),
@@ -38,12 +42,20 @@ export class SettingsService {
             },
             urlOverrides
         );
+
+        return {
+            ...merged,
+            query: applyResolvedQueryDates(merged.query),
+        };
     }
 
     async setQuerySettings(update: NullablePartial<DomainQuerySettings>): Promise<DomainAppSettings> {
         const { query } = await this.store.getAllDomainOverrides();
         const mergedQuery = applyPartialSettingsUpdate(query, update);
-        await this.store.setDomainOverrides('query', mergedQuery);
+        const normalized = normalizeQuerySettingsForPersist(
+            mergeEffectiveSettings(this.defaults, { query: mergedQuery }).query
+        );
+        await this.store.setDomainOverrides('query', normalized);
         return this.getEffective();
     }
 

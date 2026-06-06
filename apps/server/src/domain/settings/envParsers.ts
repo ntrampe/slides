@@ -1,3 +1,9 @@
+import type { QuerySettings } from '@slides/api-contract';
+
+export type DatePreset = NonNullable<QuerySettings['datePreset']>;
+
+const DATE_PRESETS: DatePreset[] = ['all', 'today', 'week', 'month', 'year', 'custom'];
+
 /** Parse helpers for `DEFAULT_*` environment variables in server default settings. */
 
 export function parseBool(value: string | undefined, fallback: boolean): boolean {
@@ -34,4 +40,10 @@ export function parseHourFormat(
     if (value === '24') return '24';
     if (value === '12') return '12';
     return fallback;
+}
+
+export function parseDatePreset(value: string | undefined): DatePreset | undefined {
+    if (!value) return undefined;
+    const preset = value.trim() as DatePreset;
+    return DATE_PRESETS.includes(preset) ? preset : undefined;
 }

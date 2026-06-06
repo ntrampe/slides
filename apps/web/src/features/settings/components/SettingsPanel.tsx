@@ -129,11 +129,10 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 </FilterCompartment>
                 <FilterCompartment>
                     <DateFilter
+                        datePreset={query.datePreset}
                         startDate={query.startDate}
                         endDate={query.endDate}
-                        onChange={(startDate, endDate) =>
-                            updateQuerySettings({ startDate, endDate })
-                        }
+                        onChange={(update) => updateQuerySettings(update)}
                     />
                 </FilterCompartment>
             </CollapsibleSection>

@@ -101,6 +101,8 @@ You can also **exclude** albums or people: photos in an excluded album, or tagge
 
 When you filter by **both** albums and people, an extra control lets you **combine** those two parts with **All** or **Any** (for example, photos must satisfy both the album rules and the people rules, or either set of rules).
 
+**Date filtering** uses a `datePreset` (`all`, `today`, `week`, `month`, `year`, or `custom`). Relative presets are resolved on the server and stay current (for example, Past Year always means the last 365 days through today). Custom ranges use explicit `startDate` and `endDate` bounds.
+
 These options use the same slideshow filter settings as URL and environment configuration (see `@slides/api-contract` / `apps/web/src/features/settings/types.ts`).
 
 ### 2. URL query overrides (kiosk presets)
@@ -117,8 +119,11 @@ http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&configu
 # Specific albums (comma-separated IDs)
 ?query[albumIds]=abc123,def456&playback[autoplay]=true
 
-# Date range
-?query[startDate]=2024-01-01&query[endDate]=2024-12-31
+# Relative date preset (resolved server-side)
+?query[datePreset]=year
+
+# Custom date range (requires datePreset=custom)
+?query[datePreset]=custom&query[startDate]=2024-01-01&query[endDate]=2024-12-31
 
 # Location filter
 ?query[locationCountry]=USA&query[locationState]=California

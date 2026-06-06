@@ -1,61 +1,36 @@
-import { useMemo } from 'react';
+import type { QuerySettings } from '../../photos/types';
+
+export type DatePreset = NonNullable<QuerySettings['datePreset']>;
+
+export type DateFilterChange = Partial<Pick<QuerySettings, 'datePreset' | 'startDate' | 'endDate'>> &
+    Pick<QuerySettings, 'datePreset'>;
 
 export interface DateFilterProps {
+    datePreset?: QuerySettings['datePreset'];
     startDate?: string;
     endDate?: string;
-    onChange: (startDate?: string, endDate?: string) => void;
+    onChange: (update: DateFilterChange) => void;
 }
 
-type DatePreset = 'all' | 'today' | 'week' | 'month' | 'year' | 'custom';
-
-function deriveDatePreset(startDate?: string, endDate?: string): DatePreset {
-    if (!startDate && !endDate) return 'all';
-
-    const today = new Date().toISOString().split('T')[0];
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    if (startDate === today && endDate === today) return 'today';
-    if (startDate === weekAgo && !endDate) return 'week';
-    if (startDate === monthAgo && !endDate) return 'month';
-    if (startDate === yearAgo && !endDate) return 'year';
-
-    return 'custom';
-}
-
-export const DateFilter = ({ startDate, endDate, onChange }: DateFilterProps) => {
-    const preset = useMemo(() => deriveDatePreset(startDate, endDate), [startDate, endDate]);
+export const DateFilter = ({ datePreset, startDate, endDate, onChange }: DateFilterProps) => {
+    const preset: DatePreset = datePreset ?? 'all';
 
     const handlePresetChange = (newPreset: DatePreset) => {
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        onChange({ datePreset: newPreset });
+    };
 
-        switch (newPreset) {
-            case 'all':
-                onChange(undefined, undefined);
-                break;
-            case 'today':
-                onChange(todayStr, todayStr);
-                break;
-            case 'week': {
-                const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                onChange(weekAgo.toISOString().split('T')[0], undefined);
-                break;
-            }
-            case 'month': {
-                const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-                onChange(monthAgo.toISOString().split('T')[0], undefined);
-                break;
-            }
-            case 'year': {
-                const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-                onChange(yearAgo.toISOString().split('T')[0], undefined);
-                break;
-            }
-            case 'custom':
-                break;
-        }
+    const handleStartChange = (value: string | undefined) => {
+        onChange({
+            datePreset: 'custom',
+            startDate: value,
+        });
+    };
+
+    const handleEndChange = (value: string | undefined) => {
+        onChange({
+            datePreset: 'custom',
+            endDate: value,
+        });
     };
 
     return (
@@ -83,7 +58,7 @@ export const DateFilter = ({ startDate, endDate, onChange }: DateFilterProps) =>
                         <input
                             type="date"
                             value={startDate || ''}
-                            onChange={(e) => onChange(e.target.value || undefined, endDate)}
+                            onChange={(e) => handleStartChange(e.target.value || undefined)}
                             className="bg-surface border border-border w-full p-2 rounded"
                         />
                     </label>
@@ -93,7 +68,7 @@ export const DateFilter = ({ startDate, endDate, onChange }: DateFilterProps) =>
                         <input
                             type="date"
                             value={endDate || ''}
-                            onChange={(e) => onChange(startDate, e.target.value || undefined)}
+                            onChange={(e) => handleEndChange(e.target.value || undefined)}
                             className="bg-surface border border-border w-full p-2 rounded"
                         />
                     </label>

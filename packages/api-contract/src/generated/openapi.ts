@@ -429,6 +429,7 @@ export interface components {
             startDate?: string;
             /** Format: date */
             endDate?: string;
+            datePreset?: components["schemas"]["DatePreset"];
             globalOperator: components["schemas"]["FilterOperator"];
             shuffle: boolean;
         };
@@ -471,6 +472,7 @@ export interface components {
             startDate?: string | null;
             /** Format: date */
             endDate?: string | null;
+            datePreset?: components["schemas"]["DatePreset"] | null;
             globalOperator?: components["schemas"]["FilterOperator"] | null;
             shuffle?: boolean | null;
         };
@@ -503,6 +505,8 @@ export interface components {
         HourFormat: "12" | "24";
         /** @enum {string} */
         FilterOperator: "AND" | "OR";
+        /** @enum {string} */
+        DatePreset: "all" | "today" | "week" | "month" | "year" | "custom";
         Album: {
             id: string;
             name: string;

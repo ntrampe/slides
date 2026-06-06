@@ -46,6 +46,7 @@ const queryUrlSchema = z
         locationCity: z.string().optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
+        datePreset: schemas.DatePreset.optional(),
         globalOperator: schemas.FilterOperator.optional(),
         shuffle: urlBooleanSchema,
     })

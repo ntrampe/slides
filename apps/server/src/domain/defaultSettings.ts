@@ -4,6 +4,7 @@ import {
     parseBool,
     parseFloatEnv,
     parseHourFormat,
+    parseDatePreset,
     parseIdArray,
     parseNumber,
     parseString,
@@ -15,6 +16,7 @@ import {
  */
 export function buildDefaultSettings(): DomainAppSettings {
     const fallback = FALLBACK_APP_SETTINGS;
+    const datePreset = parseDatePreset(process.env.DEFAULT_DATE_PRESET);
 
     return {
         query: {
@@ -42,8 +44,15 @@ export function buildDefaultSettings(): DomainAppSettings {
                 parseString(process.env.DEFAULT_LOCATION_STATE) || fallback.query.locationState,
             locationCity:
                 parseString(process.env.DEFAULT_LOCATION_CITY) || fallback.query.locationCity,
-            startDate: parseString(process.env.DEFAULT_START_DATE) || fallback.query.startDate,
-            endDate: parseString(process.env.DEFAULT_END_DATE) || fallback.query.endDate,
+            datePreset,
+            startDate:
+                datePreset === 'custom'
+                    ? parseString(process.env.DEFAULT_START_DATE) || fallback.query.startDate
+                    : fallback.query.startDate,
+            endDate:
+                datePreset === 'custom'
+                    ? parseString(process.env.DEFAULT_END_DATE) || fallback.query.endDate
+                    : fallback.query.endDate,
             globalOperator:
                 (process.env.DEFAULT_GLOBAL_OPERATOR as DomainAppSettings['query']['globalOperator']) ||
                 fallback.query.globalOperator,

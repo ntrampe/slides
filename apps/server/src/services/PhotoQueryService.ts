@@ -3,6 +3,7 @@ import type { ImmichPhotoGateway, PhotoQuery } from '../infra/ImmichPhotoGateway
 import type { LinkBuilder } from '../infra/LinkBuilder';
 import { type DomainPhoto, type FilterOperator } from '../domain/photos.js';
 import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
+import { resolveDateRange } from '../domain/resolveDateRange.js';
 
 /**
  * Application-level photo querying. Owns the filter business logic that used to
@@ -28,10 +29,15 @@ export class PhotoQueryService {
             locationCountry,
             locationState,
             locationCity,
-            startDate,
-            endDate,
+            datePreset,
             globalOperator = DEFAULT_FILTER_OPERATOR,
         } = params;
+
+        const { startDate, endDate } = resolveDateRange({
+            datePreset: datePreset ?? 'all',
+            startDate: params.startDate,
+            endDate: params.endDate,
+        });
 
         const location =
             locationCountry || locationState || locationCity

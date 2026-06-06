@@ -618,6 +618,8 @@ components:
         endDate:
           type: string
           format: date
+        datePreset:
+          $ref: '#/components/schemas/DatePreset'
         globalOperator:
           $ref: '#/components/schemas/FilterOperator'
         shuffle:
@@ -728,6 +730,10 @@ components:
           type: string
           format: date
           nullable: true
+        datePreset:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/DatePreset'
         globalOperator:
           nullable: true
           allOf:
@@ -803,6 +809,10 @@ components:
     FilterOperator:
       type: string
       enum: [AND, OR]
+
+    DatePreset:
+      type: string
+      enum: [all, today, week, month, year, custom]
 
     Album:
       type: object
