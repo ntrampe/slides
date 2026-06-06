@@ -5,6 +5,7 @@ import type {
     QuerySettings,
 } from '@slides/api-contract';
 import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
+import { applyPartialSettingsUpdate } from '@slides/shared/utils/applyPartialSettingsUpdate';
 import { mergeEffectiveSettings } from '@slides/shared/utils/mergeEffectiveSettings';
 
 const STORAGE_KEY = 'slides:settings';
@@ -31,7 +32,10 @@ export function saveDomainOverrides<K extends keyof MockDomainOverrides>(
 ): void {
     const current = loadSettingsOverrides() ?? {};
     const existing = current[domain] ?? {};
-    current[domain] = { ...existing, ...value } as NonNullable<MockDomainOverrides[K]>;
+    current[domain] = applyPartialSettingsUpdate(
+        existing as Record<string, unknown>,
+        value as Partial<Record<string, unknown | null>>
+    ) as NonNullable<MockDomainOverrides[K]>;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
 }
 

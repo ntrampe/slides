@@ -3,10 +3,12 @@ import type {
     DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
+    NullablePartial,
     SettingsDomain,
 } from '../domain/settings.js';
 import { parseUrlQueryOverrides } from '../domain/settings/urlQueryOverrides.js';
 import type { SettingsStore } from './SettingsStore.js';
+import { applyPartialSettingsUpdate } from '@slides/shared/utils/applyPartialSettingsUpdate';
 import { mergeEffectiveSettings } from '@slides/shared/utils/mergeEffectiveSettings';
 
 /**
@@ -38,25 +40,27 @@ export class SettingsService {
         );
     }
 
-    async setQuerySettings(update: Partial<DomainQuerySettings>): Promise<DomainAppSettings> {
+    async setQuerySettings(update: NullablePartial<DomainQuerySettings>): Promise<DomainAppSettings> {
         const { query } = await this.store.getAllDomainOverrides();
-        const mergedQuery = { ...(query ?? {}), ...update };
+        const mergedQuery = applyPartialSettingsUpdate(query, update);
         await this.store.setDomainOverrides('query', mergedQuery);
         return this.getEffective();
     }
 
-    async setPlaybackSettings(update: Partial<DomainPlaybackSettings>): Promise<DomainAppSettings> {
+    async setPlaybackSettings(
+        update: NullablePartial<DomainPlaybackSettings>
+    ): Promise<DomainAppSettings> {
         const { playback } = await this.store.getAllDomainOverrides();
-        const mergedPlayback = { ...(playback ?? {}), ...update };
+        const mergedPlayback = applyPartialSettingsUpdate(playback, update);
         await this.store.setDomainOverrides('playback', mergedPlayback);
         return this.getEffective();
     }
 
     async setConfigurationSettings(
-        update: Partial<DomainConfigurationSettings>
+        update: NullablePartial<DomainConfigurationSettings>
     ): Promise<DomainAppSettings> {
         const { configuration } = await this.store.getAllDomainOverrides();
-        const mergedConfiguration = { ...(configuration ?? {}), ...update };
+        const mergedConfiguration = applyPartialSettingsUpdate(configuration, update);
         await this.store.setDomainOverrides('configuration', mergedConfiguration);
         return this.getEffective();
     }

@@ -16,3 +16,6 @@ export type DomainPlaybackSettings = PlaybackSettings;
 export type DomainConfigurationSettings = ConfigurationSettings;
 
 export type SettingsDomain = 'query' | 'playback' | 'configuration';
+
+/** PATCH body values may be `null` to remove a persisted override key. */
+export type NullablePartial<T> = Partial<{ [K in keyof T]: T[K] | null }>;

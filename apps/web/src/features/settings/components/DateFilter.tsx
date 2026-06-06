@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 
 export interface DateFilterProps {
     startDate?: string;
@@ -8,27 +8,26 @@ export interface DateFilterProps {
 
 type DatePreset = 'all' | 'today' | 'week' | 'month' | 'year' | 'custom';
 
+function deriveDatePreset(startDate?: string, endDate?: string): DatePreset {
+    if (!startDate && !endDate) return 'all';
+
+    const today = new Date().toISOString().split('T')[0];
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    if (startDate === today && endDate === today) return 'today';
+    if (startDate === weekAgo && !endDate) return 'week';
+    if (startDate === monthAgo && !endDate) return 'month';
+    if (startDate === yearAgo && !endDate) return 'year';
+
+    return 'custom';
+}
+
 export const DateFilter = ({ startDate, endDate, onChange }: DateFilterProps) => {
-    const [preset, setPreset] = useState<DatePreset>(() => {
-        // Determine current preset based on dates
-        if (!startDate && !endDate) return 'all';
-
-        const today = new Date().toISOString().split('T')[0];
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-        if (startDate === today && endDate === today) return 'today';
-        if (startDate === weekAgo && !endDate) return 'week';
-        if (startDate === monthAgo && !endDate) return 'month';
-        if (startDate === yearAgo && !endDate) return 'year';
-
-        return 'custom';
-    });
+    const preset = useMemo(() => deriveDatePreset(startDate, endDate), [startDate, endDate]);
 
     const handlePresetChange = (newPreset: DatePreset) => {
-        setPreset(newPreset);
-
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
 
@@ -39,20 +38,22 @@ export const DateFilter = ({ startDate, endDate, onChange }: DateFilterProps) =>
             case 'today':
                 onChange(todayStr, todayStr);
                 break;
-            case 'week':
+            case 'week': {
                 const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                 onChange(weekAgo.toISOString().split('T')[0], undefined);
                 break;
-            case 'month':
+            }
+            case 'month': {
                 const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
                 onChange(monthAgo.toISOString().split('T')[0], undefined);
                 break;
-            case 'year':
+            }
+            case 'year': {
                 const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
                 onChange(yearAgo.toISOString().split('T')[0], undefined);
                 break;
+            }
             case 'custom':
-                // Keep current dates when switching to custom
                 break;
         }
     };

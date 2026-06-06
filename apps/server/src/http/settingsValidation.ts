@@ -3,10 +3,11 @@ import type {
     DomainConfigurationSettings,
     DomainPlaybackSettings,
     DomainQuerySettings,
+    NullablePartial,
 } from '../domain/settings.js';
 import { ClientError } from '@slides/shared/errors';
 
-export function parseQuerySettings(body: unknown): Partial<DomainQuerySettings> {
+export function parseQuerySettings(body: unknown): NullablePartial<DomainQuerySettings> {
     const result = schemas.QuerySettingsUpdate.safeParse(body);
     if (!result.success) {
         throw new ClientError(result.error.message, 400);
@@ -14,7 +15,7 @@ export function parseQuerySettings(body: unknown): Partial<DomainQuerySettings> 
     return result.data;
 }
 
-export function parsePlaybackSettings(body: unknown): Partial<DomainPlaybackSettings> {
+export function parsePlaybackSettings(body: unknown): NullablePartial<DomainPlaybackSettings> {
     const result = schemas.PlaybackSettingsUpdate.safeParse(body);
     if (!result.success) {
         throw new ClientError(result.error.message, 400);
@@ -24,7 +25,7 @@ export function parsePlaybackSettings(body: unknown): Partial<DomainPlaybackSett
 
 export function parseConfigurationSettings(
     body: unknown
-): Partial<DomainConfigurationSettings> {
+): NullablePartial<DomainConfigurationSettings> {
     const result = schemas.ConfigurationSettingsUpdate.safeParse(body);
     if (!result.success) {
         throw new ClientError(result.error.message, 400);

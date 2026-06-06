@@ -98,9 +98,10 @@ export interface paths {
         head?: never;
         /**
          * Partially update query settings overrides
-         * @description Shallow-merges the partial `QuerySettingsUpdate` body with existing persisted
+         * @description Merges the partial `QuerySettingsUpdate` body with existing persisted
          *     query overrides in `settings.query.json` and returns the full effective
-         *     `AppSettings`. Broadcasts `query_updated` on SSE.
+         *     `AppSettings`. A property set to `null` removes that key from persisted
+         *     overrides (reverting to env defaults). Broadcasts `query_updated` on SSE.
          */
         patch: operations["patchQuerySettings"];
         trace?: never;
@@ -125,9 +126,10 @@ export interface paths {
         head?: never;
         /**
          * Partially update playback settings overrides
-         * @description Shallow-merges the partial `PlaybackSettingsUpdate` body with existing persisted
+         * @description Merges the partial `PlaybackSettingsUpdate` body with existing persisted
          *     playback overrides in `settings.playback.json` and returns the full effective
-         *     `AppSettings`. Broadcasts `playback_updated` on SSE.
+         *     `AppSettings`. A property set to `null` removes that key from persisted
+         *     overrides (reverting to env defaults). Broadcasts `playback_updated` on SSE.
          */
         patch: operations["patchPlaybackSettings"];
         trace?: never;
@@ -152,9 +154,10 @@ export interface paths {
         head?: never;
         /**
          * Partially update configuration settings overrides
-         * @description Shallow-merges the partial `ConfigurationSettingsUpdate` body with existing persisted
+         * @description Merges the partial `ConfigurationSettingsUpdate` body with existing persisted
          *     configuration overrides in `settings.configuration.json` and returns the full effective
-         *     `AppSettings`. Broadcasts `configuration_updated` on SSE.
+         *     `AppSettings`. A property set to `null` removes that key from persisted
+         *     overrides (reverting to env defaults). Broadcasts `configuration_updated` on SSE.
          */
         patch: operations["patchConfigurationSettings"];
         trace?: never;
@@ -455,46 +458,46 @@ export interface components {
             weatherLng: number;
         };
         QuerySettingsUpdate: {
-            albumIds?: string[];
-            albumOperator?: components["schemas"]["FilterOperator"];
-            personIds?: string[];
-            personOperator?: components["schemas"]["FilterOperator"];
-            excludeAlbumIds?: string[];
-            excludePersonIds?: string[];
-            locationCountry?: string;
-            locationState?: string;
-            locationCity?: string;
+            albumIds?: string[] | null;
+            albumOperator?: components["schemas"]["FilterOperator"] | null;
+            personIds?: string[] | null;
+            personOperator?: components["schemas"]["FilterOperator"] | null;
+            excludeAlbumIds?: string[] | null;
+            excludePersonIds?: string[] | null;
+            locationCountry?: string | null;
+            locationState?: string | null;
+            locationCity?: string | null;
             /** Format: date */
-            startDate?: string;
+            startDate?: string | null;
             /** Format: date */
-            endDate?: string;
-            globalOperator?: components["schemas"]["FilterOperator"];
-            shuffle?: boolean;
+            endDate?: string | null;
+            globalOperator?: components["schemas"]["FilterOperator"] | null;
+            shuffle?: boolean | null;
         };
         PlaybackSettingsUpdate: {
-            intervalMs?: number;
-            autoplay?: boolean;
-            /** @enum {string} */
-            layout?: "single" | "split";
-            /** @enum {string} */
-            photoScaleMode?: "fit_inside" | "fill_crop" | "stretch" | "original";
-            /** @enum {string} */
-            transitionType?: "fade" | "slide" | "none";
-            transitionDuration?: number;
-            /** @enum {string} */
-            photoAnimationType?: "none" | "zoom-in" | "zoom-out" | "pan" | "ken-burns";
-            photoAnimationDuration?: number;
-            photoAnimationIntensity?: number;
-            livePhotoEnabled?: boolean;
-            livePhotoDelay?: number;
+            intervalMs?: number | null;
+            autoplay?: boolean | null;
+            /** @enum {string|null} */
+            layout?: "single" | "split" | null;
+            /** @enum {string|null} */
+            photoScaleMode?: "fit_inside" | "fill_crop" | "stretch" | "original" | null;
+            /** @enum {string|null} */
+            transitionType?: "fade" | "slide" | "none" | null;
+            transitionDuration?: number | null;
+            /** @enum {string|null} */
+            photoAnimationType?: "none" | "zoom-in" | "zoom-out" | "pan" | "ken-burns" | null;
+            photoAnimationDuration?: number | null;
+            photoAnimationIntensity?: number | null;
+            livePhotoEnabled?: boolean | null;
+            livePhotoDelay?: number | null;
         };
         ConfigurationSettingsUpdate: {
-            dateFormat?: string;
-            hourFormat?: components["schemas"]["HourFormat"];
+            dateFormat?: string | null;
+            hourFormat?: components["schemas"]["HourFormat"] | null;
             /** Format: double */
-            weatherLat?: number;
+            weatherLat?: number | null;
             /** Format: double */
-            weatherLng?: number;
+            weatherLng?: number | null;
         };
         /** @enum {string} */
         HourFormat: "12" | "24";

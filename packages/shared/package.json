@@ -12,6 +12,7 @@
     "./constants": "./src/constants.ts",
     "./apiVersions": "./src/apiVersions.ts",
     "./utils/slideshowSeed": "./src/utils/slideshowSeed.ts",
-    "./utils/mergeEffectiveSettings": "./src/utils/mergeEffectiveSettings.ts"
+    "./utils/mergeEffectiveSettings": "./src/utils/mergeEffectiveSettings.ts",
+    "./utils/applyPartialSettingsUpdate": "./src/utils/applyPartialSettingsUpdate.ts"
   }
 }

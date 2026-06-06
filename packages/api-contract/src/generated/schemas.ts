@@ -122,50 +122,48 @@ const AppSettings = z
   .passthrough();
 const QuerySettingsUpdate = z
   .object({
-    albumIds: z.array(z.string()),
-    albumOperator: FilterOperator,
-    personIds: z.array(z.string()),
-    personOperator: FilterOperator,
-    excludeAlbumIds: z.array(z.string()),
-    excludePersonIds: z.array(z.string()),
-    locationCountry: z.string(),
-    locationState: z.string(),
-    locationCity: z.string(),
-    startDate: z.string(),
-    endDate: z.string(),
-    globalOperator: FilterOperator,
-    shuffle: z.boolean(),
+    albumIds: z.array(z.string()).nullable(),
+    albumOperator: FilterOperator.nullable(),
+    personIds: z.array(z.string()).nullable(),
+    personOperator: FilterOperator.nullable(),
+    excludeAlbumIds: z.array(z.string()).nullable(),
+    excludePersonIds: z.array(z.string()).nullable(),
+    locationCountry: z.string().nullable(),
+    locationState: z.string().nullable(),
+    locationCity: z.string().nullable(),
+    startDate: z.string().nullable(),
+    endDate: z.string().nullable(),
+    globalOperator: FilterOperator.nullable(),
+    shuffle: z.boolean().nullable(),
   })
   .partial()
   .passthrough();
 const PlaybackSettingsUpdate = z
   .object({
-    intervalMs: z.number().int(),
-    autoplay: z.boolean(),
-    layout: z.enum(["single", "split"]),
-    photoScaleMode: z.enum(["fit_inside", "fill_crop", "stretch", "original"]),
-    transitionType: z.enum(["fade", "slide", "none"]),
-    transitionDuration: z.number(),
-    photoAnimationType: z.enum([
-      "none",
-      "zoom-in",
-      "zoom-out",
-      "pan",
-      "ken-burns",
-    ]),
-    photoAnimationDuration: z.number(),
-    photoAnimationIntensity: z.number(),
-    livePhotoEnabled: z.boolean(),
-    livePhotoDelay: z.number(),
+    intervalMs: z.number().int().nullable(),
+    autoplay: z.boolean().nullable(),
+    layout: z.enum(["single", "split"]).nullable(),
+    photoScaleMode: z
+      .enum(["fit_inside", "fill_crop", "stretch", "original"])
+      .nullable(),
+    transitionType: z.enum(["fade", "slide", "none"]).nullable(),
+    transitionDuration: z.number().nullable(),
+    photoAnimationType: z
+      .enum(["none", "zoom-in", "zoom-out", "pan", "ken-burns"])
+      .nullable(),
+    photoAnimationDuration: z.number().nullable(),
+    photoAnimationIntensity: z.number().nullable(),
+    livePhotoEnabled: z.boolean().nullable(),
+    livePhotoDelay: z.number().nullable(),
   })
   .partial()
   .passthrough();
 const ConfigurationSettingsUpdate = z
   .object({
-    dateFormat: z.string(),
-    hourFormat: HourFormat,
-    weatherLat: z.number(),
-    weatherLng: z.number(),
+    dateFormat: z.string().nullable(),
+    hourFormat: HourFormat.nullable(),
+    weatherLat: z.number().nullable(),
+    weatherLng: z.number().nullable(),
   })
   .partial()
   .passthrough();
@@ -483,9 +481,10 @@ Broadcasts &#x60;settings_cleared&#x60; on SSE.
     method: "patch",
     path: "/settings/configuration",
     alias: "patchConfigurationSettings",
-    description: `Shallow-merges the partial &#x60;ConfigurationSettingsUpdate&#x60; body with existing persisted
+    description: `Merges the partial &#x60;ConfigurationSettingsUpdate&#x60; body with existing persisted
 configuration overrides in &#x60;settings.configuration.json&#x60; and returns the full effective
-&#x60;AppSettings&#x60;. Broadcasts &#x60;configuration_updated&#x60; on SSE.
+&#x60;AppSettings&#x60;. A property set to &#x60;null&#x60; removes that key from persisted
+overrides (reverting to env defaults). Broadcasts &#x60;configuration_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
@@ -518,9 +517,10 @@ Broadcasts &#x60;configuration_updated&#x60; on SSE.
     method: "patch",
     path: "/settings/playback",
     alias: "patchPlaybackSettings",
-    description: `Shallow-merges the partial &#x60;PlaybackSettingsUpdate&#x60; body with existing persisted
+    description: `Merges the partial &#x60;PlaybackSettingsUpdate&#x60; body with existing persisted
 playback overrides in &#x60;settings.playback.json&#x60; and returns the full effective
-&#x60;AppSettings&#x60;. Broadcasts &#x60;playback_updated&#x60; on SSE.
+&#x60;AppSettings&#x60;. A property set to &#x60;null&#x60; removes that key from persisted
+overrides (reverting to env defaults). Broadcasts &#x60;playback_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [
@@ -553,9 +553,10 @@ Broadcasts &#x60;playback_updated&#x60; on SSE.
     method: "patch",
     path: "/settings/query",
     alias: "patchQuerySettings",
-    description: `Shallow-merges the partial &#x60;QuerySettingsUpdate&#x60; body with existing persisted
+    description: `Merges the partial &#x60;QuerySettingsUpdate&#x60; body with existing persisted
 query overrides in &#x60;settings.query.json&#x60; and returns the full effective
-&#x60;AppSettings&#x60;. Broadcasts &#x60;query_updated&#x60; on SSE.
+&#x60;AppSettings&#x60;. A property set to &#x60;null&#x60; removes that key from persisted
+overrides (reverting to env defaults). Broadcasts &#x60;query_updated&#x60; on SSE.
 `,
     requestFormat: "json",
     parameters: [

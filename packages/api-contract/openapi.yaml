@@ -117,9 +117,10 @@ paths:
       operationId: patchQuerySettings
       summary: Partially update query settings overrides
       description: |
-        Shallow-merges the partial `QuerySettingsUpdate` body with existing persisted
+        Merges the partial `QuerySettingsUpdate` body with existing persisted
         query overrides in `settings.query.json` and returns the full effective
-        `AppSettings`. Broadcasts `query_updated` on SSE.
+        `AppSettings`. A property set to `null` removes that key from persisted
+        overrides (reverting to env defaults). Broadcasts `query_updated` on SSE.
       requestBody:
         required: true
         content:
@@ -159,9 +160,10 @@ paths:
       operationId: patchPlaybackSettings
       summary: Partially update playback settings overrides
       description: |
-        Shallow-merges the partial `PlaybackSettingsUpdate` body with existing persisted
+        Merges the partial `PlaybackSettingsUpdate` body with existing persisted
         playback overrides in `settings.playback.json` and returns the full effective
-        `AppSettings`. Broadcasts `playback_updated` on SSE.
+        `AppSettings`. A property set to `null` removes that key from persisted
+        overrides (reverting to env defaults). Broadcasts `playback_updated` on SSE.
       requestBody:
         required: true
         content:
@@ -201,9 +203,10 @@ paths:
       operationId: patchConfigurationSettings
       summary: Partially update configuration settings overrides
       description: |
-        Shallow-merges the partial `ConfigurationSettingsUpdate` body with existing persisted
+        Merges the partial `ConfigurationSettingsUpdate` body with existing persisted
         configuration overrides in `settings.configuration.json` and returns the full effective
-        `AppSettings`. Broadcasts `configuration_updated` on SSE.
+        `AppSettings`. A property set to `null` removes that key from persisted
+        overrides (reverting to env defaults). Broadcasts `configuration_updated` on SSE.
       requestBody:
         required: true
         content:
@@ -686,80 +689,112 @@ components:
       properties:
         albumIds:
           type: array
+          nullable: true
           items: { type: string }
         albumOperator:
-          $ref: '#/components/schemas/FilterOperator'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FilterOperator'
         personIds:
           type: array
+          nullable: true
           items: { type: string }
         personOperator:
-          $ref: '#/components/schemas/FilterOperator'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FilterOperator'
         excludeAlbumIds:
           type: array
+          nullable: true
           items: { type: string }
         excludePersonIds:
           type: array
+          nullable: true
           items: { type: string }
         locationCountry:
           type: string
+          nullable: true
         locationState:
           type: string
+          nullable: true
         locationCity:
           type: string
+          nullable: true
         startDate:
           type: string
           format: date
+          nullable: true
         endDate:
           type: string
           format: date
+          nullable: true
         globalOperator:
-          $ref: '#/components/schemas/FilterOperator'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FilterOperator'
         shuffle:
           type: boolean
+          nullable: true
 
     PlaybackSettingsUpdate:
       type: object
       properties:
         intervalMs:
           type: integer
+          nullable: true
         autoplay:
           type: boolean
+          nullable: true
         layout:
           type: string
           enum: [single, split]
+          nullable: true
         photoScaleMode:
           type: string
           enum: [fit_inside, fill_crop, stretch, original]
+          nullable: true
         transitionType:
           type: string
           enum: [fade, slide, none]
+          nullable: true
         transitionDuration:
           type: number
+          nullable: true
         photoAnimationType:
           type: string
           enum: [none, zoom-in, zoom-out, pan, ken-burns]
+          nullable: true
         photoAnimationDuration:
           type: number
+          nullable: true
         photoAnimationIntensity:
           type: number
+          nullable: true
         livePhotoEnabled:
           type: boolean
+          nullable: true
         livePhotoDelay:
           type: number
+          nullable: true
 
     ConfigurationSettingsUpdate:
       type: object
       properties:
         dateFormat:
           type: string
+          nullable: true
         hourFormat:
-          $ref: '#/components/schemas/HourFormat'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/HourFormat'
         weatherLat:
           type: number
           format: double
+          nullable: true
         weatherLng:
           type: number
           format: double
+          nullable: true
 
     HourFormat:
       type: string
