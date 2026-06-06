@@ -3,9 +3,6 @@ version: "3.8"
 services:
   slides-app:
     image: ghcr.io/ntrampe/slides:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: slides
     # Injects IMMICH_* and DEFAULT_* into process.env (server does not read .env from disk)
     env_file:
