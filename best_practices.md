@@ -14,10 +14,11 @@ npm workspaces monorepo. The **server is the source of truth**; clients are thin
 ```
 apps/web/src/
 ├── api/                 # Thin fetchers → /api/v1 (no business logic)
-├── features/[feature]/  # components/, hooks/, types.ts, index.ts
-├── components/        # Shared UI (pickers, HUD chrome)
-├── context/           # UI-only context (idle, visibility)
-└── mocks/             # Demo-only fetch interceptor (VITE_USE_MOCK)
+├── features/[feature]/  # See feature layout below
+├── components/          # Shared UI (pickers, HUD chrome)
+├── context/             # UI-only context (idle, visibility)
+├── hooks/               # Cross-cutting utilities (e.g. useKeyToggle)
+└── mocks/               # Demo-only fetch interceptor (VITE_USE_MOCK)
 
 apps/server/src/
 ├── domain/              # Business rules (no HTTP)
@@ -28,6 +29,17 @@ apps/server/src/
 
 packages/api-contract/   # OpenAPI → generated types + Zod
 packages/shared/         # FALLBACK_APP_SETTINGS, errors, utilities
+```
+
+**Feature layout:**
+
+```
+apps/web/src/features/[feature]/
+├── components/
+├── hooks/         # data hooks + optional screen facade
+├── context/       # optional — e.g. settings presentation (PresentationSettingsProvider)
+├── types.ts
+└── index.ts       # public exports only
 ```
 
 **Types:** `@slides/api-contract` is the source of truth for JSON shapes on `/api/v1`. Edit `packages/api-contract/openapi.yaml`, then run `npm run contract:gen`. React re-exports wire types from `features/*/types.ts` when needed for ergonomics.
@@ -49,6 +61,25 @@ packages/shared/         # FALLBACK_APP_SETTINGS, errors, utilities
 - Presentation settings: theme mode, HUD visibility toggles (`usePresentationSettings` → `localStorage`)
 - Stable shuffle `seed` (sent in slideshow query body; not a settings key)
 
+### Thin client boundary
+
+**Server-side only (non-negotiable):**
+
+- Immich API calls, credentials, DTO mapping
+- Photo filter/query construction, shuffle ordering
+- Settings merge: env → persisted → URL bracket notation
+- Parsing URL overrides (client forwards `window.location.search`; never interprets bracket keys)
+
+**Client-side (intentional, not "fat client"):**
+
+- Playback orchestration: index, timer, transitions, keyboard
+- Photo preload ring buffer
+- Layout heuristics driven by already-fetched data (e.g. split layout for portrait pairs)
+- Wire-shape normalization at the fetch boundary (e.g. `revivePhoto` for dates)
+- Presentation-only state (`usePresentationSettings`)
+
+**Thin client** means **no business rules on the client**, not **no logic on the client**.
+
 ### Multi-client goal
 
 React web today; Flutter/mobile/kiosk later. All clients use the same `/api/v1` contract:
@@ -66,9 +97,12 @@ See `README.md` client profiles and `packages/api-contract/openapi.yaml`.
 | Persistence, Immich calls, SSE | `apps/server/src/services/` |
 | HTTP route + validation | `apps/server/src/http/routes/v1/` |
 | Web fetcher | `apps/web/src/api/` |
-| TanStack Query hook | `apps/web/src/features/[feature]/hooks/` |
+| TanStack Query data hook | `apps/web/src/features/[feature]/hooks/` |
+| Screen facade hook | `apps/web/src/features/[feature]/hooks/` |
 | UI component | `apps/web/src/features/[feature]/components/` |
 | Shared UI widget | `apps/web/src/components/` |
+| Client-only persisted UI state | `apps/web/src/features/[feature]/context/` (e.g. `features/settings/context/`) |
+| Cross-cutting hook utility | `apps/web/src/hooks/` (idle lives in `context/IdleContext.tsx`, re-exported from `hooks/`) |
 | Cross-app constant/fallback | `packages/shared/` |
 
 ---
@@ -80,7 +114,13 @@ See `README.md` client profiles and `packages/api-contract/openapi.yaml`.
 1. Edit `packages/api-contract/openapi.yaml`
 2. Run `npm run contract:gen`
 3. Fix types in `apps/server` (mappers, validation) and `apps/web` (fetchers)
-4. Bump `info.version` and sync `packages/shared/src/apiVersions.ts` `SLIDES_CONTRACT_VERSION` on breaking changes
+4. Bump `info.version` on **every** contract change (breaking or additive)
+5. Sync `packages/shared/src/apiVersions.ts` `SLIDES_CONTRACT_VERSION` in the same commit/PR
+
+`GET /meta` returns `contractVersion` — clients rely on it for compatibility checks.
+
+- `SLIDES_API_VERSION` (`"1"`) — URL path segment (`/api/v1`)
+- `SLIDES_CONTRACT_VERSION` — tracks OpenAPI `info.version`
 
 Import wire types from `@slides/api-contract`. Server validates requests with generated Zod schemas.
 
@@ -114,14 +154,16 @@ Domain-scoped events on `GET /events`: `query_updated`, `playback_updated`, `con
 
 ### Canonical TanStack Query keys
 
-| Data | Query key |
-|------|-----------|
-| Settings | `['settings', search]` — `staleTime: Infinity` |
-| Slideshow photos | `['slideshow-photos', queryBody]` where `queryBody = { ...settings.query, seed }` |
-| Albums / people / locations | `['albums']`, `['people']`, `['locations']` |
-| Weather | `['weather', lat, lng]` |
+| Data | Query key | Data hook |
+|------|-----------|-----------|
+| Settings | `['settings', search]` — `staleTime: Infinity` | `useSettingsData` |
+| Slideshow photos | `['slideshow-photos', queryBody]` where `queryBody = { ...settings.query, seed }` | `useSlideshowData` |
+| Albums / people / locations | `['albums']`, `['people']`, `['locations']` | `useAlbums`, `usePeople`, `useLocationHierarchy` |
+| Weather | `['weather', lat, lng]` | `useWeather` |
 
 After query settings change: invalidate `['slideshow-photos']`. After configuration settings change: invalidate `['weather']`.
+
+`fetchWeather()` forwards `window.location.search`; lat/lng in the query key come from `settings.configuration` passed into `useWeather`.
 
 ### Slideshow query body
 
@@ -138,48 +180,100 @@ Server returns full ordered list; client manages playback index locally.
 
 ### Feature-first layout
 
-```
-apps/web/src/features/[feature]/
-├── components/    # Presentational UI only
-├── hooks/         # Business logic (facade + sub-hooks)
-├── types.ts       # Re-exports from @slides/api-contract when needed
-└── index.ts       # Public API
-```
-
 Cross-feature fetchers live in `apps/web/src/api/` — not in feature `repos/` folders.
 
 Shared UI: `apps/web/src/components/`. UI-only context: `apps/web/src/context/`.
 
-### Components
+### Public API (`index.ts`)
 
-- Presentational only — UI + user interactions
-- Call **one** facade hook for business logic
-- Never call `apps/web/src/api/*` directly from components
-- Never import Immich DTOs or put filtering/settings logic in JSX
+- Every feature exports its public surface via `index.ts`
+- Export hooks, components, and types intended for cross-feature use
+- Export shared data hooks (e.g. `useSettingsData` from `features/settings/index.ts`)
+- Import from feature barrels (`from '../../settings'`) rather than deep paths where possible
+
+### Components (three tiers)
+
+| Tier | Examples | Hook rule |
+|------|----------|-----------|
+| **Screen** | `Slideshow`, `SettingsPanel` | One facade hook **or** compose 1–2 focused data hooks if the screen is primarily a form (settings) |
+| **Widget** | `SlideshowHUD`, `AlbumPicker`, `PeoplePicker` | Use a **feature data hook** (`useWeather`, `useAlbums`) — never import `api/*` |
+| **Leaf** | `PhotoDisplay`, `WeatherDisplay`, `HudButton` | Receive props **or** read a narrow slice via `useSettingsData()` for display config — no `useQuery`, no `api/*` |
+
+**Hard bans (all tiers):**
+
+- Never import `apps/web/src/api/*` from any component
+- Never run `useQuery` / `useMutation` in components (belongs in `features/*/hooks/`)
+- Never encode filter/settings merge or Immich logic in JSX
+
+**Screen — facade hook:**
 
 ```tsx
-// ✅ GOOD
+// ✅ GOOD: screen uses one facade
 export const Slideshow = () => {
-    const { state, actions } = useSlideshow(); // Single facade hook
-    
+    const { state, actions } = useSlideshow();
+
     if (state.isLoading) return <LoadingView />;
     if (state.isError) return <ErrorView />;
-    
-    return <PhotoDisplay photo={state.currentPhoto} />;
+
+    return <PhotoDisplay photo={state.currentPhoto} photoScaleMode={state.photoScaleMode} />;
 };
 ```
 
-### Hooks (facade pattern)
+**Widget — data hook (never api/* directly):**
 
-One public hook per screen orchestrates sub-hooks. Return `{ state, actions, debug? }` with explicit `Use[Name]Return` type.
+```tsx
+// ✅ GOOD: widget uses a feature data hook
+export const SlideshowHUD = (props: SlideshowHUDProps) => {
+    const { presentation } = usePresentationSettings();
+    const { data: weather } = useWeather({ enabled: presentation.showWeather });
+    // ...
+};
+```
 
-Reference: `apps/web/src/features/slideshow/hooks/useSlideshow.ts`, `apps/web/src/features/settings/hooks/useSettingsData.ts`.
+**Leaf — props preferred:**
+
+```tsx
+// ✅ GOOD: leaf receives data via props (preferred)
+export const PhotoDisplay = ({ photo, photoScaleMode }: PhotoDisplayProps) => { /* ... */ };
+
+// ✅ ACCEPTABLE: leaf reads a narrow settings slice for display config
+export const PhotoDisplay = ({ photo }: { photo: Photo }) => {
+    const { settings } = useSettingsData();
+    const photoScaleMode = settings.playback.photoScaleMode;
+    // ...
+};
+```
+
+### Hooks
+
+#### Data hooks
+
+One per remote resource or query key. Call fetchers from `apps/web/src/api/`; wrap TanStack Query. Named `use[Resource]`. Return query result shape or a thin wrapper — `{ state, actions }` is not required.
+
+| Hook | Query key | Fetcher |
+|------|-----------|---------|
+| `useSettingsData` | `['settings', search]` | `fetchSettings` |
+| `useSlideshowData` | `['slideshow-photos', queryBody]` | `querySlideshow` |
+| `useAlbums` | `['albums']` | `fetchAlbums` |
+| `usePeople` | `['people']` | `fetchPeople` |
+| `useLocationHierarchy` | `['locations']` | `fetchLocationHierarchy` |
+| `useWeather` | `['weather', lat, lng]` | `fetchWeather` |
+
+Reference: `apps/web/src/features/settings/hooks/useSettingsData.ts`
+
+`useSettingsData` is a **shared data hook** — used by facades, widgets, and occasionally leaves. It is not a screen facade.
+
+#### Facade hooks
+
+One per **screen** that orchestrates multiple sub-hooks. Return `{ state, actions, debug? }` with explicit `Use[Name]Return` type.
+
+Reference: `apps/web/src/features/slideshow/hooks/useSlideshow.ts`
 
 ```typescript
 export function useSlideshow(): UseSlideshowReturn {
     const data = useSlideshowData();
     const timer = useSlideshowTimer();
-    
+
     return {
         state: { currentPhoto, isPlaying, progress },
         actions: { goToNext, togglePlayPause },
@@ -188,6 +282,14 @@ export function useSlideshow(): UseSlideshowReturn {
 }
 ```
 
+`useSettingsPanel` is a **UI-state facade** (panel open/close), distinct from `useSettingsData`.
+
+#### Action hooks
+
+Hooks that orchestrate side effects without TanStack Query may use `{ state, actions }`. Reference: `apps/web/src/features/settings/hooks/useWeatherCurrentLocation.ts`.
+
+`useSyncEvents` — SSE invalidation (mounted in `App.tsx`); not a data or facade hook.
+
 ### API fetchers (`apps/web/src/api/`)
 
 - **Production fetchers** only perform `fetch` via `api/http.ts` — no `VITE_USE_MOCK` branches
@@ -195,7 +297,7 @@ export function useSlideshow(): UseSlideshowReturn {
 - Immich DTO → contract mapping happens **server-side** in `apps/server/src/domain` and services
 
 ```typescript
-// ✅ GOOD: thin fetcher + hook (slideshow is the primary data path)
+// ✅ GOOD: thin fetcher + data hook (slideshow is the primary data path)
 export async function querySlideshow(body: SlideshowQueryRequest): Promise<SlideshowData> {
     const data = await apiPost<SlideshowResponse>('/slideshow/query', body);
     return { total: data.total, photos: data.photos.map(revivePhoto) };
@@ -208,13 +310,6 @@ const { data } = useQuery({
     queryFn: () => querySlideshow(queryBody),
 });
 ```
-
-### Data hooks
-
-- Use TanStack Query with fetchers from `apps/web/src/api/`
-- `useSettingsData` — boot fetch settings once; per-domain mutations
-- `useSlideshowData` — `querySlideshow` with `['slideshow-photos', queryBody]`
-- `useSyncEvents` — SSE invalidation (mounted in `App.tsx`)
 
 ### Demo mode
 
@@ -244,6 +339,11 @@ Theme applied via `data-theme` attribute. Semantic Tailwind variables — never 
 <div className="bg-slate-100 border-gray-300 text-gray-900">
     <button className="bg-blue-500 hover:bg-blue-600">Save</button>
 </div>
+
+// ❌ BAD: Raw palette status colors in settings chrome
+<span className="text-yellow-400">Warning</span>
+<span className="text-red-500">Error</span>
+// Use text-warning, text-error instead
 ```
 
 **Exception**: Overlays on photos can use `text-white`, `bg-black/20` (always on dark media).
@@ -258,9 +358,11 @@ const { mode, setMode } = useTheme();
 ## State Management
 
 1. **Local UI** → `useState` (transient: hover, focus)
-2. **Business logic** → Custom hooks
-3. **Server data** → TanStack Query (`useSettingsData`, catalog, slideshow)
+2. **Business logic** → Custom hooks (data hooks, facades, action hooks)
+3. **Server data** → TanStack Query (`useSettingsData`, catalog, slideshow, weather)
 4. **Global UI** → Context (visibility, idle) and `usePresentationSettings` (theme, HUD toggles)
+
+Data hooks may be shared across features; facades are screen-scoped.
 
 ```typescript
 const { data, isLoading } = useQuery({
@@ -331,7 +433,8 @@ updatePlaybackSettings({ myFeatureEnabled: false });
 | Type | Pattern | Example |
 |------|---------|---------|
 | Component | PascalCase.tsx | `PhotoDisplay.tsx` |
-| Hook | use*.ts | `useSlideshow.ts` |
+| Data hook | use*.ts | `useWeather.ts`, `useSettingsData.ts` |
+| Facade hook | use*.ts | `useSlideshow.ts` |
 | API fetcher | `api/*.ts` | `slideshow.ts` (`querySlideshow`) |
 | Types | types.ts | Feature-level `types.ts` |
 | Hook return | Use[Name]Return | `UseSlideshowReturn` |
@@ -369,10 +472,11 @@ updateQuerySettings({ shuffle: false });
 
 ## Anti-Patterns (Avoid)
 
-- ❌ Logic in components
-- ❌ Multiple hooks without facade
+- ❌ Business logic in components (filtering, settings merge, Immich query building)
+- ❌ `useQuery` / `useMutation` in components (move to a data hook in `features/*/hooks/`)
+- ❌ `api/*` imports in components (move to a data hook)
 - ❌ DTOs leaking into components
-- ❌ Hardcoded theme colors in UI chrome
+- ❌ Hardcoded theme colors in UI chrome (including raw palette status colors like `text-yellow-400`, `text-red-500`)
 - ❌ `any` types (use interfaces)
 - ❌ Feature-level `repos/` or `services/` folders (use `apps/web/src/api/`)
 - ❌ `fetchSlideshow` via GET or `updateSettings` flat mutation
@@ -386,13 +490,13 @@ updateQuerySettings({ shuffle: false });
 
 ## Checklist: New Feature
 
-1. Extend `packages/api-contract/openapi.yaml` if the API shape changes; run `npm run contract:gen`
-2. Create `apps/web/src/features/[name]/` with `components/`, `hooks/`, `types.ts`
+1. Extend `packages/api-contract/openapi.yaml` if the API shape changes; run `npm run contract:gen`; sync `SLIDES_CONTRACT_VERSION`
+2. Implement server logic in `apps/server/src/domain` + `services/` + `http/routes/v1/`
 3. Add fetchers in `apps/web/src/api/` if new endpoints are needed
-4. Implement server logic in `apps/server/src/domain` + `services/` + `http/routes/v1/`
-5. Write data hooks (TanStack Query calling fetchers)
-6. Write facade hook
-7. Build presentational components
+4. Create `apps/web/src/features/[name]/` with `components/`, `hooks/`, `types.ts`
+5. Write **data hook** in `features/[name]/hooks/` (TanStack Query calling fetchers)
+6. Write **facade hook** if the feature has a screen-level orchestrator (skip for simple catalog pickers)
+7. Build components (tier-appropriate hook usage)
 8. Export via `index.ts`
 
 ---
@@ -400,10 +504,12 @@ updateQuerySettings({ shuffle: false });
 ## Notes for AI Agents
 
 - **This file** is the complete architecture and pattern reference for this repo
-- **Components** = dumb presentational UI calling facade hooks
-- **Hooks** = orchestrate logic via facade pattern; call `apps/web/src/api/*`, not server imports
+- **Thin client** = server owns rules; client owns playback and presentation
+- **Screens** → facade hook; **widgets** → data hooks; **leaves** → props preferred
+- Never `api/*` or TanStack Query in components
+- `useSettingsData` is a shared data hook, not a screen facade
 - **API fetchers** = thin `/api/v1` clients (Immich mapping is server-side only)
 - **Theming** = semantic CSS variables (`bg-surface`, not `bg-gray-100`)
-- **Types** = `@slides/api-contract` for wire shapes; explicit `Use*Return` for hooks
-- **Reference implementations:** `apps/web/src/features/slideshow/`, `apps/web/src/features/settings/hooks/useSettingsData.ts`
+- **Types** = `@slides/api-contract` for wire shapes; explicit `Use*Return` for facade/action hooks
+- **Reference implementations:** `features/slideshow/` (facade), `features/settings/hooks/useSettingsData.ts` (data hook), `features/settings/hooks/useWeatherCurrentLocation.ts` (action hook)
 - **Demo build:** `VITE_USE_MOCK=true` → extend `apps/web/src/mocks/handlers.ts`, not production fetchers
