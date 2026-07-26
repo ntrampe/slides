@@ -144,10 +144,21 @@ export class ImmichPhotoGateway {
         if (query.location?.country) body.country = query.location.country;
         if (query.location?.state) body.state = query.location.state;
         if (query.location?.city) body.city = query.location.city;
-        if (query.startDate) body.takenAfter = query.startDate;
-        if (query.endDate) body.takenBefore = query.endDate;
+        if (query.startDate) body.takenAfter = this.toImmichTakenAfter(query.startDate);
+        if (query.endDate) body.takenBefore = this.toImmichTakenBefore(query.endDate);
 
         return body;
+    }
+
+    /** Slides query dates are calendar `yyyy-MM-dd`; Immich v3 validates ISO datetimes. */
+    private toImmichTakenAfter(calendarDate: string): string {
+        if (calendarDate.includes('T')) return calendarDate;
+        return `${calendarDate}T00:00:00.000Z`;
+    }
+
+    private toImmichTakenBefore(calendarDate: string): string {
+        if (calendarDate.includes('T')) return calendarDate;
+        return `${calendarDate}T23:59:59.999Z`;
     }
 
     /** Map an Immich asset DTO onto the DomainPhoto wire shape. */
