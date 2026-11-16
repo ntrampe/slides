@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Calendar, MapPin, Info, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, FileImage, Info, ExternalLink } from 'lucide-react';
 import type { Photo } from '../types';
 import { useSettingsData } from '../../settings/hooks/useSettingsData';
 import { HudPanel, HudButton, hudTextSizes } from '../../../components';
@@ -9,13 +9,20 @@ interface PhotoMetadataOverlayProps {
     isExpanded?: boolean;
     onToggleExpanded?: () => void;
     areControlsVisible?: boolean;
+    /** Which fields appear in the always-visible section (from presentation settings). */
+    showDate: boolean;
+    showLocation: boolean;
+    showFileName: boolean;
 }
 
 export const PhotoMetadataOverlay = ({
     photo,
     isExpanded = false,
     onToggleExpanded,
-    areControlsVisible
+    areControlsVisible,
+    showDate,
+    showLocation,
+    showFileName,
 }: PhotoMetadataOverlayProps) => {
     const { settings } = useSettingsData();
 
@@ -46,9 +53,12 @@ export const PhotoMetadataOverlay = ({
 
     const location = formatLocation(photo.location);
     const hasButtons = areControlsVisible && (onToggleExpanded || photo.inAppUrl);
-    const hasBasicMetadata = photo.createdAt || location;
+    const visibleDate = showDate && photo.createdAt ? photo.createdAt : undefined;
+    const visibleLocation = showLocation ? location : undefined;
+    const visibleFileName = showFileName ? photo.fileName : undefined;
+    const hasBasicMetadata = Boolean(visibleDate || visibleLocation || visibleFileName);
 
-    if (!hasBasicMetadata && !hasButtons) return null;
+    if (!hasBasicMetadata && !hasButtons && !isExpanded) return null;
 
     return (
         <div className="absolute inset-0 pointer-events-none">
@@ -59,19 +69,30 @@ export const PhotoMetadataOverlay = ({
                 >
                     {/* Basic Metadata - Always Visible */}
                     {hasBasicMetadata && (
-                        <div className={hasButtons || isExpanded ? 'mb-3' : ''}>
-                            {photo.createdAt && (
-                                <div className={`flex items-center gap-2 sm:gap-3 ${location ? 'mb-1 sm:mb-2' : ''}`}>
+                        <div className={`flex flex-col gap-1 sm:gap-2 ${hasButtons || isExpanded ? 'mb-3' : ''}`}>
+                            {visibleDate && (
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
                                     <p className={`font-medium ${hudTextSizes.body}`}>
-                                        {format(new Date(photo.createdAt), settings.configuration.dateFormat)}
+                                        {format(new Date(visibleDate), settings.configuration.dateFormat)}
                                     </p>
                                 </div>
                             )}
-                            {location && (
+                            {visibleLocation && (
                                 <div className="flex items-center gap-2 sm:gap-3">
                                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
-                                    <h2 className={`font-medium ${hudTextSizes.body}`}>{location}</h2>
+                                    <h2 className={`font-medium ${hudTextSizes.body}`}>{visibleLocation}</h2>
+                                </div>
+                            )}
+                            {visibleFileName && (
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                    <FileImage className="w-4 h-4 sm:w-5 sm:h-5 opacity-60 shrink-0" />
+                                    <p
+                                        className={`font-medium ${hudTextSizes.body} truncate max-w-[60vw] sm:max-w-[40vw]`}
+                                        title={visibleFileName}
+                                    >
+                                        {visibleFileName}
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -85,6 +106,9 @@ export const PhotoMetadataOverlay = ({
                                 <div className="space-y-1">
                                     <h4 className="font-medium opacity-90 text-xs">Photo Details</h4>
                                     <p><span className="opacity-70">ID:</span> {photo.id}</p>
+                                    {photo.fileName && (
+                                        <p className="break-all"><span className="opacity-70">File:</span> {photo.fileName}</p>
+                                    )}
                                     {photo.width && photo.height && (
                                         <p><span className="opacity-70">Dimensions:</span> {photo.width} × {photo.height}px</p>
                                     )}

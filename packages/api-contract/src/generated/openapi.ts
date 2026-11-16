@@ -378,6 +378,8 @@ export interface components {
             height?: number;
             /** @enum {string} */
             type: "IMAGE" | "VIDEO";
+            /** @description Original filename as uploaded to the photo source (no directory path). */
+            fileName?: string;
             /** Format: date-time */
             createdAt: string;
             description?: string;

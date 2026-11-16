@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Slides API
-  version: "6"
+  version: "7"
   description: |
     Sync-and-play slideshow API. The server is the source of truth for **configuration
     rules** (`AppSettings` grouped by `query`, `playback`, `configuration`) and a **real-time
@@ -503,6 +503,9 @@ components:
         type:
           type: string
           enum: [IMAGE, VIDEO]
+        fileName:
+          type: string
+          description: Original filename as uploaded to the photo source (no directory path).
         createdAt:
           type: string
           format: date-time

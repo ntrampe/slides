@@ -17,7 +17,7 @@ A beautiful, customizable slideshow application for your [Immich](https://immich
 - 🎞️ **Live Photos** - Support for live photos with configurable delay
 - ⏱️ **Customizable Timing** - Set your preferred slideshow interval
 - 🎭 **Smooth Transitions** - Fade, slide, or instant transitions between photos
-- 🕐 **Optional Overlays** - Clock, weather, and photo metadata
+- 🕐 **Optional Overlays** - Clock, weather, and photo metadata (date, location, and file name can each be shown or hidden)
 - ⌨️ **Keyboard Control** - Full keyboard navigation support
 - 💾 **Persistent Settings** - UI preferences saved on the server (shared across displays on the same instance)
 - 🔗 **URL Configuration** - Configure via URL query parameters

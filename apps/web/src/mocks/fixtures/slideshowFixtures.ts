@@ -61,6 +61,7 @@ export const MOCK_SLIDESHOW_PHOTOS: Photo[] = Array.from(
             width: dim.width,
             height: dim.height,
             type: 'IMAGE',
+            fileName: `IMG_${1000 + i}.jpg`,
             createdAt: createdAt.toISOString(),
             description,
             rating: index % 3 === 0 ? (index % 5) + 1 : undefined,

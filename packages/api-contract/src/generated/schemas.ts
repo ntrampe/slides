@@ -61,6 +61,7 @@ const Photo = z
     width: z.number().int().optional(),
     height: z.number().int().optional(),
     type: z.enum(["IMAGE", "VIDEO"]),
+    fileName: z.string().optional(),
     createdAt: z.string().datetime({ offset: true }),
     description: z.string().optional(),
     rating: z.number().int().gte(0).lte(5).optional(),
