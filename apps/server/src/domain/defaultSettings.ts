@@ -1,5 +1,5 @@
 import type { DomainAppSettings } from './settings.js';
-import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
+import { DEFAULT_SORT_ORDER, FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
 import {
     parseBool,
     parseFloatEnv,
@@ -60,7 +60,7 @@ export function buildDefaultSettings(): DomainAppSettings {
             shuffle: parseBool(process.env.DEFAULT_SHUFFLE, fallback.query.shuffle),
             sortOrder: parseSortOrder(
                 process.env.DEFAULT_SORT_ORDER,
-                fallback.query.sortOrder ?? 'oldest'
+                fallback.query.sortOrder ?? DEFAULT_SORT_ORDER
             ),
         },
         playback: {

@@ -1,10 +1,8 @@
-import type { QuerySettings } from '@slides/api-contract';
+import { schemas, type QuerySettings, type SortOrder } from '@slides/api-contract';
 
 export type DatePreset = NonNullable<QuerySettings['datePreset']>;
-export type SortOrder = NonNullable<QuerySettings['sortOrder']>;
 
 const DATE_PRESETS: DatePreset[] = ['all', 'today', 'week', 'month', 'year', 'custom'];
-const SORT_ORDERS: SortOrder[] = ['oldest', 'newest', 'album'];
 
 /** Parse helpers for `DEFAULT_*` environment variables in server default settings. */
 
@@ -52,6 +50,6 @@ export function parseDatePreset(value: string | undefined): DatePreset | undefin
 
 export function parseSortOrder(value: string | undefined, fallback: SortOrder): SortOrder {
     if (!value) return fallback;
-    const order = value.trim().toLowerCase() as SortOrder;
-    return SORT_ORDERS.includes(order) ? order : fallback;
+    const parsed = schemas.SortOrder.safeParse(value.trim().toLowerCase());
+    return parsed.success ? parsed.data : fallback;
 }

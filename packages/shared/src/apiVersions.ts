@@ -3,4 +3,4 @@
  * `SLIDES_API_VERSION` is the URL path segment (`/api/v1` → `"1"`).
  */
 export const SLIDES_API_VERSION = '1' as const;
-export const SLIDES_CONTRACT_VERSION = '1' as const;
+export const SLIDES_CONTRACT_VERSION = '6' as const;

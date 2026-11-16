@@ -1,15 +1,11 @@
-import type { SlideshowQueryRequest } from '@slides/api-contract';
+import type { SlideshowQueryRequest, SortOrder } from '@slides/api-contract';
+import { DEFAULT_SORT_ORDER } from '@slides/shared/constants';
 import type { PhotoQueryService } from './PhotoQueryService.js';
 import type { CatalogService } from './CatalogService.js';
 import type { LinkBuilder } from '../infra/LinkBuilder.js';
 import type { DomainSlideshowResult } from '../domain/slideshow.js';
 import { seededShuffle } from '../domain/seededShuffle.js';
-import {
-    resolveSortDirection,
-    sortPhotos,
-    type SortDirection,
-    type SortOrder,
-} from '../domain/sortPhotos.js';
+import { resolveSortDirection, sortPhotos, type SortDirection } from '../domain/sortPhotos.js';
 
 /**
  * Stateless slideshow photo query — filter, then shuffle or sort, from request body only.
@@ -29,7 +25,7 @@ export class SlideshowService {
 
         const ordered = shuffle
             ? seededShuffle(photos, seed ?? defaultSeed())
-            : sortPhotos(photos, await this.resolveDirection(sortOrder ?? 'oldest', body));
+            : sortPhotos(photos, await this.resolveDirection(sortOrder ?? DEFAULT_SORT_ORDER, body));
 
         return { photos: ordered, total: ordered.length };
     }

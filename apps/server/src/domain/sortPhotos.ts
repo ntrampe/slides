@@ -1,7 +1,5 @@
-import type { QuerySettings } from '@slides/api-contract';
+import type { SortOrder } from '@slides/api-contract';
 import type { DomainPhoto } from './photos.js';
-
-export type SortOrder = NonNullable<QuerySettings['sortOrder']>;
 
 /** Concrete chronological direction after resolving `album` mode. */
 export type SortDirection = 'asc' | 'desc';

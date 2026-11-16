@@ -13,10 +13,8 @@ import { SlideshowFilterCombineControl } from './SlideshowFilterCombineControl';
 import { SlideshowFilterSummary } from './SlideshowFilterSummary';
 import { WeatherCurrentLocationButton } from './WeatherCurrentLocationButton';
 import type { PhotoAnimationType } from '../../photos';
-import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
-import type { QuerySettings } from '../types';
-
-type SortOrder = NonNullable<QuerySettings['sortOrder']>;
+import { DEFAULT_FILTER_OPERATOR, DEFAULT_SORT_ORDER } from '@slides/shared/constants';
+import type { SortOrder } from '../types';
 
 const SORT_ORDER_OPTIONS: SegmentedOption<SortOrder>[] = [
     { value: 'oldest', label: 'Oldest', title: 'Oldest photos first' },
@@ -168,7 +166,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     </span>
                     <SegmentedControl
                         options={SORT_ORDER_OPTIONS}
-                        value={query.sortOrder ?? 'oldest'}
+                        value={query.sortOrder ?? DEFAULT_SORT_ORDER}
                         onChange={(sortOrder) => updateQuerySettings({ sortOrder })}
                         ariaLabel="Photo order"
                         disabled={query.shuffle}
