@@ -445,24 +445,29 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     <span>Show Photo Metadata</span>
                 </label>
 
-                <label
-                    className={`flex items-center ml-6 ${
-                        presentation.photoMetadataEnabled ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'
-                    }`}
-                >
-                    <input
-                        type="checkbox"
-                        checked={presentation.photoMetadataAdvanced}
-                        disabled={!presentation.photoMetadataEnabled}
-                        onChange={(e) =>
-                            updatePresentationSettings({
-                                photoMetadataAdvanced: e.target.checked,
-                            })
-                        }
-                        className="mr-2 w-4 h-4"
-                    />
-                    <span>Show Advanced Details (filename)</span>
-                </label>
+                {(
+                    [
+                        { key: 'photoMetadataShowDate', label: 'Show Date' },
+                        { key: 'photoMetadataShowLocation', label: 'Show Location' },
+                        { key: 'photoMetadataShowFileName', label: 'Show File Name' },
+                    ] as const
+                ).map(({ key, label }) => (
+                    <label
+                        key={key}
+                        className={`flex items-center ml-6 ${
+                            presentation.photoMetadataEnabled ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'
+                        }`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={presentation[key]}
+                            disabled={!presentation.photoMetadataEnabled}
+                            onChange={(e) => updatePresentationSettings({ [key]: e.target.checked })}
+                            className="mr-2 w-4 h-4"
+                        />
+                        <span>{label}</span>
+                    </label>
+                ))}
 
                 <Divider />
 

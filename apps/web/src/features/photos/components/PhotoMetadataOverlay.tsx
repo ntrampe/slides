@@ -9,8 +9,10 @@ interface PhotoMetadataOverlayProps {
     isExpanded?: boolean;
     onToggleExpanded?: () => void;
     areControlsVisible?: boolean;
-    /** Show advanced details (e.g. filename) in the always-visible section. */
-    showAdvanced?: boolean;
+    /** Which fields appear in the always-visible section. */
+    showDate?: boolean;
+    showLocation?: boolean;
+    showFileName?: boolean;
 }
 
 export const PhotoMetadataOverlay = ({
@@ -18,7 +20,9 @@ export const PhotoMetadataOverlay = ({
     isExpanded = false,
     onToggleExpanded,
     areControlsVisible,
-    showAdvanced = false,
+    showDate = true,
+    showLocation = true,
+    showFileName = false,
 }: PhotoMetadataOverlayProps) => {
     const { settings } = useSettingsData();
 
@@ -49,13 +53,12 @@ export const PhotoMetadataOverlay = ({
 
     const location = formatLocation(photo.location);
     const hasButtons = areControlsVisible && (onToggleExpanded || photo.inAppUrl);
-    // Advanced lines render below date/location when enabled. Add future
-    // "show X in the overlay" requests here rather than as separate toggles.
-    const advancedFileName = showAdvanced ? photo.fileName : undefined;
-    const hasAdvancedMetadata = Boolean(advancedFileName);
-    const hasBasicMetadata = photo.createdAt || location || hasAdvancedMetadata;
+    const visibleDate = showDate && photo.createdAt ? photo.createdAt : undefined;
+    const visibleLocation = showLocation ? location : undefined;
+    const visibleFileName = showFileName ? photo.fileName : undefined;
+    const hasBasicMetadata = Boolean(visibleDate || visibleLocation || visibleFileName);
 
-    if (!hasBasicMetadata && !hasButtons) return null;
+    if (!hasBasicMetadata && !hasButtons && !isExpanded) return null;
 
     return (
         <div className="absolute inset-0 pointer-events-none">
@@ -66,29 +69,29 @@ export const PhotoMetadataOverlay = ({
                 >
                     {/* Basic Metadata - Always Visible */}
                     {hasBasicMetadata && (
-                        <div className={hasButtons || isExpanded ? 'mb-3' : ''}>
-                            {photo.createdAt && (
-                                <div className={`flex items-center gap-2 sm:gap-3 ${location || hasAdvancedMetadata ? 'mb-1 sm:mb-2' : ''}`}>
+                        <div className={`flex flex-col gap-1 sm:gap-2 ${hasButtons || isExpanded ? 'mb-3' : ''}`}>
+                            {visibleDate && (
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
                                     <p className={`font-medium ${hudTextSizes.body}`}>
-                                        {format(new Date(photo.createdAt), settings.configuration.dateFormat)}
+                                        {format(new Date(visibleDate), settings.configuration.dateFormat)}
                                     </p>
                                 </div>
                             )}
-                            {location && (
-                                <div className={`flex items-center gap-2 sm:gap-3 ${hasAdvancedMetadata ? 'mb-1 sm:mb-2' : ''}`}>
+                            {visibleLocation && (
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" />
-                                    <h2 className={`font-medium ${hudTextSizes.body}`}>{location}</h2>
+                                    <h2 className={`font-medium ${hudTextSizes.body}`}>{visibleLocation}</h2>
                                 </div>
                             )}
-                            {advancedFileName && (
+                            {visibleFileName && (
                                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                                     <FileImage className="w-4 h-4 sm:w-5 sm:h-5 opacity-60 shrink-0" />
                                     <p
                                         className={`font-medium ${hudTextSizes.body} truncate max-w-[60vw] sm:max-w-[40vw]`}
-                                        title={advancedFileName}
+                                        title={visibleFileName}
                                     >
-                                        {advancedFileName}
+                                        {visibleFileName}
                                     </p>
                                 </div>
                             )}

@@ -41,7 +41,9 @@ export const MediaDisplay = ({
                         setIsExpanded(prev => !prev)
                     }
                     areControlsVisible={!isIdle}
-                    showAdvanced={presentation.photoMetadataAdvanced}
+                    showDate={presentation.photoMetadataShowDate}
+                    showLocation={presentation.photoMetadataShowLocation}
+                    showFileName={presentation.photoMetadataShowFileName}
                 />
             )}
         </div>
