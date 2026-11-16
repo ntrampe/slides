@@ -23,9 +23,22 @@ export class LinkBuilder {
         private readonly immichAppUrl: string
     ) {}
 
-    /** Proxied Immich thumbnail/preview for a photo asset. */
-    assetThumbnail(assetId: string): string {
-        return `${this.apiBaseUrl}/api/v1/assets/${assetId}/thumbnail?size=preview`;
+    /**
+     * Proxied Immich preview for a photo asset.
+     *
+     * `edited=true` asks Immich for the edited rendition (crop/rotate/mirror)
+     * when one exists, falling back to the original otherwise. Immich only
+     * serves edits by default to shared-link viewers, so API-key callers must
+     * opt in explicitly.
+     *
+     * `cacheKey` (the asset's thumbhash) is appended as `c`, mirroring Immich's
+     * own web client: the thumbhash changes whenever the asset is re-edited,
+     * which busts browser caches that would otherwise serve the stale image.
+     */
+    assetThumbnail(assetId: string, cacheKey?: string): string {
+        const params = new URLSearchParams({ size: 'preview', edited: 'true' });
+        if (cacheKey) params.set('c', cacheKey);
+        return `${this.apiBaseUrl}/api/v1/assets/${assetId}/thumbnail?${params}`;
     }
 
     /** Proxied Immich video (used for live photos). */
