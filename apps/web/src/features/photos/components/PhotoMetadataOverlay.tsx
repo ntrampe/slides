@@ -9,10 +9,10 @@ interface PhotoMetadataOverlayProps {
     isExpanded?: boolean;
     onToggleExpanded?: () => void;
     areControlsVisible?: boolean;
-    /** Which fields appear in the always-visible section. */
-    showDate?: boolean;
-    showLocation?: boolean;
-    showFileName?: boolean;
+    /** Which fields appear in the always-visible section (from presentation settings). */
+    showDate: boolean;
+    showLocation: boolean;
+    showFileName: boolean;
 }
 
 export const PhotoMetadataOverlay = ({
@@ -20,9 +20,9 @@ export const PhotoMetadataOverlay = ({
     isExpanded = false,
     onToggleExpanded,
     areControlsVisible,
-    showDate = true,
-    showLocation = true,
-    showFileName = false,
+    showDate,
+    showLocation,
+    showFileName,
 }: PhotoMetadataOverlayProps) => {
     const { settings } = useSettingsData();
 
