@@ -6,6 +6,7 @@ const ApiMeta = z
   .passthrough();
 const FilterOperator = z.enum(["AND", "OR"]);
 const DatePreset = z.enum(["all", "today", "week", "month", "year", "custom"]);
+const SortOrder = z.enum(["oldest", "newest", "album"]);
 const QuerySettings = z
   .object({
     albumIds: z.array(z.string()),
@@ -22,6 +23,7 @@ const QuerySettings = z
     datePreset: DatePreset.optional(),
     globalOperator: FilterOperator,
     shuffle: z.boolean(),
+    sortOrder: SortOrder.optional(),
   })
   .passthrough();
 const SlideshowQueryRequest = QuerySettings.and(
@@ -138,6 +140,7 @@ const QuerySettingsUpdate = z
     datePreset: DatePreset.nullable(),
     globalOperator: FilterOperator.nullable(),
     shuffle: z.boolean().nullable(),
+    sortOrder: SortOrder.nullable(),
   })
   .partial()
   .passthrough();
@@ -229,6 +232,7 @@ export const schemas = {
   ApiMeta,
   FilterOperator,
   DatePreset,
+  SortOrder,
   QuerySettings,
   SlideshowQueryRequest,
   PhotoLocation,

@@ -113,10 +113,15 @@ export async function handleMockFetch(
     const { pathname, search } = api;
 
     if (pathname === '/slideshow/query' && method === 'POST') {
-        return jsonResponse({
-            photos: MOCK_SLIDESHOW_PHOTOS,
-            total: MOCK_SLIDESHOW_PHOTOS.length,
-        });
+        // Demo honours only shuffle/sortOrder; filters are not simulated. `album` → oldest.
+        const body = (await readJsonBody(input, init)) as Partial<QuerySettings>;
+        const photos = body.shuffle
+            ? MOCK_SLIDESHOW_PHOTOS
+            : [...MOCK_SLIDESHOW_PHOTOS].sort((a, b) => {
+                  const diff = Date.parse(a.createdAt) - Date.parse(b.createdAt);
+                  return body.sortOrder === 'newest' ? -diff : diff;
+              });
+        return jsonResponse({ photos, total: photos.length });
     }
 
     if (pathname === '/settings' && method === 'GET') {

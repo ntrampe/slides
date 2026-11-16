@@ -8,6 +8,7 @@ import type {
     DomainMapMarker,
 } from '../domain/locations.js';
 import { buildLocationHierarchy } from '../domain/buildLocationHierarchy.js';
+import type { ImmichAlbumOrder } from '../domain/sortPhotos.js';
 
 interface ImmichAlbum {
     id: string;
@@ -18,6 +19,8 @@ interface ImmichAlbum {
     createdAt: string;
     updatedAt: string;
     shared?: boolean;
+    /** Album display order set in Immich (newest-first is Immich's default). */
+    order?: ImmichAlbumOrder;
 }
 
 interface ImmichMapMarker {
@@ -56,6 +59,20 @@ export class CatalogService {
             updatedAt: album.updatedAt,
             shared: album.shared ?? false,
         }));
+    }
+
+    /**
+     * Display orders for the given album IDs, as configured in Immich. Albums that
+     * are not found are skipped; albums without an explicit order use Immich's
+     * default (`desc`).
+     */
+    async getAlbumOrders(albumIds: string[]): Promise<ImmichAlbumOrder[]> {
+        if (albumIds.length === 0) return [];
+        const wanted = new Set(albumIds);
+        const albums = await this.immich.get<ImmichAlbum[]>('/api/albums');
+        return albums
+            .filter((album) => wanted.has(album.id))
+            .map((album) => album.order ?? 'desc');
     }
 
     async getPeople(links: LinkBuilder): Promise<DomainPerson[]> {

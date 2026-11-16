@@ -49,6 +49,7 @@ const queryUrlSchema = z
         datePreset: schemas.DatePreset.optional(),
         globalOperator: schemas.FilterOperator.optional(),
         shuffle: urlBooleanSchema,
+        sortOrder: schemas.SortOrder.optional(),
     })
     .partial();
 

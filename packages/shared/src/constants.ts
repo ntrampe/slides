@@ -12,6 +12,7 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         excludePersonIds: [],
         globalOperator: 'AND',
         shuffle: true,
+        sortOrder: 'oldest',
     },
     playback: {
         layout: 'single',

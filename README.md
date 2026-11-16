@@ -103,6 +103,8 @@ When you filter by **both** albums and people, an extra control lets you **combi
 
 **Date filtering** uses a `datePreset` (`all`, `today`, `week`, `month`, `year`, or `custom`). Relative presets are resolved on the server and stay current (for example, Past Year always means the last 365 days through today). Custom ranges use explicit `startDate` and `endDate` bounds.
 
+**Photo order**: when **Shuffle** is off, the **Order** control (Playback section) sorts photos by capture date: **Oldest** first (default), **Newest** first, or **Album**. Album mode follows each album's *Display order* set in Immich; if the selected albums use different display orders, or no album is selected, it falls back to oldest first. Set it via `query[sortOrder]=oldest|newest|album` or `DEFAULT_SORT_ORDER`.
+
 These options use the same slideshow filter settings as URL and environment configuration (see `@slides/api-contract` / `apps/web/src/features/settings/types.ts`).
 
 ### 2. URL query overrides (kiosk presets)
@@ -124,6 +126,9 @@ http://localhost:3000/?playback[intervalMs]=30000&playback[layout]=split&configu
 
 # Custom date range (requires datePreset=custom)
 ?query[datePreset]=custom&query[startDate]=2024-01-01&query[endDate]=2024-12-31
+
+# Chronological playback following the album's Immich display order
+?query[albumIds]=abc123&query[shuffle]=false&query[sortOrder]=album
 
 # Location filter
 ?query[locationCountry]=USA&query[locationState]=California

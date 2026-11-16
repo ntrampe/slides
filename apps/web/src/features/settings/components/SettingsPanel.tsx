@@ -6,7 +6,7 @@ import { PeoplePicker } from "../../people/components/PeoplePicker";
 import { AlbumPicker } from "../../albums/components/AlbumPicker";
 import { LocationPicker } from "../../locations/components/LocationPicker";
 import { ThemeSelector } from "../../theme/components/ThemeSelector";
-import { CollapsibleSection } from "../../../components";
+import { CollapsibleSection, SegmentedControl, type SegmentedOption } from "../../../components";
 import { SupportButton } from './SupportButton';
 import { DateFilter } from './DateFilter';
 import { SlideshowFilterCombineControl } from './SlideshowFilterCombineControl';
@@ -14,6 +14,19 @@ import { SlideshowFilterSummary } from './SlideshowFilterSummary';
 import { WeatherCurrentLocationButton } from './WeatherCurrentLocationButton';
 import type { PhotoAnimationType } from '../../photos';
 import { DEFAULT_FILTER_OPERATOR } from '@slides/shared/constants';
+import type { QuerySettings } from '../types';
+
+type SortOrder = NonNullable<QuerySettings['sortOrder']>;
+
+const SORT_ORDER_OPTIONS: SegmentedOption<SortOrder>[] = [
+    { value: 'oldest', label: 'Oldest', title: 'Oldest photos first' },
+    { value: 'newest', label: 'Newest', title: 'Newest photos first' },
+    {
+        value: 'album',
+        label: 'Album',
+        title: 'Follow the album display order set in Immich (oldest first if albums differ)',
+    },
+];
 
 export interface SettingsPanelProps {
     onClose: () => void;
@@ -148,6 +161,19 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     />
                     <span>Shuffle</span>
                 </label>
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className={query.shuffle ? 'text-text-secondary' : undefined}>
+                        Order
+                    </span>
+                    <SegmentedControl
+                        options={SORT_ORDER_OPTIONS}
+                        value={query.sortOrder ?? 'oldest'}
+                        onChange={(sortOrder) => updateQuerySettings({ sortOrder })}
+                        ariaLabel="Photo order"
+                        disabled={query.shuffle}
+                    />
+                </div>
 
                 <label className="flex items-center cursor-pointer">
                     <input
