@@ -32,6 +32,8 @@ export interface DomainPhoto {
     width?: number;
     height?: number;
     type: 'IMAGE' | 'VIDEO';
+    /** Original filename as uploaded to the photo source (no directory path). */
+    fileName?: string;
     createdAt: string;
     description?: string;
     rating?: number;

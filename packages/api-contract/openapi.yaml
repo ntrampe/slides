@@ -503,6 +503,9 @@ components:
         type:
           type: string
           enum: [IMAGE, VIDEO]
+        fileName:
+          type: string
+          description: Original filename as uploaded to the photo source (no directory path).
         createdAt:
           type: string
           format: date-time

@@ -36,6 +36,8 @@ interface ImmichAsset {
     id: string;
     type: string;
     isFavorite: boolean;
+    /** Original upload filename (e.g. `IMG_1234.HEIC`); unchanged by Immich edits. */
+    originalFileName?: string;
     fileCreatedAt?: string;
     createdAt?: string;
     /** Post-edit dimensions when the asset has been edited in Immich. */
@@ -201,6 +203,7 @@ export class ImmichPhotoGateway {
             width: asset.width || exif?.exifImageWidth,
             height: asset.height || exif?.exifImageHeight,
             type: asset.type as 'IMAGE',
+            fileName: asset.originalFileName || undefined,
             createdAt: new Date(asset.fileCreatedAt ?? asset.createdAt ?? 0).toISOString(),
             description: exif?.description,
             rating: exif?.rating,

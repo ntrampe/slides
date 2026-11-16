@@ -16,6 +16,8 @@ export interface PresentationSettings {
     showWeather: boolean;
     showProgressBar: boolean;
     photoMetadataEnabled: boolean;
+    /** Show extra details (e.g. filename) in the always-visible photo metadata overlay. */
+    photoMetadataAdvanced: boolean;
     showDebugStats: boolean;
     supportEnabled: boolean;
 }
@@ -26,6 +28,7 @@ export const DEFAULT_PRESENTATION_SETTINGS: PresentationSettings = {
     showDebugStats: false,
     supportEnabled: true,
     photoMetadataEnabled: true,
+    photoMetadataAdvanced: false,
     showClock: true,
     showWeather: false,
 };
