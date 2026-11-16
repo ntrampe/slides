@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Slides API
-  version: "5"
+  version: "6"
   description: |
     Sync-and-play slideshow API. The server is the source of truth for **configuration
     rules** (`AppSettings` grouped by `query`, `playback`, `configuration`) and a **real-time
@@ -624,6 +624,8 @@ components:
           $ref: '#/components/schemas/FilterOperator'
         shuffle:
           type: boolean
+        sortOrder:
+          $ref: '#/components/schemas/SortOrder'
 
     PlaybackSettings:
       type: object
@@ -741,6 +743,10 @@ components:
         shuffle:
           type: boolean
           nullable: true
+        sortOrder:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/SortOrder'
 
     PlaybackSettingsUpdate:
       type: object
@@ -813,6 +819,14 @@ components:
     DatePreset:
       type: string
       enum: [all, today, week, month, year, custom]
+
+    SortOrder:
+      type: string
+      enum: [oldest, newest, album]
+      description: |
+        Photo order when `shuffle` is false. `oldest`/`newest` sort by capture date.
+        `album` follows the Immich album display order when every selected album shares
+        the same order; otherwise it falls back to `oldest`.
 
     Album:
       type: object

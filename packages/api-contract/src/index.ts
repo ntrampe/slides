@@ -19,6 +19,7 @@ export type PhotoLocation = components['schemas']['PhotoLocation'];
 export type PhotoCameraInfo = components['schemas']['PhotoCameraInfo'];
 export type PhotoExifSettings = components['schemas']['PhotoExifSettings'];
 export type FilterOperator = components['schemas']['FilterOperator'];
+export type SortOrder = components['schemas']['SortOrder'];
 export type Album = components['schemas']['Album'];
 export type Person = components['schemas']['Person'];
 export type LocationHierarchy = components['schemas']['LocationHierarchy'];

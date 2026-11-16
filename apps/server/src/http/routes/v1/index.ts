@@ -33,7 +33,7 @@ export function createV1Router(config: ServerConfig): Router {
     const dataDir = process.env.DATA_DIR ?? './data';
     const settingsStore = new FileSettingsStore(dataDir);
     const settingsService = new SettingsService(defaults, settingsStore);
-    const slideshowService = new SlideshowService(photoService);
+    const slideshowService = new SlideshowService(photoService, catalogService);
 
     const catalog = createCatalogRouters(catalogService, immich, config);
 

@@ -1,10 +1,11 @@
 import type { DomainAppSettings } from './settings.js';
-import { FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
+import { DEFAULT_SORT_ORDER, FALLBACK_APP_SETTINGS } from '@slides/shared/constants';
 import {
     parseBool,
     parseFloatEnv,
     parseHourFormat,
     parseDatePreset,
+    parseSortOrder,
     parseIdArray,
     parseNumber,
     parseString,
@@ -57,6 +58,10 @@ export function buildDefaultSettings(): DomainAppSettings {
                 (process.env.DEFAULT_GLOBAL_OPERATOR as DomainAppSettings['query']['globalOperator']) ||
                 fallback.query.globalOperator,
             shuffle: parseBool(process.env.DEFAULT_SHUFFLE, fallback.query.shuffle),
+            sortOrder: parseSortOrder(
+                process.env.DEFAULT_SORT_ORDER,
+                fallback.query.sortOrder ?? DEFAULT_SORT_ORDER
+            ),
         },
         playback: {
             layout:

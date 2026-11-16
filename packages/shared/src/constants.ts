@@ -1,6 +1,9 @@
-import type { AppSettings } from '@slides/api-contract';
+import type { AppSettings, SortOrder } from '@slides/api-contract';
 
 export const DEFAULT_FILTER_OPERATOR = 'AND' as const;
+
+/** Photo order when shuffle is off and no `sortOrder` is set. */
+export const DEFAULT_SORT_ORDER: SortOrder = 'oldest';
 
 export const FALLBACK_APP_SETTINGS: AppSettings = {
     query: {
@@ -12,6 +15,7 @@ export const FALLBACK_APP_SETTINGS: AppSettings = {
         excludePersonIds: [],
         globalOperator: 'AND',
         shuffle: true,
+        sortOrder: DEFAULT_SORT_ORDER,
     },
     playback: {
         layout: 'single',

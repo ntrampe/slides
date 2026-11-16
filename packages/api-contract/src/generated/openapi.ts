@@ -432,6 +432,7 @@ export interface components {
             datePreset?: components["schemas"]["DatePreset"];
             globalOperator: components["schemas"]["FilterOperator"];
             shuffle: boolean;
+            sortOrder?: components["schemas"]["SortOrder"];
         };
         PlaybackSettings: {
             intervalMs: number;
@@ -475,6 +476,7 @@ export interface components {
             datePreset?: components["schemas"]["DatePreset"] | null;
             globalOperator?: components["schemas"]["FilterOperator"] | null;
             shuffle?: boolean | null;
+            sortOrder?: components["schemas"]["SortOrder"] | null;
         };
         PlaybackSettingsUpdate: {
             intervalMs?: number | null;
@@ -507,6 +509,13 @@ export interface components {
         FilterOperator: "AND" | "OR";
         /** @enum {string} */
         DatePreset: "all" | "today" | "week" | "month" | "year" | "custom";
+        /**
+         * @description Photo order when `shuffle` is false. `oldest`/`newest` sort by capture date.
+         *     `album` follows the Immich album display order when every selected album shares
+         *     the same order; otherwise it falls back to `oldest`.
+         * @enum {string}
+         */
+        SortOrder: "oldest" | "newest" | "album";
         Album: {
             id: string;
             name: string;

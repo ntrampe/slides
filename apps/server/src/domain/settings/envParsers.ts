@@ -1,4 +1,4 @@
-import type { QuerySettings } from '@slides/api-contract';
+import { schemas, type QuerySettings, type SortOrder } from '@slides/api-contract';
 
 export type DatePreset = NonNullable<QuerySettings['datePreset']>;
 
@@ -46,4 +46,10 @@ export function parseDatePreset(value: string | undefined): DatePreset | undefin
     if (!value) return undefined;
     const preset = value.trim() as DatePreset;
     return DATE_PRESETS.includes(preset) ? preset : undefined;
+}
+
+export function parseSortOrder(value: string | undefined, fallback: SortOrder): SortOrder {
+    if (!value) return fallback;
+    const parsed = schemas.SortOrder.safeParse(value.trim().toLowerCase());
+    return parsed.success ? parsed.data : fallback;
 }

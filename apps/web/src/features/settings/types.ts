@@ -6,6 +6,7 @@ export type {
     PlaybackSettings,
     ConfigurationSettings,
     FilterOperator,
+    SortOrder,
 } from '@slides/api-contract';
 
 /** Client-local presentation toggles (not in the API contract). */
